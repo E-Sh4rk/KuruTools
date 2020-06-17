@@ -72,14 +72,15 @@ namespace KuruTools
 
         public string ToString()
         {
-            string res = width.ToString() + " " + height.ToString() + "\n";
+            StringBuilder res = new StringBuilder();
+            res.Append(width.ToString() + " " + height.ToString() + "\n");
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
-                    res += data[y, x].ToString() + " ";
-                res += "\n";
+                    res.Append(data[y, x].ToString() + " ");
+                res.Append("\n");
             }
-            return res;
+            return res.ToString();
         }
     }
 }
