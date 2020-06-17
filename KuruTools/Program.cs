@@ -3,7 +3,7 @@ using System.IO;
 
 namespace KuruTools
 {
-    // TODO: Doc and normalize function and variable names (capitalize, etc)
+    // TODO: Document public functions
     class Program
     {
         /// <summary>
@@ -30,9 +30,9 @@ namespace KuruTools
                 foreach (Levels.World w in Enum.GetValues(typeof(Levels.World)))
                 {
                     Console.WriteLine(string.Format("===== {0} =====", Enum.GetName(typeof(Levels.World), w)));
-                    for (int l = 0; l < Levels.numberOfLevels(w); l++)
+                    for (int l = 0; l < Levels.NumberOfLevels(w); l++)
                     {
-                        Levels.LevelInfo info = levels.getLevelInfo(new Levels.LevelIdentifier(w, l));
+                        Levels.LevelInfo info = levels.GetLevelInfo(new Levels.LevelIdentifier(w, l));
                         Console.WriteLine(string.Format("Level {1} Data Base Address: {0:X}", info.DataBaseAddress, l + 1));
                         Console.WriteLine(string.Format("Level {1} Uncompressed Size: {0:X}", info.DataUncompressedSize, l + 1));
                         Console.WriteLine(string.Format("Level {1} Next Section Base Address: {0:X}", info.NextSectionBaseAddress, l + 1));
@@ -42,22 +42,22 @@ namespace KuruTools
             }
 
             Directory.CreateDirectory(workspace);
-            foreach (Levels.LevelIdentifier level in Levels.allLevels())
+            foreach (Levels.LevelIdentifier level in Levels.AllLevels())
             {
-                string filename = Path.Combine(workspace, level.shortName() + ".txt");
+                string filename = Path.Combine(workspace, level.ShortName() + ".txt");
                 if (File.Exists(filename))
                 {
                     // Alter map in the ROM
-                    Map m = Map.parse(File.ReadAllLines(filename));
-                    if (levels.alterLevelData(level, m.toByteData()))
-                        Console.WriteLine("Changes detected in " + level.toString() + ". The ROM has been updated.");
+                    Map m = Map.Parse(File.ReadAllLines(filename));
+                    if (levels.AlterLevelData(level, m.ToByteData()))
+                        Console.WriteLine("Changes detected in " + level.ToString() + ". The ROM has been updated.");
                 }
                 else
                 {
                     // Export map if not already present
-                    Levels.RawMapData raw = levels.extractLevelData(level);
+                    Levels.RawMapData raw = levels.ExtractLevelData(level);
                     Map m = new Map(raw.RawData);
-                    File.WriteAllText(filename, m.toString());
+                    File.WriteAllText(filename, m.ToString());
                 }
             }
 
@@ -82,7 +82,7 @@ namespace KuruTools
             File.WriteAllText("training1_reparsed.txt", lvl.toString());*/
 
             Console.WriteLine("All tasks terminated.");
-            levels.dispose();
+            levels.Dispose();
         }
     }
 }

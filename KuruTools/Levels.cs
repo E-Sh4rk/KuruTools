@@ -12,16 +12,17 @@ namespace KuruTools
     struct WorldEntry
     {
         public const long BASE_ADDRESS = 0xC2E68;
+
         [FieldOffset(0)]
-        public int worldInfoMemAddress;
+        int world_info_mem_address;
         [FieldOffset(4)]
-        public int worldDataMemAddress;
+        int world_data_mem_address;
         [FieldOffset(8)]
-        public int dummy1;
+        int dummy1;
 
         public int WorldInfoBaseAddress
         {
-            get { return worldInfoMemAddress - 0x8000000; }
+            get { return world_info_mem_address - 0x8000000; }
         }
         public int LevelInfosBaseAddress
         {
@@ -29,28 +30,28 @@ namespace KuruTools
         }
         public int WorldDataBaseAddress
         {
-            get { return worldDataMemAddress - 0x8000000; }
+            get { return world_data_mem_address - 0x8000000; }
         }
     }
     [StructLayout(LayoutKind.Explicit, Size = 32)]
     struct LevelEntry
     {
         [FieldOffset(0)]
-        public int levelDataOffset;
+        public int level_data_offset;
         [FieldOffset(4)]
-        public int levelUncompressedSize;
+        public int level_uncompressed_size;
         [FieldOffset(8)]
         public int dummy1; // Next section. Starts with bytes 03 80 00 40 and seems to contain graphical informations.
         [FieldOffset(12)]
-        public int dummy2;
+        int dummy2;
         [FieldOffset(16)]
-        public int dummy3;
+        int dummy3;
         [FieldOffset(20)]
-        public int dummy4;
+        int dummy4;
         [FieldOffset(24)]
-        public int dummy5;
+        int dummy5;
         [FieldOffset(28)]
-        public int dummy6;
+        int dummy6;
     }
     public class Levels
     {
@@ -91,34 +92,34 @@ namespace KuruTools
             }
             public World world;
             public int level;
-            public string shortName()
+            public string ShortName()
             {
                 return string.Format("{0}_{1}", Enum.GetName(typeof(World), world).ToLowerInvariant(), level+1);
             }
-            public string toString()
+            public string ToString()
             {
                 return string.Format("{0} {1}", Enum.GetName(typeof(World), world), level + 1);
             }
         }
 
-        public static int numberOfLevels(World world)
+        public static int NumberOfLevels(World world)
         {
             return NUMBER_LEVELS[(int)world];
         }
 
-        public static LevelIdentifier[] allLevels()
+        public static LevelIdentifier[] AllLevels()
         {
             List<LevelIdentifier> res = new List<LevelIdentifier>();
             foreach (World w in Enum.GetValues(typeof(World)))
             {
-                for (int l = 0; l < numberOfLevels(w); l++)
+                for (int l = 0; l < NumberOfLevels(w); l++)
                     res.Add(new LevelIdentifier(w, l));
             }
             return res.ToArray();
         }
 
-        WorldEntry[] worldEntries;
-        LevelEntry[][] levelEntries;
+        WorldEntry[] world_entries;
+        LevelEntry[][] level_entries;
         FileStream rom;
 
         public Levels(string romPath)
@@ -132,64 +133,64 @@ namespace KuruTools
             BinaryReader reader = new BinaryReader(rom);
 
             // World entries
-            worldEntries = new WorldEntry[Enum.GetValues(typeof(World)).Length];
+            world_entries = new WorldEntry[Enum.GetValues(typeof(World)).Length];
             rom.Seek(WorldEntry.BASE_ADDRESS, SeekOrigin.Begin);
-            for (int w = 0; w < worldEntries.Length; w++)
-                worldEntries[w] = Utils.ByteToType<WorldEntry>(reader);
+            for (int w = 0; w < world_entries.Length; w++)
+                world_entries[w] = Utils.ByteToType<WorldEntry>(reader);
 
             // Level entries
-            levelEntries = new LevelEntry[worldEntries.Length][];
-            for (int w = 0; w < worldEntries.Length; w++)
+            level_entries = new LevelEntry[world_entries.Length][];
+            for (int w = 0; w < world_entries.Length; w++)
             {
-                WorldEntry we = worldEntries[w];
-                LevelEntry[] levelEntry = new LevelEntry[NUMBER_LEVELS[w]];
+                WorldEntry we = world_entries[w];
+                LevelEntry[] le = new LevelEntry[NUMBER_LEVELS[w]];
                 rom.Seek(we.LevelInfosBaseAddress, SeekOrigin.Begin);
-                for (int l = 0; l < levelEntry.Length; l++)
-                    levelEntry[l] = Utils.ByteToType<LevelEntry>(reader);
-                levelEntries[w] = levelEntry;
+                for (int l = 0; l < le.Length; l++)
+                    le[l] = Utils.ByteToType<LevelEntry>(reader);
+                level_entries[w] = le;
             }
         }
 
-        public LevelInfo getLevelInfo(LevelIdentifier level)
+        public LevelInfo GetLevelInfo(LevelIdentifier level)
         {
             int w = (int)level.world;
             int l = level.level;
             LevelInfo res;
-            res.DataBaseAddress = worldEntries[w].WorldDataBaseAddress + levelEntries[w][l].levelDataOffset;
-            res.DataUncompressedSize = levelEntries[w][l].levelUncompressedSize;
-            res.NextSectionBaseAddress = worldEntries[w].WorldDataBaseAddress + levelEntries[w][l].dummy1;
+            res.DataBaseAddress = world_entries[w].WorldDataBaseAddress + level_entries[w][l].level_data_offset;
+            res.DataUncompressedSize = level_entries[w][l].level_uncompressed_size;
+            res.NextSectionBaseAddress = world_entries[w].WorldDataBaseAddress + level_entries[w][l].dummy1;
             return res;
         }
 
-        public RawMapData extractLevelData(LevelIdentifier level)
+        public RawMapData ExtractLevelData(LevelIdentifier level)
         {
             RawMapData res;
-            LevelInfo info = getLevelInfo(level);
+            LevelInfo info = GetLevelInfo(level);
             rom.Seek(info.DataBaseAddress, SeekOrigin.Begin);
             long startPos = rom.Position;
-            res.RawData = LzCompression.decompress(rom, info.DataUncompressedSize);
+            res.RawData = LzCompression.Decompress(rom, info.DataUncompressedSize);
             int length = (int)(rom.Position - startPos);
             rom.Seek(startPos, SeekOrigin.Begin);
             res.CompressedData = (new BinaryReader(rom)).ReadBytes(length);
             return res;
         }
 
-        public bool alterLevelData(LevelIdentifier level, byte[] newRawData)
+        public bool AlterLevelData(LevelIdentifier level, byte[] new_raw_data)
         {
             // TODO: Also alter the level info data (in case the length of the map has changed)
-            RawMapData original = extractLevelData(level);
-            if (original.RawData.SequenceEqual(newRawData))
+            RawMapData original = ExtractLevelData(level);
+            if (original.RawData.SequenceEqual(new_raw_data))
                 return false;
-            LevelInfo info = getLevelInfo(level);
+            LevelInfo info = GetLevelInfo(level);
             rom.Seek(info.DataBaseAddress, SeekOrigin.Begin);
-            LzCompression.compress(rom, newRawData);
+            LzCompression.Compress(rom, new_raw_data);
             if (rom.Position > info.NextSectionBaseAddress)
                 Console.WriteLine(string.Format("Warning: The new level {0} overlaps next section ({1:X} > {2:X}). It might result in a ROM corruption.",
-                    level.toString(), rom.Position, info.NextSectionBaseAddress));
+                    level.ToString(), rom.Position, info.NextSectionBaseAddress));
             return true;
         }
 
-        public void dispose()
+        public void Dispose()
         {
             rom.Close();
         }

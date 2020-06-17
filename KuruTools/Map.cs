@@ -33,7 +33,7 @@ namespace KuruTools
             this.data = data;
         }
 
-        public static Map parse(string[] lines)
+        public static Map Parse(string[] lines)
         {
             string[] headers = lines[0].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
             ushort xl = Convert.ToUInt16(headers[0]);
@@ -48,7 +48,7 @@ namespace KuruTools
             return new Map(xl, yl, map);
         }
 
-        public byte[] toByteData()
+        public byte[] ToByteData()
         {
             byte[] res = new byte[4 + width * height * 2];
             BinaryWriter writer = new BinaryWriter(new MemoryStream(res));
@@ -63,7 +63,7 @@ namespace KuruTools
             return res;
         }
 
-        public string toString()
+        public string ToString()
         {
             string res = width.ToString() + " " + height.ToString() + "\n";
             for (int y = 0; y < height; y++)

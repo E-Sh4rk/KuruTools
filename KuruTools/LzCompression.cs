@@ -9,13 +9,13 @@ namespace KuruTools
 {
     public static class LzCompression
     {
-        const int prefixMinLen = 3;
-        static int prefixLength(byte[] data, int leftCursor, int rightCursor)
+        const int PREFIX_MIN_LENGTH = 3;
+        static int PrefixLength(byte[] data, int leftCursor, int rightCursor)
         {
             if (leftCursor >= rightCursor)
                 return 0;
             int i = 0;
-            while (rightCursor < data.Length && i < 0x7F + prefixMinLen)
+            while (rightCursor < data.Length && i < 0x7F + PREFIX_MIN_LENGTH)
             {
                 if (data[leftCursor] != data[rightCursor])
                     break;
@@ -25,14 +25,14 @@ namespace KuruTools
             }
             return i;
         }
-        static int findLongestPrefixOffset(byte[] data, int cursor)
+        static int FindLongestPrefixOffset(byte[] data, int cursor)
         {
             int maxL = 0;
             int res = 0;
             int leftCursor = cursor-1;
             while (leftCursor >= 0 && cursor - leftCursor < 0xFF)
             {
-                int l = prefixLength(data, leftCursor, cursor);
+                int l = PrefixLength(data, leftCursor, cursor);
                 if (l > maxL)
                 {
                     maxL = l;
@@ -43,19 +43,19 @@ namespace KuruTools
             return res;
         }
         // TODO: Function to force stopping after a given position. End of level might be modified to satisfy the constraint.
-        public static void compress(FileStream rom, byte[] data)
+        public static void Compress(FileStream rom, byte[] data)
         {
             BinaryWriter writer = new BinaryWriter(rom);
             int cursor = 0;
             while(cursor < data.Length)
             {
-                int offset = findLongestPrefixOffset(data, cursor);
-                int len = prefixLength(data, cursor + offset, cursor);
-                if (len < prefixMinLen)
+                int offset = FindLongestPrefixOffset(data, cursor);
+                int len = PrefixLength(data, cursor + offset, cursor);
+                if (len < PREFIX_MIN_LENGTH)
                 {
                     len = 1;
                     while (len < 0x80 &&
-                        prefixLength(data, cursor + len + findLongestPrefixOffset(data, cursor+len), cursor + len) < prefixMinLen)
+                        PrefixLength(data, cursor + len + FindLongestPrefixOffset(data, cursor+len), cursor + len) < PREFIX_MIN_LENGTH)
                         len++;
                     writer.Write((byte)(len - 1));
                     for (; len > 0; len--)
@@ -66,13 +66,13 @@ namespace KuruTools
                 }
                 else
                 {
-                    writer.Write((byte)(0x80 + len - prefixMinLen));
+                    writer.Write((byte)(0x80 + len - PREFIX_MIN_LENGTH));
                     writer.Write((byte)(-offset));
                     cursor += len;
                 }
             }
         }
-        public static byte[] decompress(FileStream rom, int uncompressedSize)
+        public static byte[] Decompress(FileStream rom, int uncompressedSize)
         {
             BinaryReader reader = new BinaryReader(rom);
             byte[] res = new byte[uncompressedSize];
