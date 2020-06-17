@@ -204,25 +204,43 @@ namespace KuruTools
             return res;
         }
 
-        public bool AlterLevelData(LevelIdentifier level, byte[] new_raw_data)
+        int WriteDataWithCompression(LevelIdentifier level, byte[] original_raw, byte[] original_compressed, byte[] new_raw, int baseAddr, int endAddr)
         {
-            // TODO: Take graphical and background data into account
+            rom.Seek(baseAddr, SeekOrigin.Begin);
+            int uncompressed_length_written;
+            if (original_raw.SequenceEqual(new_raw))
+            {
+                rom.Write(original_compressed);
+                uncompressed_length_written = original_raw.Length;
+            }
+            else
+                uncompressed_length_written = LzCompression.Compress(rom, new_raw, endAddr);
+            if (uncompressed_length_written < new_raw.Length)
+                Console.WriteLine(string.Format("Warning: The new level {0} has been truncated.", level.ToString()));
+            return uncompressed_length_written;
+        }
+        public bool AlterLevelData(LevelIdentifier level, byte[] new_data, byte[] new_graphical, byte[] new_background)
+        {
             // TODO: Allow graphical and background sections to move to allow more space
 
-            // Write level compressed data
             RawMapData original = ExtractLevelData(level);
-            if (original.RawData.SequenceEqual(new_raw_data))
+            if (original.RawData.SequenceEqual(new_data) &&
+                original.RawGraphical.SequenceEqual(new_graphical) &&
+                original.RawBackground.SequenceEqual(new_background))
                 return false;
-            LevelInfo info = GetLevelInfo(level);
-            rom.Seek(info.DataBaseAddress, SeekOrigin.Begin);
-            int uncompressed_length_written = LzCompression.Compress(rom, new_raw_data, info.GraphicalBaseAddress);
-            if (uncompressed_length_written < new_raw_data.Length)
-                Console.WriteLine(string.Format("Warning: The new level {0} has been truncated.", level.ToString()));
 
-            // Update LevelEntry structure
+            // Write compressed data
             int w = (int)level.world;
             int l = level.level;
-            level_entries[w][l].level_uncompressed_size = new_raw_data.Length;//uncompressed_length_written;
+            LevelInfo info = GetLevelInfo(level);
+            WriteDataWithCompression(level, original.RawData, original.CompressedData, new_data, info.DataBaseAddress, info.GraphicalBaseAddress);
+            level_entries[w][l].level_uncompressed_size = new_data.Length;//uncompressed_length_written;
+            WriteDataWithCompression(level, original.RawGraphical, original.CompressedGraphical, new_graphical, info.GraphicalBaseAddress, info.BackgroundBaseAddress);
+            level_entries[w][l].graphical_uncompressed_size = new_graphical.Length;//uncompressed_length_written;
+            WriteDataWithCompression(level, original.RawBackground, original.CompressedBackground, new_background, info.BackgroundBaseAddress, info.NextSectionBaseAddress);
+            level_entries[w][l].background_uncompressed_size = new_background.Length;//uncompressed_length_written;
+
+            // Update LevelEntry structure
             rom.Seek(world_entries[w].LevelInfosBaseAddress, SeekOrigin.Begin);
             BinaryWriter writer = new BinaryWriter(rom);
             foreach (LevelEntry entry in level_entries[w])

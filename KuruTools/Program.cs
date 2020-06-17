@@ -50,8 +50,10 @@ namespace KuruTools
                 if (File.Exists(filename))
                 {
                     // Alter map in the ROM
-                    Map m = Map.Parse(File.ReadAllLines(filename), Map.Type.PHYSICAL);
-                    if (levels.AlterLevelData(level, m.ToByteData()))
+                    Map mp = Map.Parse(File.ReadAllLines(filename), Map.Type.PHYSICAL);
+                    Map mg = Map.Parse(File.ReadAllLines(filename_graphical), Map.Type.GRAPHICAL);
+                    Map mb = Map.Parse(File.ReadAllLines(filename_background), Map.Type.BACKGROUND);
+                    if (levels.AlterLevelData(level, mp.ToByteData(), mg.ToByteData(), mb.ToByteData()))
                         Console.WriteLine("Changes detected in " + level.ToString() + ". The ROM has been updated.");
                 }
                 else
