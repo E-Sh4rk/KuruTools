@@ -177,16 +177,25 @@ namespace KuruTools
 
         public bool AlterLevelData(LevelIdentifier level, byte[] new_raw_data)
         {
+            // Write level compressed data
             RawMapData original = ExtractLevelData(level);
             if (original.RawData.SequenceEqual(new_raw_data))
                 return false;
             LevelInfo info = GetLevelInfo(level);
             rom.Seek(info.DataBaseAddress, SeekOrigin.Begin);
-            if (LzCompression.Compress(rom, new_raw_data, info.NextSectionBaseAddress) < new_raw_data.Length)
+            int uncompressed_length_written = LzCompression.Compress(rom, new_raw_data, info.NextSectionBaseAddress);
+            if (uncompressed_length_written < new_raw_data.Length)
                 Console.WriteLine(string.Format("Warning: The new level {0} has been truncated.", level.ToString()));
-            /*Console.WriteLine(string.Format("Warning: The new level {0} overlaps next section ({1:X} > {2:X}). It might result in a ROM corruption.",
-                level.ToString(), rom.Position, info.NextSectionBaseAddress));*/
-            // TODO: Also alter the level info data (in case the length of the map has changed, due to the provided map or due to truncature)
+
+            // Update LevelEntry structure
+            int w = (int)level.world;
+            int l = level.level;
+            level_entries[w][l].level_uncompressed_size = new_raw_data.Length;//uncompressed_length_written;
+            rom.Seek(world_entries[w].LevelInfosBaseAddress, SeekOrigin.Begin);
+            BinaryWriter writer = new BinaryWriter(rom);
+            foreach (LevelEntry entry in level_entries[w])
+                Utils.TypeToByte(writer, entry);
+
             return true;
         }
 
