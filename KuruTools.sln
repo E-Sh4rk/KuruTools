@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30204.135
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KuruTools", "KuruTools\KuruTools.csproj", "{C03091AE-F5EB-4AC9-96C8-A17CF3C60CDA}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C03091AE-F5EB-4AC9-96C8-A17CF3C60CDA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C03091AE-F5EB-4AC9-96C8-A17CF3C60CDA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C03091AE-F5EB-4AC9-96C8-A17CF3C60CDA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C03091AE-F5EB-4AC9-96C8-A17CF3C60CDA}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B9C3F04A-3790-48E5-986C-84141630DA6F}
+	EndGlobalSection
+EndGlobal

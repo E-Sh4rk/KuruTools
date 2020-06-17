@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "KuruTools": {
+      "commandName": "Project",
+      "commandLineArgs": "rom.gba"
+    }
+  }
+}
