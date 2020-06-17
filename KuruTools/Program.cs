@@ -35,7 +35,7 @@ namespace KuruTools
                         Levels.LevelInfo info = levels.GetLevelInfo(new Levels.LevelIdentifier(w, l));
                         Console.WriteLine(string.Format("Level {1} Data Base Address: {0:X}", info.DataBaseAddress, l + 1));
                         Console.WriteLine(string.Format("Level {1} Uncompressed Size: {0:X}", info.DataUncompressedSize, l + 1));
-                        Console.WriteLine(string.Format("Level {1} Next Section Base Address: {0:X}", info.NextSectionBaseAddress, l + 1));
+                        Console.WriteLine(string.Format("Level {1} Next Section Base Address: {0:X}", info.GraphicalBaseAddress, l + 1));
                     }
                     Console.WriteLine("");
                 }
@@ -45,10 +45,12 @@ namespace KuruTools
             foreach (Levels.LevelIdentifier level in Levels.AllLevels())
             {
                 string filename = Path.Combine(workspace, level.ShortName() + ".txt");
+                string filename_graphical = Path.Combine(workspace, level.ShortName() + "_graphical.txt");
+                string filename_background = Path.Combine(workspace, level.ShortName() + "_background.txt");
                 if (File.Exists(filename))
                 {
                     // Alter map in the ROM
-                    Map m = Map.Parse(File.ReadAllLines(filename));
+                    Map m = Map.Parse(File.ReadAllLines(filename), Map.Type.PHYSICAL);
                     if (levels.AlterLevelData(level, m.ToByteData()))
                         Console.WriteLine("Changes detected in " + level.ToString() + ". The ROM has been updated.");
                 }
@@ -56,8 +58,12 @@ namespace KuruTools
                 {
                     // Export map if not already present
                     Levels.RawMapData raw = levels.ExtractLevelData(level);
-                    Map m = new Map(raw.RawData);
-                    File.WriteAllText(filename, m.ToString());
+                    Map mp = new Map(raw.RawData, Map.Type.PHYSICAL);
+                    File.WriteAllText(filename, mp.ToString());
+                    Map mg = new Map(raw.RawGraphical, Map.Type.GRAPHICAL);
+                    File.WriteAllText(filename_graphical, mg.ToString());
+                    Map mb = new Map(raw.RawBackground, Map.Type.BACKGROUND);
+                    File.WriteAllText(filename_background, mb.ToString());
                 }
             }
 

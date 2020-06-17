@@ -8,11 +8,16 @@ namespace KuruTools
     // TODO: Function to normalize the level (remove useless orientation data) and thus improve compression.
     public class Map
     {
+        public enum Type
+        {
+            PHYSICAL, GRAPHICAL, BACKGROUND
+        }
         ushort width;
         ushort height;
         ushort[,] data;
+        Type type;
 
-        public Map(byte[] raw)
+        public Map(byte[] raw, Type type)
         {
             BinaryReader br = new BinaryReader(new MemoryStream(raw));
             width = br.ReadUInt16();
@@ -24,16 +29,18 @@ namespace KuruTools
                     data[y, x] = br.ReadUInt16();
             }
             br.Close();
+            this.type = type;
         }
 
-        Map(ushort width, ushort height, ushort[,] data)
+        Map(ushort width, ushort height, ushort[,] data, Type type)
         {
             this.width = width;
             this.height = height;
             this.data = data;
+            this.type = type;
         }
 
-        public static Map Parse(string[] lines)
+        public static Map Parse(string[] lines, Type type)
         {
             string[] headers = lines[0].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
             ushort xl = Convert.ToUInt16(headers[0]);
@@ -45,7 +52,7 @@ namespace KuruTools
                 for (ushort j = 0; j < xl; j++)
                     map[i, j] = Convert.ToUInt16(line[j]);
             }
-            return new Map(xl, yl, map);
+            return new Map(xl, yl, map, type);
         }
 
         public byte[] ToByteData()

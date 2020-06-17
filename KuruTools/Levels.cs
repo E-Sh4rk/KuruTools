@@ -18,7 +18,7 @@ namespace KuruTools
         [FieldOffset(4)]
         int world_data_mem_address;
         [FieldOffset(8)]
-        int dummy1;
+        int dummy1; // Seems to be linked to bonuses
 
         public int WorldInfoBaseAddress
         {
@@ -41,17 +41,17 @@ namespace KuruTools
         [FieldOffset(4)]
         public int level_uncompressed_size;
         [FieldOffset(8)]
-        public int dummy1; // Next section. Starts with bytes 03 80 00 40 and seems to contain graphical informations.
+        public int graphical_data_offset;
         [FieldOffset(12)]
-        int dummy2;
+        public int graphical_uncompressed_size;
         [FieldOffset(16)]
-        int dummy3;
+        public int background_data_offset;
         [FieldOffset(20)]
-        int dummy4;
+        public int background_uncompressed_size;
         [FieldOffset(24)]
-        int dummy5;
+        public int dummy1; // Offset of another compressed section
         [FieldOffset(28)]
-        int dummy6;
+        public int dummy2; // Uncompressed size of this section
     }
     public class Levels
     {
@@ -76,12 +76,20 @@ namespace KuruTools
         {
             public int DataBaseAddress;
             public int DataUncompressedSize;
+            public int GraphicalBaseAddress;
+            public int GraphicalUncompressedSize;
+            public int BackgroundBaseAddress;
+            public int BackgroundUncompressedSize;
             public int NextSectionBaseAddress;
         }
         public struct RawMapData
         {
             public byte[] CompressedData;
             public byte[] RawData;
+            public byte[] CompressedGraphical;
+            public byte[] RawGraphical;
+            public byte[] CompressedBackground;
+            public byte[] RawBackground;
         }
         public struct LevelIdentifier
         {
@@ -155,10 +163,15 @@ namespace KuruTools
         {
             int w = (int)level.world;
             int l = level.level;
+            int base_addr = world_entries[w].WorldDataBaseAddress;
             LevelInfo res;
-            res.DataBaseAddress = world_entries[w].WorldDataBaseAddress + level_entries[w][l].level_data_offset;
+            res.DataBaseAddress = base_addr + level_entries[w][l].level_data_offset;
             res.DataUncompressedSize = level_entries[w][l].level_uncompressed_size;
-            res.NextSectionBaseAddress = world_entries[w].WorldDataBaseAddress + level_entries[w][l].dummy1;
+            res.GraphicalBaseAddress = base_addr + level_entries[w][l].graphical_data_offset;
+            res.GraphicalUncompressedSize = level_entries[w][l].graphical_uncompressed_size;
+            res.BackgroundBaseAddress = base_addr + level_entries[w][l].background_data_offset;
+            res.BackgroundUncompressedSize = level_entries[w][l].background_uncompressed_size;
+            res.NextSectionBaseAddress = base_addr + level_entries[w][l].dummy1;
             return res;
         }
 
@@ -166,24 +179,43 @@ namespace KuruTools
         {
             RawMapData res;
             LevelInfo info = GetLevelInfo(level);
+
             rom.Seek(info.DataBaseAddress, SeekOrigin.Begin);
             long startPos = rom.Position;
             res.RawData = LzCompression.Decompress(rom, info.DataUncompressedSize);
             int length = (int)(rom.Position - startPos);
             rom.Seek(startPos, SeekOrigin.Begin);
             res.CompressedData = (new BinaryReader(rom)).ReadBytes(length);
+
+            rom.Seek(info.GraphicalBaseAddress, SeekOrigin.Begin);
+            startPos = rom.Position;
+            res.RawGraphical = LzCompression.Decompress(rom, info.GraphicalUncompressedSize);
+            length = (int)(rom.Position - startPos);
+            rom.Seek(startPos, SeekOrigin.Begin);
+            res.CompressedGraphical = (new BinaryReader(rom)).ReadBytes(length);
+
+            rom.Seek(info.BackgroundBaseAddress, SeekOrigin.Begin);
+            startPos = rom.Position;
+            res.RawBackground = LzCompression.Decompress(rom, info.BackgroundUncompressedSize);
+            length = (int)(rom.Position - startPos);
+            rom.Seek(startPos, SeekOrigin.Begin);
+            res.CompressedBackground = (new BinaryReader(rom)).ReadBytes(length);
+
             return res;
         }
 
         public bool AlterLevelData(LevelIdentifier level, byte[] new_raw_data)
         {
+            // TODO: Take graphical and background data into account
+            // TODO: Allow graphical and background sections to move to allow more space
+
             // Write level compressed data
             RawMapData original = ExtractLevelData(level);
             if (original.RawData.SequenceEqual(new_raw_data))
                 return false;
             LevelInfo info = GetLevelInfo(level);
             rom.Seek(info.DataBaseAddress, SeekOrigin.Begin);
-            int uncompressed_length_written = LzCompression.Compress(rom, new_raw_data, info.NextSectionBaseAddress);
+            int uncompressed_length_written = LzCompression.Compress(rom, new_raw_data, info.GraphicalBaseAddress);
             if (uncompressed_length_written < new_raw_data.Length)
                 Console.WriteLine(string.Format("Warning: The new level {0} has been truncated.", level.ToString()));
 
