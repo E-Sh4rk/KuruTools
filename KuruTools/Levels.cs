@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Channels;
@@ -63,6 +64,11 @@ namespace KuruTools
             public int DataBaseAddress;
             public int DataUncompressedSize;
         }
+        public struct RawMapData
+        {
+            public byte[] CompressedData;
+            public byte[] RawData;
+        }
 
         WorldEntry[] worldEntries;
         LevelEntry[][] levelEntries;
@@ -70,7 +76,7 @@ namespace KuruTools
 
         public Levels(string romPath)
         {
-            rom = File.OpenRead(romPath);
+            rom = File.Open(romPath, FileMode.Open, FileAccess.ReadWrite);
             LoadLevelInfos();
         }
 
@@ -111,22 +117,32 @@ namespace KuruTools
             return res;
         }
 
-        public byte[] extractLevelData(World world, int l, bool decompress = true)
+        public RawMapData extractLevelData(World world, int l)
         {
+            RawMapData res;
             LevelInfo info = getLevelInfo(world, l);
             rom.Seek(info.DataBaseAddress, SeekOrigin.Begin);
             long startPos = rom.Position;
-            byte[] decompressed = LzCompression.decompress(rom, info.DataUncompressedSize);
-            if (decompress)
-                return decompressed;
-            else
-            {
-                // TODO: Cleaner way to get the length of the compressed data?
-                BinaryReader reader = new BinaryReader(rom);
-                int length =(int)(rom.Position - startPos);
-                rom.Seek(startPos, SeekOrigin.Begin);
-                return reader.ReadBytes(length);
-            }
+            res.RawData = LzCompression.decompress(rom, info.DataUncompressedSize);
+            int length = (int)(rom.Position - startPos);
+            rom.Seek(startPos, SeekOrigin.Begin);
+            res.CompressedData = (new BinaryReader(rom)).ReadBytes(length);
+            return res;
+        }
+
+        public bool alterLevelData(World world, int l, byte[] newRawData)
+        {
+            RawMapData original = extractLevelData(world, l);
+            if (original.RawData.SequenceEqual(newRawData))
+                return false;
+            LevelInfo info = getLevelInfo(world, l);
+            rom.Seek(info.DataBaseAddress, SeekOrigin.Begin);
+            long startPos = rom.Position;
+            LzCompression.compress(rom, newRawData);
+            int length = (int)(rom.Position - startPos);
+            if (length > original.CompressedData.Length)
+                Console.WriteLine("Warning: The new level takes more space than the original one. It might result in a ROM corruption.");
+            return true;
         }
 
         public void dispose()

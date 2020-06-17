@@ -15,7 +15,9 @@ namespace KuruTools
             Console.WriteLine("=== Kuru Kuru Kururin Tools ===");
             Console.WriteLine("");
             string romPath = args[0];
-            Levels levels = new Levels(romPath);
+            string destRomPath = args.Length >= 2 ? args[1] : "output.gba";
+            File.Copy(romPath, destRomPath, true);
+            Levels levels = new Levels(destRomPath);
 
             // Print all level infos
             foreach (Levels.World w in Enum.GetValues(typeof(Levels.World)))
@@ -30,15 +32,18 @@ namespace KuruTools
                 Console.WriteLine("");
             }
             // Some tests and experiments...
-            /*byte[] raw_gl = levels.extractLevelData(Levels.World.GRASS, 0);
-            File.WriteAllBytes("grassland1_raw.bin", raw_gl);
-            Map m = new Map(raw_gl);
+            /*Levels.RawMapData raw_gl = levels.extractLevelData(Levels.World.GRASS, 0);
+            File.WriteAllBytes("grassland1_raw.bin", raw_gl.RawData);
+            Map m = new Map(raw_gl.RawData);
             File.WriteAllText("grassland1.txt", m.toString());
             File.WriteAllBytes("grassland1_raw_2.bin", m.toByteData());
-            File.WriteAllBytes("grassland1_compressed.bin", levels.extractLevelData(Levels.World.GRASS, 0, false));
+            File.WriteAllBytes("grassland1_compressed.bin", raw_gl.CompressedData);
             FileStream f = File.OpenWrite("grassland1_compressed_2.bin");
-            LzCompression.compress(f, raw_gl);
+            LzCompression.compress(f, raw_gl.RawData);
             f.Close();*/
+            Map gl1 = Map.parse(File.ReadAllLines("grassland1.txt"));
+            if (levels.alterLevelData(Levels.World.GRASS, 0, gl1.toByteData()))
+                Console.WriteLine("Change detected in Grassland 1. The ROM has been updated.");
 
             Console.WriteLine("Tasks terminated.");
             Console.ReadLine();
