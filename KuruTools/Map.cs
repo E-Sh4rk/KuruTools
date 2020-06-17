@@ -43,14 +43,14 @@ namespace KuruTools
         public static Map Parse(string[] lines, Type type)
         {
             string[] headers = lines[0].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-            ushort xl = Convert.ToUInt16(headers[0]);
-            ushort yl = Convert.ToUInt16(headers[1]);
+            ushort xl = Convert.ToUInt16(headers[0], 16);
+            ushort yl = Convert.ToUInt16(headers[1], 16);
             ushort[,] map = new ushort[yl, xl];
             for (ushort i = 0; i < yl; i++)
             {
                 string[] line = lines[i + 1].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                 for (ushort j = 0; j < xl; j++)
-                    map[i, j] = Convert.ToUInt16(line[j]);
+                    map[i, j] = Convert.ToUInt16(line[j], 16);
             }
             return new Map(xl, yl, map, type);
         }
@@ -73,11 +73,11 @@ namespace KuruTools
         public string ToString()
         {
             StringBuilder res = new StringBuilder();
-            res.Append(width.ToString() + " " + height.ToString() + "\n");
+            res.Append(width.ToString("X") + " " + height.ToString("X") + "\n");
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
-                    res.Append(data[y, x].ToString() + " ");
+                    res.Append(data[y, x].ToString("X").PadLeft(4, ' ') + " ");
                 res.Append("\n");
             }
             return res.ToString();
