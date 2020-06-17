@@ -47,26 +47,42 @@ namespace KuruTools
                 string filename = Path.Combine(workspace, level.ShortName() + ".txt");
                 string filename_graphical = Path.Combine(workspace, level.ShortName() + "_graphical.txt");
                 string filename_background = Path.Combine(workspace, level.ShortName() + "_background.txt");
+
+                byte[] p = null;
+                byte[] g = null;
+                byte[] b = null;
                 if (File.Exists(filename))
+                    p = Map.Parse(File.ReadAllLines(filename), Map.Type.PHYSICAL).ToByteData();
+                if (File.Exists(filename_graphical))
+                    g = Map.Parse(File.ReadAllLines(filename_graphical), Map.Type.GRAPHICAL).ToByteData();
+                if (File.Exists(filename_background))
+                    b = Map.Parse(File.ReadAllLines(filename_background), Map.Type.BACKGROUND).ToByteData();
+
+                // Export map if not already present
+                if (p == null || g == null || b == null)
                 {
-                    // Alter map in the ROM
-                    Map mp = Map.Parse(File.ReadAllLines(filename), Map.Type.PHYSICAL);
-                    Map mg = Map.Parse(File.ReadAllLines(filename_graphical), Map.Type.GRAPHICAL);
-                    Map mb = Map.Parse(File.ReadAllLines(filename_background), Map.Type.BACKGROUND);
-                    if (levels.AlterLevelData(level, mp.ToByteData(), mg.ToByteData(), mb.ToByteData()))
-                        Console.WriteLine("Changes detected in " + level.ToString() + ". The ROM has been updated.");
-                }
-                else
-                {
-                    // Export map if not already present
                     Levels.RawMapData raw = levels.ExtractLevelData(level);
-                    Map mp = new Map(raw.RawData, Map.Type.PHYSICAL);
-                    File.WriteAllText(filename, mp.ToString());
-                    Map mg = new Map(raw.RawGraphical, Map.Type.GRAPHICAL);
-                    File.WriteAllText(filename_graphical, mg.ToString());
-                    Map mb = new Map(raw.RawBackground, Map.Type.BACKGROUND);
-                    File.WriteAllText(filename_background, mb.ToString());
+                    if (p == null)
+                    {
+                        Map mp = new Map(raw.RawData, Map.Type.PHYSICAL);
+                        File.WriteAllText(filename, mp.ToString());
+                    }
+                    if (g == null)
+                    {
+                        Map mg = new Map(raw.RawGraphical, Map.Type.GRAPHICAL);
+                        File.WriteAllText(filename_graphical, mg.ToString());
+                    }
+                    if (b == null)
+                    {
+                        Map mb = new Map(raw.RawBackground, Map.Type.BACKGROUND);
+                        File.WriteAllText(filename_background, mb.ToString());
+                    }
+                    Console.WriteLine("Missing components for " + level.ToString() + ". Missing data has been exported.");
                 }
+
+                // Alter map in the ROM
+                if (levels.AlterLevelData(level, p, g, b))
+                    Console.WriteLine("Changes detected in " + level.ToString() + ". The ROM has been updated.");
             }
 
             // Some tests and experiments...

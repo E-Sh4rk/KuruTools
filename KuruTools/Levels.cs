@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -207,38 +208,43 @@ namespace KuruTools
         int WriteDataWithCompression(LevelIdentifier level, byte[] original_raw, byte[] original_compressed, byte[] new_raw, int baseAddr, int endAddr)
         {
             rom.Seek(baseAddr, SeekOrigin.Begin);
-            int uncompressed_length_written;
-            if (original_raw.SequenceEqual(new_raw))
+            if (new_raw == null)
             {
                 rom.Write(original_compressed);
-                uncompressed_length_written = original_raw.Length;
+                return original_raw.Length;
             }
-            else
-                uncompressed_length_written = LzCompression.Compress(rom, new_raw, endAddr);
+            int uncompressed_length_written = LzCompression.Compress(rom, new_raw, endAddr);
             if (uncompressed_length_written < new_raw.Length)
                 Console.WriteLine(string.Format("Warning: The new level {0} has been truncated.", level.ToString()));
-            return uncompressed_length_written;
+            Debug.Assert(uncompressed_length_written <= new_raw.Length);
+            //return uncompressed_length_written;
+            return new_raw.Length; // The size reported must match with the map dimensions.
         }
         public bool AlterLevelData(LevelIdentifier level, byte[] new_data, byte[] new_graphical, byte[] new_background)
         {
             // TODO: Allow graphical and background sections to move to allow more space
 
             RawMapData original = ExtractLevelData(level);
-            if (original.RawData.SequenceEqual(new_data) &&
-                original.RawGraphical.SequenceEqual(new_graphical) &&
-                original.RawBackground.SequenceEqual(new_background))
+            if (new_data != null && original.RawData.SequenceEqual(new_data))
+                new_data = null;
+            if (new_graphical != null && original.RawGraphical.SequenceEqual(new_graphical))
+                new_graphical = null;
+            if (new_background != null && original.RawBackground.SequenceEqual(new_background))
+                new_background = null;
+
+            if (new_data == null && new_graphical == null && new_background == null)
                 return false;
 
             // Write compressed data
             int w = (int)level.world;
             int l = level.level;
             LevelInfo info = GetLevelInfo(level);
-            WriteDataWithCompression(level, original.RawData, original.CompressedData, new_data, info.DataBaseAddress, info.GraphicalBaseAddress);
-            level_entries[w][l].level_uncompressed_size = new_data.Length;//uncompressed_length_written;
-            WriteDataWithCompression(level, original.RawGraphical, original.CompressedGraphical, new_graphical, info.GraphicalBaseAddress, info.BackgroundBaseAddress);
-            level_entries[w][l].graphical_uncompressed_size = new_graphical.Length;//uncompressed_length_written;
-            WriteDataWithCompression(level, original.RawBackground, original.CompressedBackground, new_background, info.BackgroundBaseAddress, info.NextSectionBaseAddress);
-            level_entries[w][l].background_uncompressed_size = new_background.Length;//uncompressed_length_written;
+            level_entries[w][l].level_uncompressed_size =
+                WriteDataWithCompression(level, original.RawData, original.CompressedData, new_data, info.DataBaseAddress, info.GraphicalBaseAddress);
+            level_entries[w][l].graphical_uncompressed_size =
+                WriteDataWithCompression(level, original.RawGraphical, original.CompressedGraphical, new_graphical, info.GraphicalBaseAddress, info.BackgroundBaseAddress);
+            level_entries[w][l].background_uncompressed_size =
+                WriteDataWithCompression(level, original.RawBackground, original.CompressedBackground, new_background, info.BackgroundBaseAddress, info.NextSectionBaseAddress);
 
             // Update LevelEntry structure
             rom.Seek(world_entries[w].LevelInfosBaseAddress, SeekOrigin.Begin);

@@ -89,31 +89,35 @@ namespace KuruTools
             byte[] res = new byte[uncompressedSize];
             int cursor = 0;
             int size = uncompressedSize;
-            while (size > 0)
+            try
             {
-                int len = reader.ReadByte();
-                if (len < 0x80)
+                while (size > 0)
                 {
-                    len++;
-                    size -= len;
-                    for (; len > 0; len--)
+                    int len = reader.ReadByte();
+                    if (len < 0x80)
                     {
-                        res[cursor] = reader.ReadByte();
-                        cursor++;
+                        len++;
+                        size -= len;
+                        for (; len > 0; len--)
+                        {
+                            res[cursor] = reader.ReadByte();
+                            cursor++;
+                        }
                     }
-                }
-                else
-                {
-                    int offset = -reader.ReadByte();
-                    len = (len & 0x7F) + 3;
-                    size -= len;
-                    for (; len > 0; len--)
+                    else
                     {
-                        res[cursor] = res[cursor + offset];
-                        cursor++;
+                        int offset = -reader.ReadByte();
+                        len = (len & 0x7F) + 3;
+                        size -= len;
+                        for (; len > 0; len--)
+                        {
+                            res[cursor] = res[cursor + offset];
+                            cursor++;
+                        }
                     }
                 }
             }
+            catch (IndexOutOfRangeException) { } // Can happen with truncated data
             return res;
         }
     }
