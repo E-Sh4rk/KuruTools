@@ -69,6 +69,40 @@ namespace KuruTools
             public byte[] CompressedData;
             public byte[] RawData;
         }
+        public struct LevelIdentifier
+        {
+            public LevelIdentifier(World w, int l)
+            {
+                world = w;
+                level = l;
+            }
+            public World world;
+            public int level;
+            public string shortName()
+            {
+                return string.Format("{0}_{1}", Enum.GetName(typeof(World), world).ToLowerInvariant(), level+1);
+            }
+            public string toString()
+            {
+                return string.Format("{0} {1}", Enum.GetName(typeof(World), world), level + 1);
+            }
+        }
+
+        public static int numberOfLevels(World world)
+        {
+            return NUMBER_LEVELS[(int)world];
+        }
+
+        public static LevelIdentifier[] allLevels()
+        {
+            List<LevelIdentifier> res = new List<LevelIdentifier>();
+            foreach (World w in Enum.GetValues(typeof(World)))
+            {
+                for (int l = 0; l < numberOfLevels(w); l++)
+                    res.Add(new LevelIdentifier(w, l));
+            }
+            return res.ToArray();
+        }
 
         WorldEntry[] worldEntries;
         LevelEntry[][] levelEntries;
@@ -103,24 +137,20 @@ namespace KuruTools
             }
         }
 
-        public int numberOfLevels(World world)
+        public LevelInfo getLevelInfo(LevelIdentifier level)
         {
-            return NUMBER_LEVELS[(int)world];
-        }
-
-        public LevelInfo getLevelInfo(World world, int l)
-        {
-            int w = (int)world;
+            int w = (int)level.world;
+            int l = level.level;
             LevelInfo res;
             res.DataBaseAddress = worldEntries[w].WorldDataBaseAddress + levelEntries[w][l].levelDataOffset;
             res.DataUncompressedSize = levelEntries[w][l].levelUncompressedSize;
             return res;
         }
 
-        public RawMapData extractLevelData(World world, int l)
+        public RawMapData extractLevelData(LevelIdentifier level)
         {
             RawMapData res;
-            LevelInfo info = getLevelInfo(world, l);
+            LevelInfo info = getLevelInfo(level);
             rom.Seek(info.DataBaseAddress, SeekOrigin.Begin);
             long startPos = rom.Position;
             res.RawData = LzCompression.decompress(rom, info.DataUncompressedSize);
@@ -130,18 +160,21 @@ namespace KuruTools
             return res;
         }
 
-        public bool alterLevelData(World world, int l, byte[] newRawData)
+        public bool alterLevelData(LevelIdentifier level, byte[] newRawData)
         {
-            RawMapData original = extractLevelData(world, l);
+            // TODO: Also alter the level info data (in case the length of the map has changed)
+            // TODO: Investigate the issue with the modified training 1
+            RawMapData original = extractLevelData(level);
             if (original.RawData.SequenceEqual(newRawData))
                 return false;
-            LevelInfo info = getLevelInfo(world, l);
+            LevelInfo info = getLevelInfo(level);
             rom.Seek(info.DataBaseAddress, SeekOrigin.Begin);
             long startPos = rom.Position;
             LzCompression.compress(rom, newRawData);
             int length = (int)(rom.Position - startPos);
             if (length > original.CompressedData.Length)
-                Console.WriteLine("Warning: The new level takes more space than the original one. It might result in a ROM corruption.");
+                Console.WriteLine(string.Format("Warning: The new level {0} takes more space than the original one ({1:X} > {2:X}). It might result in a ROM corruption.",
+                    level.toString(), length, original.CompressedData.Length));
             return true;
         }
 
