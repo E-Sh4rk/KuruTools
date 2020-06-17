@@ -42,6 +42,7 @@ namespace KuruTools
             }
             return res;
         }
+        // TODO: Function to force stopping after a given position. End of level might be modified to satisfy the constraint.
         public static void compress(FileStream rom, byte[] data)
         {
             BinaryWriter writer = new BinaryWriter(rom);

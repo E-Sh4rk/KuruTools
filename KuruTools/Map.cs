@@ -5,6 +5,7 @@ using System.Text;
 
 namespace KuruTools
 {
+    // TODO: Function to normalize the level (remove useless orientation data) and thus improve compression.
     public class Map
     {
         ushort width;

@@ -35,6 +35,7 @@ namespace KuruTools
                         Levels.LevelInfo info = levels.getLevelInfo(new Levels.LevelIdentifier(w, l));
                         Console.WriteLine(string.Format("Level {1} Data Base Address: {0:X}", info.DataBaseAddress, l + 1));
                         Console.WriteLine(string.Format("Level {1} Uncompressed Size: {0:X}", info.DataUncompressedSize, l + 1));
+                        Console.WriteLine(string.Format("Level {1} Next Section Base Address: {0:X}", info.NextSectionBaseAddress, l + 1));
                     }
                     Console.WriteLine("");
                 }
@@ -54,7 +55,8 @@ namespace KuruTools
                 else
                 {
                     // Export map if not already present
-                    Map m = new Map(levels.extractLevelData(level).RawData);
+                    Levels.RawMapData raw = levels.extractLevelData(level);
+                    Map m = new Map(raw.RawData);
                     File.WriteAllText(filename, m.toString());
                 }
             }

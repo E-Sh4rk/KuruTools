@@ -17,7 +17,7 @@ namespace KuruTools
         [FieldOffset(4)]
         public int worldDataMemAddress;
         [FieldOffset(8)]
-        public int dummy;
+        public int dummy1;
 
         public int WorldInfoBaseAddress
         {
@@ -39,6 +39,18 @@ namespace KuruTools
         public int levelDataOffset;
         [FieldOffset(4)]
         public int levelUncompressedSize;
+        [FieldOffset(8)]
+        public int dummy1; // Next section. Starts with bytes 03 80 00 40 and seems to contain graphical informations.
+        [FieldOffset(12)]
+        public int dummy2;
+        [FieldOffset(16)]
+        public int dummy3;
+        [FieldOffset(20)]
+        public int dummy4;
+        [FieldOffset(24)]
+        public int dummy5;
+        [FieldOffset(28)]
+        public int dummy6;
     }
     public class Levels
     {
@@ -63,6 +75,7 @@ namespace KuruTools
         {
             public int DataBaseAddress;
             public int DataUncompressedSize;
+            public int NextSectionBaseAddress;
         }
         public struct RawMapData
         {
@@ -144,6 +157,7 @@ namespace KuruTools
             LevelInfo res;
             res.DataBaseAddress = worldEntries[w].WorldDataBaseAddress + levelEntries[w][l].levelDataOffset;
             res.DataUncompressedSize = levelEntries[w][l].levelUncompressedSize;
+            res.NextSectionBaseAddress = worldEntries[w].WorldDataBaseAddress + levelEntries[w][l].dummy1;
             return res;
         }
 
@@ -163,18 +177,15 @@ namespace KuruTools
         public bool alterLevelData(LevelIdentifier level, byte[] newRawData)
         {
             // TODO: Also alter the level info data (in case the length of the map has changed)
-            // TODO: Investigate the issue with the modified training 1
             RawMapData original = extractLevelData(level);
             if (original.RawData.SequenceEqual(newRawData))
                 return false;
             LevelInfo info = getLevelInfo(level);
             rom.Seek(info.DataBaseAddress, SeekOrigin.Begin);
-            long startPos = rom.Position;
             LzCompression.compress(rom, newRawData);
-            int length = (int)(rom.Position - startPos);
-            if (length > original.CompressedData.Length)
-                Console.WriteLine(string.Format("Warning: The new level {0} takes more space than the original one ({1:X} > {2:X}). It might result in a ROM corruption.",
-                    level.toString(), length, original.CompressedData.Length));
+            if (rom.Position > info.NextSectionBaseAddress)
+                Console.WriteLine(string.Format("Warning: The new level {0} overlaps next section ({1:X} > {2:X}). It might result in a ROM corruption.",
+                    level.toString(), rom.Position, info.NextSectionBaseAddress));
             return true;
         }
 
