@@ -42,13 +42,21 @@ namespace KuruTools
             }
             return res;
         }
-        // TODO: Function to force stopping after a given position. End of level might be modified to satisfy the constraint.
-        public static void Compress(FileStream rom, byte[] data)
+        public static int Compress(FileStream rom, byte[] data, long end_position = -1)
         {
+            int SpaceLeft()
+            {
+                return (int)(end_position - rom.Position);
+            }
+            bool NotEnoughSpace(int number_bytes = 1)
+            {
+                return end_position >= 0 && number_bytes > SpaceLeft();
+            }
             BinaryWriter writer = new BinaryWriter(rom);
             int cursor = 0;
             while(cursor < data.Length)
             {
+                if (NotEnoughSpace(2)) return cursor;
                 int offset = FindLongestPrefixOffset(data, cursor);
                 int len = PrefixLength(data, cursor + offset, cursor);
                 if (len < PREFIX_MIN_LENGTH)
@@ -57,6 +65,8 @@ namespace KuruTools
                     while (len < 0x80 &&
                         PrefixLength(data, cursor + len + FindLongestPrefixOffset(data, cursor+len), cursor + len) < PREFIX_MIN_LENGTH)
                         len++;
+                    if (NotEnoughSpace(len + 1))
+                        len = SpaceLeft() - 1;
                     writer.Write((byte)(len - 1));
                     for (; len > 0; len--)
                     {
@@ -71,6 +81,7 @@ namespace KuruTools
                     cursor += len;
                 }
             }
+            return cursor;
         }
         public static byte[] Decompress(FileStream rom, int uncompressedSize)
         {

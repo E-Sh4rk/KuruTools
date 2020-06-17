@@ -177,16 +177,16 @@ namespace KuruTools
 
         public bool AlterLevelData(LevelIdentifier level, byte[] new_raw_data)
         {
-            // TODO: Also alter the level info data (in case the length of the map has changed)
             RawMapData original = ExtractLevelData(level);
             if (original.RawData.SequenceEqual(new_raw_data))
                 return false;
             LevelInfo info = GetLevelInfo(level);
             rom.Seek(info.DataBaseAddress, SeekOrigin.Begin);
-            LzCompression.Compress(rom, new_raw_data);
-            if (rom.Position > info.NextSectionBaseAddress)
-                Console.WriteLine(string.Format("Warning: The new level {0} overlaps next section ({1:X} > {2:X}). It might result in a ROM corruption.",
-                    level.ToString(), rom.Position, info.NextSectionBaseAddress));
+            if (LzCompression.Compress(rom, new_raw_data, info.NextSectionBaseAddress) < new_raw_data.Length)
+                Console.WriteLine(string.Format("Warning: The new level {0} has been truncated.", level.ToString()));
+            /*Console.WriteLine(string.Format("Warning: The new level {0} overlaps next section ({1:X} > {2:X}). It might result in a ROM corruption.",
+                level.ToString(), rom.Position, info.NextSectionBaseAddress));*/
+            // TODO: Also alter the level info data (in case the length of the map has changed, due to the provided map or due to truncature)
             return true;
         }
 
