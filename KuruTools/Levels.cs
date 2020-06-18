@@ -4,8 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Channels;
 
 namespace KuruTools
 {
@@ -50,11 +48,11 @@ namespace KuruTools
         [FieldOffset(20)]
         public int background_uncompressed_size;
         [FieldOffset(24)]
-        public int dummy1; // Offset of the map preview
+        public int minimap_data_offset;
         [FieldOffset(28)]
-        public int dummy2; // Uncompressed size of the map preview (0x800)
+        public int minimap_size; // (0x800)
     }
-    public class Levels // TODO: Add support for minimap
+    public class Levels
     {
         public enum World
         {
@@ -81,7 +79,8 @@ namespace KuruTools
             public int GraphicalUncompressedSize;
             public int BackgroundBaseAddress;
             public int BackgroundUncompressedSize;
-            public int NextSectionBaseAddress;
+            public int MinimapBaseAddress;
+            public int MinimapSize;
         }
         public struct RawMapData
         {
@@ -91,6 +90,7 @@ namespace KuruTools
             public byte[] RawGraphical;
             public byte[] CompressedBackground;
             public byte[] RawBackground;
+            public byte[] RawMinimap;
         }
         public struct LevelIdentifier
         {
@@ -172,7 +172,8 @@ namespace KuruTools
             res.GraphicalUncompressedSize = level_entries[w][l].graphical_uncompressed_size;
             res.BackgroundBaseAddress = base_addr + level_entries[w][l].background_data_offset;
             res.BackgroundUncompressedSize = level_entries[w][l].background_uncompressed_size;
-            res.NextSectionBaseAddress = base_addr + level_entries[w][l].dummy1;
+            res.MinimapBaseAddress = base_addr + level_entries[w][l].minimap_data_offset;
+            res.MinimapSize = level_entries[w][l].minimap_size;
             return res;
         }
 
@@ -201,6 +202,9 @@ namespace KuruTools
             length = (int)(rom.Position - startPos);
             rom.Seek(startPos, SeekOrigin.Begin);
             res.CompressedBackground = (new BinaryReader(rom)).ReadBytes(length);
+
+            rom.Seek(info.MinimapBaseAddress, SeekOrigin.Begin);
+            res.RawMinimap = (new BinaryReader(rom)).ReadBytes(info.MinimapSize);
 
             return res;
         }
@@ -232,9 +236,10 @@ namespace KuruTools
             return floorToMultiple(uncompressed_length_written, 4);
             //return new_raw.Length;
         }
-        public bool AlterLevelData(LevelIdentifier level, byte[] new_data, byte[] new_graphical, byte[] new_background)
+        public bool AlterLevelData(LevelIdentifier level, byte[] new_data, byte[] new_graphical, byte[] new_background, byte[] new_minimap)
         {
-            // TODO: add parameters that indicates where it is allowed to truncate (physics?, graphics?, background?)
+            // TODO: Test saving the levels at the end of the rom
+            // TODO: Add parameters that indicates where it is allowed to truncate (physics?, graphics?, background?)
             RawMapData original = ExtractLevelData(level);
             if (new_data != null && original.RawData.SequenceEqual(new_data))
                 new_data = null;
@@ -242,8 +247,10 @@ namespace KuruTools
                 new_graphical = null;
             if (new_background != null && original.RawBackground.SequenceEqual(new_background))
                 new_background = null;
+            if (new_minimap != null && original.RawMinimap.SequenceEqual(new_minimap))
+                new_minimap = null;
 
-            if (new_data == null && new_graphical == null && new_background == null)
+            if (new_data == null && new_graphical == null && new_background == null && new_minimap == null)
                 return false;
 
             // Write compressed data
@@ -259,7 +266,13 @@ namespace KuruTools
             int pos2 = ceilToMultiple((int)rom.Position, 4);
             level_entries[w][l].background_data_offset = pos2 - world_entries[w].WorldDataBaseAddress;
             level_entries[w][l].background_uncompressed_size =
-                WriteDataWithCompression(level, original.RawBackground, original.CompressedBackground, new_background, pos2, info.NextSectionBaseAddress/* Or -1 */);
+                WriteDataWithCompression(level, original.RawBackground, original.CompressedBackground, new_background, pos2, info.MinimapBaseAddress/* Or -1 */);
+            int pos3 = ceilToMultiple((int)rom.Position, 4);
+            level_entries[w][l].minimap_data_offset = pos3 - world_entries[w].WorldDataBaseAddress;
+            int endAddr = info.MinimapBaseAddress + info.MinimapSize;
+            byte[] minimap = new_minimap == null ? original.RawMinimap : new_minimap;
+            rom.Seek(pos3, SeekOrigin.Begin);
+            rom.Write(minimap, Math.Max(0, minimap.Length + pos3 - endAddr), Math.Min(endAddr - pos3, minimap.Length));
 
             // Update LevelEntry structure
             rom.Seek(world_entries[w].LevelInfosBaseAddress, SeekOrigin.Begin);

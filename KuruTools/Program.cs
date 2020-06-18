@@ -35,31 +35,34 @@ namespace KuruTools
                         Levels.LevelInfo info = levels.GetLevelInfo(new Levels.LevelIdentifier(w, l));
                         Console.WriteLine(string.Format("Level {1} Data Base Address: {0:X}", info.DataBaseAddress, l + 1));
                         Console.WriteLine(string.Format("Level {1} Uncompressed Size: {0:X}", info.DataUncompressedSize, l + 1));
-                        Console.WriteLine(string.Format("Level {1} Next Section Base Address: {0:X}", info.GraphicalBaseAddress, l + 1));
                     }
                     Console.WriteLine("");
                 }
             }
 
             Directory.CreateDirectory(workspace);
-            foreach (Levels.LevelIdentifier level in Levels.AllLevels())
+            foreach (Levels.LevelIdentifier level in Levels.AllLevels()) // TODO: Decrypt the minimap format and export it in a more convenient one
             {
                 string filename = Path.Combine(workspace, level.ShortName() + ".txt");
                 string filename_graphical = Path.Combine(workspace, level.ShortName() + "_graphical.txt");
                 string filename_background = Path.Combine(workspace, level.ShortName() + "_background.txt");
+                string filename_minimap = Path.Combine(workspace, level.ShortName() + "_minimap.bin");
 
                 byte[] p = null;
                 byte[] g = null;
                 byte[] b = null;
+                byte[] m = null;
                 if (File.Exists(filename))
                     p = Map.Parse(File.ReadAllLines(filename), Map.Type.PHYSICAL).ToByteData();
                 if (File.Exists(filename_graphical))
                     g = Map.Parse(File.ReadAllLines(filename_graphical), Map.Type.GRAPHICAL).ToByteData();
                 if (File.Exists(filename_background))
                     b = Map.Parse(File.ReadAllLines(filename_background), Map.Type.BACKGROUND).ToByteData();
+                if (File.Exists(filename_minimap))
+                    m = File.ReadAllBytes(filename_minimap);
 
                 // Export map if not already present
-                if (p == null || g == null || b == null)
+                if (p == null || g == null || b == null || m == null)
                 {
                     Levels.RawMapData raw = levels.ExtractLevelData(level);
                     if (p == null)
@@ -77,11 +80,15 @@ namespace KuruTools
                         Map mb = new Map(raw.RawBackground, Map.Type.BACKGROUND);
                         File.WriteAllText(filename_background, mb.ToString());
                     }
+                    if (m == null)
+                    {
+                        File.WriteAllBytes(filename_minimap, raw.RawMinimap);
+                    }
                     Console.WriteLine("Missing components for " + level.ToString() + ". Missing data has been exported.");
                 }
 
                 // Alter map in the ROM
-                if (levels.AlterLevelData(level, p, g, b))
+                if (levels.AlterLevelData(level, p, g, b, m))
                     Console.WriteLine("Changes detected in " + level.ToString() + ". The ROM has been updated.");
             }
 
