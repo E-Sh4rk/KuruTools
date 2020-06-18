@@ -50,11 +50,11 @@ namespace KuruTools
         [FieldOffset(20)]
         public int background_uncompressed_size;
         [FieldOffset(24)]
-        public int dummy1; // Offset of another compressed section
+        public int dummy1; // Offset of the map preview
         [FieldOffset(28)]
-        public int dummy2; // Uncompressed size of this section
+        public int dummy2; // Uncompressed size of the map preview (0x800)
     }
-    public class Levels
+    public class Levels // TODO: Add support for minimap
     {
         public enum World
         {
@@ -205,25 +205,36 @@ namespace KuruTools
             return res;
         }
 
+        int floorToMultiple(int v, int multiple)
+        {
+            return v - (v % multiple);
+        }
+        int ceilToMultiple(int v, int multiple)
+        {
+            if (v % multiple == 0) return v;
+            return floorToMultiple(v, multiple) + multiple;
+        }
+
         int WriteDataWithCompression(LevelIdentifier level, byte[] original_raw, byte[] original_compressed, byte[] new_raw, int baseAddr, int endAddr)
         {
             rom.Seek(baseAddr, SeekOrigin.Begin);
-            if (new_raw == null)
+            if (new_raw == null && baseAddr + original_compressed.Length <= endAddr)
             {
                 rom.Write(original_compressed);
                 return original_raw.Length;
             }
+            else if (new_raw == null)
+                new_raw = original_raw;
             int uncompressed_length_written = LzCompression.Compress(rom, new_raw, endAddr);
             if (uncompressed_length_written < new_raw.Length)
                 Console.WriteLine(string.Format("Warning: The new level {0} has been truncated.", level.ToString()));
             Debug.Assert(uncompressed_length_written <= new_raw.Length);
-            //return uncompressed_length_written;
-            return new_raw.Length; // The size reported must match with the map dimensions.
+            return floorToMultiple(uncompressed_length_written, 4);
+            //return new_raw.Length;
         }
         public bool AlterLevelData(LevelIdentifier level, byte[] new_data, byte[] new_graphical, byte[] new_background)
         {
-            // TODO: Allow graphical and background sections to move to allow more space
-
+            // TODO: add parameters that indicates where it is allowed to truncate (physics?, graphics?, background?)
             RawMapData original = ExtractLevelData(level);
             if (new_data != null && original.RawData.SequenceEqual(new_data))
                 new_data = null;
@@ -240,11 +251,15 @@ namespace KuruTools
             int l = level.level;
             LevelInfo info = GetLevelInfo(level);
             level_entries[w][l].level_uncompressed_size =
-                WriteDataWithCompression(level, original.RawData, original.CompressedData, new_data, info.DataBaseAddress, info.GraphicalBaseAddress);
+                WriteDataWithCompression(level, original.RawData, original.CompressedData, new_data, info.DataBaseAddress, info.GraphicalBaseAddress/* Or -1 */);
+            int pos1 = ceilToMultiple((int)rom.Position, 4);
+            level_entries[w][l].graphical_data_offset = pos1 - world_entries[w].WorldDataBaseAddress;
             level_entries[w][l].graphical_uncompressed_size =
-                WriteDataWithCompression(level, original.RawGraphical, original.CompressedGraphical, new_graphical, info.GraphicalBaseAddress, info.BackgroundBaseAddress);
+                WriteDataWithCompression(level, original.RawGraphical, original.CompressedGraphical, new_graphical, pos1, info.BackgroundBaseAddress/* Or -1 */);
+            int pos2 = ceilToMultiple((int)rom.Position, 4);
+            level_entries[w][l].background_data_offset = pos2 - world_entries[w].WorldDataBaseAddress;
             level_entries[w][l].background_uncompressed_size =
-                WriteDataWithCompression(level, original.RawBackground, original.CompressedBackground, new_background, info.BackgroundBaseAddress, info.NextSectionBaseAddress);
+                WriteDataWithCompression(level, original.RawBackground, original.CompressedBackground, new_background, pos2, info.NextSectionBaseAddress/* Or -1 */);
 
             // Update LevelEntry structure
             rom.Seek(world_entries[w].LevelInfosBaseAddress, SeekOrigin.Begin);
