@@ -222,7 +222,7 @@ namespace KuruTools
         int WriteDataWithCompression(LevelIdentifier level, byte[] original_raw, byte[] original_compressed, byte[] new_raw, int baseAddr, int endAddr)
         {
             rom.Seek(baseAddr, SeekOrigin.Begin);
-            if (new_raw == null && baseAddr + original_compressed.Length <= endAddr)
+            if (new_raw == null && (endAddr < 0 ||baseAddr + original_compressed.Length <= endAddr))
             {
                 rom.Write(original_compressed);
                 return original_raw.Length;

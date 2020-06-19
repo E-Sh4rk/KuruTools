@@ -41,12 +41,12 @@ namespace KuruTools
             }
 
             Directory.CreateDirectory(workspace);
-            foreach (Levels.LevelIdentifier level in Levels.AllLevels()) // TODO: Decrypt the minimap format and export it in a more convenient one
+            foreach (Levels.LevelIdentifier level in Levels.AllLevels())
             {
                 string filename = Path.Combine(workspace, level.ShortName() + ".txt");
                 string filename_graphical = Path.Combine(workspace, level.ShortName() + "_graphical.txt");
                 string filename_background = Path.Combine(workspace, level.ShortName() + "_background.txt");
-                string filename_minimap = Path.Combine(workspace, level.ShortName() + "_minimap.bin");
+                string filename_minimap = Path.Combine(workspace, level.ShortName() + "_minimap.txt");
 
                 byte[] p = null;
                 byte[] g = null;
@@ -59,7 +59,7 @@ namespace KuruTools
                 if (File.Exists(filename_background))
                     b = Map.Parse(File.ReadAllLines(filename_background), Map.Type.BACKGROUND).ToByteData();
                 if (File.Exists(filename_minimap))
-                    m = File.ReadAllBytes(filename_minimap);
+                    m = MiniMap.Parse(File.ReadAllLines(filename_minimap)).ToByteData();
 
                 // Export map if not already present
                 if (p == null || g == null || b == null || m == null)
@@ -82,7 +82,8 @@ namespace KuruTools
                     }
                     if (m == null)
                     {
-                        File.WriteAllBytes(filename_minimap, raw.RawMinimap);
+                        MiniMap mm = new MiniMap(raw.RawMinimap);
+                        File.WriteAllText(filename_minimap, mm.ToString());
                     }
                     Console.WriteLine("Missing components for " + level.ToString() + ". Missing data has been exported.");
                 }
