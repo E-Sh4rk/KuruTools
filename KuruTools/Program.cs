@@ -44,10 +44,10 @@ namespace KuruTools
             Directory.CreateDirectory(workspace);
             foreach (Levels.LevelIdentifier level in Levels.AllLevels())
             {
-                string filename = Path.Combine(workspace, level.ShortName() + ".txt");
-                string filename_graphical = Path.Combine(workspace, level.ShortName() + "_graphical.txt");
-                string filename_background = Path.Combine(workspace, level.ShortName() + "_background.txt");
-                string filename_minimap = Path.Combine(workspace, level.ShortName() + "_minimap.txt");
+                string filename = Path.Combine(workspace, level.ShortName() + ".physical.txt");
+                string filename_graphical = Path.Combine(workspace, level.ShortName() + ".graphical.txt");
+                string filename_background = Path.Combine(workspace, level.ShortName() + ".background.txt");
+                string filename_minimap = Path.Combine(workspace, level.ShortName() + ".minimap.txt");
 
                 byte[] p = null;
                 byte[] g = null;

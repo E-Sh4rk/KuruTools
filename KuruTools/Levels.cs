@@ -103,7 +103,7 @@ namespace KuruTools
             public int level;
             public string ShortName()
             {
-                return string.Format("{0}_{1}", Enum.GetName(typeof(World), world).ToLowerInvariant(), level+1);
+                return string.Format("{2:D2}_{0}_{1:D2}", Enum.GetName(typeof(World), world).ToLowerInvariant(), level+1, (int)world);
             }
             public string ToString()
             {
