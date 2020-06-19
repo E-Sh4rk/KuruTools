@@ -12,8 +12,9 @@ namespace KuruTools
         /// <param name="input">The path to the input ROM</param>
         /// <param name="output">The target path for the altered ROM</param>
         /// <param name="workspace">The path to the directory containing the level data</param>
+        /// <param name="relocate">Relocate the new maps at the end of the ROM (prevent overlapping, but increase ROM size)</param>
         /// <param name="debug">Print debug information</param>
-        static void Main(string input = "input.gba", string output = "output.gba", string workspace = "levels", bool debug = false)
+        static void Main(string input = "input.gba", string output = "output.gba", string workspace = "levels", bool relocate = true, bool debug = false)
         {
             Console.WriteLine("=== Kuru Kuru Kururin Tools ===");
             Console.WriteLine("");
@@ -89,7 +90,7 @@ namespace KuruTools
                 }
 
                 // Alter map in the ROM
-                if (levels.AlterLevelData(level, p, g, b, m))
+                if (levels.AlterLevelData(level, p, g, b, m, relocate))
                     Console.WriteLine("Changes detected in " + level.ToString() + ". The ROM has been updated.");
             }
 

@@ -236,10 +236,8 @@ namespace KuruTools
             return floorToMultiple(uncompressed_length_written, 4);
             //return new_raw.Length;
         }
-        public bool AlterLevelData(LevelIdentifier level, byte[] new_data, byte[] new_graphical, byte[] new_background, byte[] new_minimap)
+        public bool AlterLevelData(LevelIdentifier level, byte[] new_data, byte[] new_graphical, byte[] new_background, byte[] new_minimap, bool relocate)
         {
-            // TODO: Test saving the levels at the end of the rom
-            // TODO: Add parameters that indicates where it is allowed to truncate (physics?, graphics?, background?)
             RawMapData original = ExtractLevelData(level);
             if (new_data != null && original.RawData.SequenceEqual(new_data))
                 new_data = null;
@@ -257,20 +255,26 @@ namespace KuruTools
             int w = (int)level.world;
             int l = level.level;
             LevelInfo info = GetLevelInfo(level);
+
+            int pos0 = relocate ? ceilToMultiple((int)rom.Length, 4) : info.DataBaseAddress;
+            level_entries[w][l].level_data_offset = pos0 - world_entries[w].WorldDataBaseAddress;
             level_entries[w][l].level_uncompressed_size =
-                WriteDataWithCompression(level, original.RawData, original.CompressedData, new_data, info.DataBaseAddress, info.GraphicalBaseAddress/* Or -1 */);
+                WriteDataWithCompression(level, original.RawData, original.CompressedData, new_data, pos0, relocate ? -1 : info.GraphicalBaseAddress);
+
             int pos1 = ceilToMultiple((int)rom.Position, 4);
             level_entries[w][l].graphical_data_offset = pos1 - world_entries[w].WorldDataBaseAddress;
             level_entries[w][l].graphical_uncompressed_size =
-                WriteDataWithCompression(level, original.RawGraphical, original.CompressedGraphical, new_graphical, pos1, info.BackgroundBaseAddress/* Or -1 */);
+                WriteDataWithCompression(level, original.RawGraphical, original.CompressedGraphical, new_graphical, pos1, relocate ? -1 : info.BackgroundBaseAddress);
+
             int pos2 = ceilToMultiple((int)rom.Position, 4);
             level_entries[w][l].background_data_offset = pos2 - world_entries[w].WorldDataBaseAddress;
             level_entries[w][l].background_uncompressed_size =
-                WriteDataWithCompression(level, original.RawBackground, original.CompressedBackground, new_background, pos2, info.MinimapBaseAddress/* Or -1 */);
+                WriteDataWithCompression(level, original.RawBackground, original.CompressedBackground, new_background, pos2, relocate ? -1 : info.MinimapBaseAddress);
+
             int pos3 = ceilToMultiple((int)rom.Position, 4);
             level_entries[w][l].minimap_data_offset = pos3 - world_entries[w].WorldDataBaseAddress;
-            int endAddr = info.MinimapBaseAddress + info.MinimapSize;
             byte[] minimap = new_minimap == null ? original.RawMinimap : new_minimap;
+            int endAddr = (relocate ? pos3 : info.MinimapBaseAddress) + info.MinimapSize;
             rom.Seek(pos3, SeekOrigin.Begin);
             rom.Write(minimap, Math.Max(0, minimap.Length + pos3 - endAddr), Math.Min(endAddr - pos3, minimap.Length));
 
