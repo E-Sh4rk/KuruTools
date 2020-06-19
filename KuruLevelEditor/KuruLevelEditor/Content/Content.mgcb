@@ -13,8 +13,8 @@
 
 #---------------------------------- Content ---------------------------------#
 
-#begin ../../Assets/16colors.png
+#begin ../../Assets/minimap_colors.png
 /importer:
 /processor:
-/build:../../Assets/16colors.png;16colors.png
+/build:../../Assets/minimap_colors.png;minimap_colors.png
 

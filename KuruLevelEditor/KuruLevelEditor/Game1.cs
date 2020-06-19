@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Input;
 using Myra;
 using Myra.Graphics2D.Brushes;
 using Myra.Graphics2D.UI;
+using System.Collections.Generic;
 using System.IO;
 
 namespace KuruLevelEditor
@@ -29,6 +30,9 @@ namespace KuruLevelEditor
             _graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
+
+            _graphics.PreferredBackBufferWidth = 1280;
+            _graphics.PreferredBackBufferHeight = 720;
         }
 
         protected override void Initialize()
@@ -44,7 +48,7 @@ namespace KuruLevelEditor
 
             MyraEnvironment.Game = this;
 
-            Load.LoadContent(Content);
+            Load.LoadContent(Content, GraphicsDevice);
 
             // ===== MAIN MENU =====
             var grid = new Grid
@@ -188,7 +192,7 @@ namespace KuruLevelEditor
             editor = new EditorGrid(
                 new Rectangle(GraphicsDevice.Viewport.X + LATERAL_PANEL_WIDTH,
                 GraphicsDevice.Viewport.Y, GraphicsDevice.Viewport.Width - LATERAL_PANEL_WIDTH, GraphicsDevice.Viewport.Height),
-                new SpriteSet(Load.Colors16), grid);
+                new SpriteSet(Load.MinimapColors), grid, new Point(-8, -8));
         }
 
         protected override void Update(GameTime gameTime)
@@ -197,6 +201,12 @@ namespace KuruLevelEditor
                 Exit();
 
             // TODO: Add your update logic here
+            if (mode != Mode.Menu)
+            {
+                List<Controller.Action> actions = Controller.GetActionsGrid(Keyboard.GetState(), Mouse.GetState(), gameTime);
+                foreach (Controller.Action action in actions)
+                    editor.PerformAction(action);
+            }
 
             base.Update(gameTime);
         }
