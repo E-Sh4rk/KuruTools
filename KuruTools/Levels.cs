@@ -34,29 +34,35 @@ namespace KuruTools
     struct WorldInfo
     {
         [FieldOffset(0)]
-        public int addr1_offset; // Seems interesting
+        public int addr1_offset; // Graphical Tiles
         [FieldOffset(4)]
         public int addr1_uncompressed_size;
         [FieldOffset(8)]
-        public int addr2_offset; // Seems interesting
+        public int addr2_offset; // Background tiles
         [FieldOffset(12)]
         public int addr2_uncompressed_size;
-        /* addr3 and addr4 seem to correspond to physical tiles (walls, etc) and sprites (objects),
-           which are common to all levels. That's why they are always missing here. */
+        [FieldOffset(16)]
+        public int addr3_offset; // Physical tiles? These are common to all worlds, so this field is always empty...
+        [FieldOffset(20)]
+        public int addr3_uncompressed_size;
+        [FieldOffset(24)]
+        public int addr4_offset; // Sprite tiles? These are common to all worlds, so this field is always empty...
+        [FieldOffset(28)]
+        public int addr4_uncompressed_size;
         [FieldOffset(32)]
-        public int addr5_offset;
+        public int addr5_offset; // Palette for background layers (not for sprites)
         [FieldOffset(36)]
         public int addr5_uncompressed_size;
         [FieldOffset(40)]
-        public int addr6_offset;
+        public int addr6_offset; // Palette (for birds and bonuses?)
         [FieldOffset(44)]
         public int addr6_uncompressed_size;
         [FieldOffset(48)]
-        public int addr7_offset;
+        public int addr7_offset; // Other versions of the first color set (32 first bytes)
         [FieldOffset(52)]
         public int addr7_size;
         [FieldOffset(56)]
-        public int addr8_offset;
+        public int addr8_offset; // Other versions of a particular color set?
         [FieldOffset(60)]
         public int addr8_size;
     }
@@ -254,7 +260,10 @@ namespace KuruTools
         byte[] DecompressWorldData(int w, int offset, int uncompressed_size)
         {
             if (uncompressed_size == 0)
+            {
+                Debug.Assert(offset == 0);
                 return null;
+            }
             int addr = world_entries[w].WorldDataBaseAddress + offset;
             //Debug.Assert(rom.Position <= addr);
             rom.Seek(addr, SeekOrigin.Begin);
@@ -263,7 +272,10 @@ namespace KuruTools
         byte[] ReadWorldData(int w, int offset, int size)
         {
             if (size == 0)
+            {
+                Debug.Assert(offset == 0);
                 return null;
+            }
             int addr = world_entries[w].WorldDataBaseAddress + offset;
             //Debug.Assert(rom.Position <= addr);
             rom.Seek(addr, SeekOrigin.Begin);
@@ -271,12 +283,14 @@ namespace KuruTools
         }
         public byte[][] ExtractWorldData(World world)
         {
-            byte[][] res = new byte[16][];
+            byte[][] res = new byte[8][];
             int w = (int)world;
             WorldInfo wi = world_infos[w];
             //rom.Seek(0, SeekOrigin.Begin);
             res[0] = DecompressWorldData(w, wi.addr1_offset, wi.addr1_uncompressed_size);
             res[1] = DecompressWorldData(w, wi.addr2_offset, wi.addr2_uncompressed_size);
+            res[2] = DecompressWorldData(w, wi.addr3_offset, wi.addr3_uncompressed_size);
+            res[3] = DecompressWorldData(w, wi.addr4_offset, wi.addr4_uncompressed_size);
             res[4] = DecompressWorldData(w, wi.addr5_offset, wi.addr5_uncompressed_size);
             res[5] = DecompressWorldData(w, wi.addr6_offset, wi.addr6_uncompressed_size);
             res[6] = ReadWorldData(w, wi.addr7_offset, wi.addr7_size);

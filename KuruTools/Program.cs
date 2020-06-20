@@ -60,7 +60,7 @@ namespace KuruTools
                             string filename_bin = string.Format("{0}.{1:D2}.bin", Levels.LevelIdentifier.WorldShortName(w), i);
                             string filename_png = string.Format("{0}.{1:D2}.png", Levels.LevelIdentifier.WorldShortName(w), i);
                             File.WriteAllBytes(Path.Combine(extractWorldsData, filename_bin), d);
-                            if (i == 0 || i == 1)
+                            if (i < 4)
                                 Tiles.PreviewOfTilesData(d).Save(Path.Combine(extractWorldsData, filename_png));
                         }
                     }
