@@ -43,6 +43,8 @@ namespace KuruTools
                 }
             }
 
+            // TODO: Also extract the palette, and generate one image per palette
+            // TODO: Extract the global tiles (walls, etc)
             if (!string.IsNullOrEmpty(extractWorldsData))
             {
                 Directory.CreateDirectory(extractWorldsData);
@@ -54,8 +56,13 @@ namespace KuruTools
                         byte[] d = data[i];
                         if (d != null)
                         {
-                            string filename = string.Format("{0}.{1:D2}.bin", Levels.LevelIdentifier.WorldShortName(w), i);
-                            File.WriteAllBytes(Path.Combine(extractWorldsData, filename), d);
+                            string filename_bin = string.Format("{0}.{1:D2}.bin", Levels.LevelIdentifier.WorldShortName(w), i);
+                            string filename_png = string.Format("{0}.{1:D2}.png", Levels.LevelIdentifier.WorldShortName(w), i);
+                            if (i == 0 || i == 1)
+                            {
+                                Tiles.PreviewOfTilesData(d).Save(Path.Combine(extractWorldsData, filename_png));
+                            }
+                            File.WriteAllBytes(Path.Combine(extractWorldsData, filename_bin), d);
                         }
                     }
                 }
