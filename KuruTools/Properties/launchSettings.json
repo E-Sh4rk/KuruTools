@@ -2,7 +2,7 @@
   "profiles": {
     "KuruTools": {
       "commandName": "Project",
-      "commandLineArgs": "--extract-worlds-data \"worlds\""
+      "commandLineArgs": "--extract-tiles \"tiles\""
     }
   }
 }

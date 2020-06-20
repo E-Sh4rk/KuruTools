@@ -95,6 +95,21 @@ namespace KuruTools
         const int PHYSICAL_TILES_ADDR = 0x1DA788 - 0x2000;
         const int PHYSICAL_TILES_LENGTH = 0x2000;
 
+        // Common background palette (the 5 last color sets)
+        /*
+        11 (Blue):  0x1DC988 (4 versions)
+        12:         0x1DCA88 (4 versions)
+        13 (Red):   0x1DCD88 (7 versions)
+        14:         0x1DC948 (1 version) 
+        15 (Green): 0x1DC968 (1 version)
+        */
+        const int COMMON_PALETTE_11 = 0x1DC988;
+        const int COMMON_PALETTE_12 = 0x1DCA88;
+        const int COMMON_PALETTE_13 = 0x1DCD88;
+        const int COMMON_PALETTE_14 = 0x1DC948;
+        const int COMMON_PALETTE_15 = 0x1DC968;
+        const int COLORSET_SIZE = 0x20;
+
         public enum World
         {
             TRAINING = 0,
@@ -302,6 +317,25 @@ namespace KuruTools
             rom.Seek(PHYSICAL_TILES_ADDR, SeekOrigin.Begin);
             return new BinaryReader(rom).ReadBytes(PHYSICAL_TILES_LENGTH);
         }
+        public byte[] ExtractCommonPaletteData()
+        {
+            byte[] res = new byte[5*COLORSET_SIZE];
+            BinaryWriter writer = new BinaryWriter(new MemoryStream(res));
+            BinaryReader reader = new BinaryReader(rom);
+            rom.Seek(COMMON_PALETTE_11, SeekOrigin.Begin);
+            writer.Write(reader.ReadBytes(COLORSET_SIZE));
+            rom.Seek(COMMON_PALETTE_12, SeekOrigin.Begin);
+            writer.Write(reader.ReadBytes(COLORSET_SIZE));
+            rom.Seek(COMMON_PALETTE_13, SeekOrigin.Begin);
+            writer.Write(reader.ReadBytes(COLORSET_SIZE));
+            rom.Seek(COMMON_PALETTE_14, SeekOrigin.Begin);
+            writer.Write(reader.ReadBytes(COLORSET_SIZE));
+            rom.Seek(COMMON_PALETTE_15, SeekOrigin.Begin);
+            writer.Write(reader.ReadBytes(COLORSET_SIZE));
+            writer.Close();
+            return res;
+        }
+            
 
         int floorToMultiple(int v, int multiple)
         {

@@ -14,11 +14,12 @@ namespace KuruTools
         /// <param name="output">The target path for the altered ROM</param>
         /// <param name="workspace">The path to the directory containing the level data</param>
         /// <param name="relocate">Relocate the new maps at the end of the ROM (prevent overlapping, but increase ROM size)</param>
-        /// <param name="extractWorldsData">Path to the directory where worlds data will be extracted</param>
+        /// <param name="extractTiles">Path to the directory where tiles will be extracted</param>
         /// <param name="debug">Print debug information</param>
         static void Main(string input = "input.gba", string output = "output.gba", string workspace = "levels",
-            bool relocate = true, string extractWorldsData = null, bool debug = false)
+            bool relocate = true, string extractTiles = null, bool debug = false)
         {
+            // TODO: option to treat first color as transparency for sprite extraction?
             Console.WriteLine("=== Kuru Kuru Kururin Tools ===");
             Console.WriteLine("");
             File.Copy(input, output, true);
@@ -44,30 +45,35 @@ namespace KuruTools
                 }
             }
 
-            if (!string.IsNullOrEmpty(extractWorldsData))
+            if (!string.IsNullOrEmpty(extractTiles))
             {
-                Directory.CreateDirectory(extractWorldsData);
+                Directory.CreateDirectory(extractTiles);
                 byte[] physicalTilesData = levels.ExtractPhysicalTilesData();
-                File.WriteAllBytes(Path.Combine(extractWorldsData, "physical_tiles.bin"), physicalTilesData);
+                //File.WriteAllBytes(Path.Combine(extractTiles, "physical_tiles.bin"), physicalTilesData);
+                byte[] commonPaletteData = levels.ExtractCommonPaletteData();
+                //File.WriteAllBytes(Path.Combine(extractTiles, "common_palette.bin"), commonPaletteData);
                 foreach (Levels.World w in Enum.GetValues(typeof(Levels.World)))
                 {
                     byte[][] data = levels.ExtractWorldData(w);
                     if (data[2] == null)
                         data[2] = physicalTilesData;
+
+                    Array.Copy(commonPaletteData, 0, data[4], data[4].Length - commonPaletteData.Length, commonPaletteData.Length);
                     Palette palette = new Palette(data[4]);
                     for (int i = 0; i < data.Length; i++)
                     {
                         byte[] d = data[i];
                         if (d != null)
                         {
-                            string filename_bin = string.Format("{0}.{1:D2}.bin", Levels.LevelIdentifier.WorldShortName(w), i);
-                            File.WriteAllBytes(Path.Combine(extractWorldsData, filename_bin), d);
+                            //string filename_bin = string.Format("{0}.{1:D2}.bin", Levels.LevelIdentifier.WorldShortName(w), i);
+                            //File.WriteAllBytes(Path.Combine(extractTiles, filename_bin), d);
                             if (i < 4)
                             {
+                                string type = (new string[] { "graphical", "background", "physical", "sprites" })[i];
                                 for (int j = 0; j < palette.Colors.Length; j++)
                                 {
-                                    string filename_png = string.Format("{0}.{1:D2}.{2}.png", Levels.LevelIdentifier.WorldShortName(w), i, j);
-                                    Tiles.PreviewOfTilesData(d, palette.Colors[j]).Save(Path.Combine(extractWorldsData, filename_png));
+                                    string filename_png = string.Format("{0}.{1}.{2:D2}.png", Levels.LevelIdentifier.WorldShortName(w), type, j);
+                                    Tiles.PreviewOfTilesData(d, palette.Colors[j]).Save(Path.Combine(extractTiles, filename_png));
                                 }
                             }
                         }
