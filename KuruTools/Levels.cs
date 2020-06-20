@@ -10,27 +10,92 @@ namespace KuruTools
     [StructLayout(LayoutKind.Explicit, Size = 12)]
     struct WorldEntry
     {
-        public const long BASE_ADDRESS = 0xC2E68;
+        public const int BASE_ADDRESS = 0xC2E68;
+        const int ROM_MEMORY_DOMAIN = 0x08000000;
 
         [FieldOffset(0)]
         int world_info_mem_address;
         [FieldOffset(4)]
         int world_data_mem_address;
         [FieldOffset(8)]
-        int dummy1; // Seems to be linked to bonuses
+        int dummy1; // Seems related to bonuses
 
         public int WorldInfoBaseAddress
         {
-            get { return world_info_mem_address - 0x8000000; }
-        }
-        public int LevelInfosBaseAddress
-        {
-            get { return WorldInfoBaseAddress + 0x80; }
+            get { return world_info_mem_address - ROM_MEMORY_DOMAIN; }
         }
         public int WorldDataBaseAddress
         {
-            get { return world_data_mem_address - 0x8000000; }
+            get { return world_data_mem_address - ROM_MEMORY_DOMAIN; }
         }
+    }
+    [StructLayout(LayoutKind.Explicit, Size = 0x80)]
+    struct WorldInfo
+    {
+        [FieldOffset(0)]
+        public int addr1_offset; // Seems interesting
+        [FieldOffset(4)]
+        public int addr1_uncompressed_size;
+        [FieldOffset(8)]
+        public int addr2_offset; // Seems interesting
+        [FieldOffset(12)]
+        public int addr2_uncompressed_size;
+        [FieldOffset(16)]
+        public int addr3_offset;
+        [FieldOffset(20)]
+        public int addr3_uncompressed_size;
+        [FieldOffset(24)]
+        public int addr4_offset;
+        [FieldOffset(28)]
+        public int addr4_uncompressed_size;
+        [FieldOffset(32)]
+        public int addr5_offset;
+        [FieldOffset(36)]
+        public int addr5_uncompressed_size;
+        [FieldOffset(40)]
+        public int addr6_offset;
+        [FieldOffset(44)]
+        public int addr6_uncompressed_size;
+        [FieldOffset(48)]
+        public int addr7_offset;
+        [FieldOffset(52)]
+        public int addr7_uncompressed_size;
+        [FieldOffset(56)]
+        public int addr8_offset;
+        [FieldOffset(60)]
+        public int addr8_uncompressed_size;
+        [FieldOffset(64)]
+        public int addr9_offset;
+        [FieldOffset(68)]
+        public int addr9_uncompressed_size;
+        [FieldOffset(72)]
+        public int addr10_offset;
+        [FieldOffset(76)]
+        public int addr10_uncompressed_size;
+        [FieldOffset(80)]
+        public int addr11_offset;
+        [FieldOffset(84)]
+        public int addr11_uncompressed_size;
+        [FieldOffset(88)]
+        public int addr12_offset;
+        [FieldOffset(92)]
+        public int addr12_uncompressed_size;
+        [FieldOffset(96)]
+        public int addr13_offset;
+        [FieldOffset(100)]
+        public int addr13_uncompressed_size;
+        [FieldOffset(104)]
+        public int addr14_offset;
+        [FieldOffset(108)]
+        public int addr14_uncompressed_size;
+        [FieldOffset(112)]
+        public int addr15_offset;
+        [FieldOffset(116)]
+        public int addr15_uncompressed_size;
+        [FieldOffset(120)]
+        public int addr16_offset;
+        [FieldOffset(124)]
+        public int addr16_uncompressed_size;
     }
     [StructLayout(LayoutKind.Explicit, Size = 32)]
     struct LevelEntry
@@ -128,6 +193,7 @@ namespace KuruTools
         }
 
         WorldEntry[] world_entries;
+        WorldInfo[] world_infos;
         LevelEntry[][] level_entries;
         FileStream rom;
 
@@ -147,13 +213,15 @@ namespace KuruTools
             for (int w = 0; w < world_entries.Length; w++)
                 world_entries[w] = Utils.ByteToType<WorldEntry>(reader);
 
-            // Level entries
+            // World infos and level entries
+            world_infos = new WorldInfo[world_entries.Length];
             level_entries = new LevelEntry[world_entries.Length][];
             for (int w = 0; w < world_entries.Length; w++)
             {
                 WorldEntry we = world_entries[w];
+                rom.Seek(we.WorldInfoBaseAddress, SeekOrigin.Begin);
+                world_infos[w] = Utils.ByteToType<WorldInfo>(reader);
                 LevelEntry[] le = new LevelEntry[NUMBER_LEVELS[w]];
-                rom.Seek(we.LevelInfosBaseAddress, SeekOrigin.Begin);
                 for (int l = 0; l < le.Length; l++)
                     le[l] = Utils.ByteToType<LevelEntry>(reader);
                 level_entries[w] = le;
@@ -279,7 +347,7 @@ namespace KuruTools
             rom.Write(minimap, Math.Max(0, minimap.Length + pos3 - endAddr), Math.Min(endAddr - pos3, minimap.Length));
 
             // Update LevelEntry structure
-            rom.Seek(world_entries[w].LevelInfosBaseAddress, SeekOrigin.Begin);
+            rom.Seek(world_entries[w].WorldInfoBaseAddress + Marshal.SizeOf(typeof(WorldInfo)), SeekOrigin.Begin);
             BinaryWriter writer = new BinaryWriter(rom);
             foreach (LevelEntry entry in level_entries[w])
                 Utils.TypeToByte(writer, entry);

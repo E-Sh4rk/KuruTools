@@ -1,0 +1,3 @@
+RIP tiles and palette: https://spritedatabase.net/tutorial_gba.php4
+Read palettes: https://www.cyotek.com/blog/loading-microsoft-riff-palette-pal-files-with-csharp
+VisualBoyAdvance-m: https://github.com/visualboyadvance-m/visualboyadvance-m/releases
