@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Runtime.Serialization;
 
 namespace KuruTools
 {
@@ -40,14 +41,7 @@ namespace KuruTools
         public int addr2_offset; // Seems interesting
         [FieldOffset(12)]
         public int addr2_uncompressed_size;
-        [FieldOffset(16)]
-        public int addr3_offset;
-        [FieldOffset(20)]
-        public int addr3_uncompressed_size;
-        [FieldOffset(24)]
-        public int addr4_offset;
-        [FieldOffset(28)]
-        public int addr4_uncompressed_size;
+
         [FieldOffset(32)]
         public int addr5_offset;
         [FieldOffset(36)]
@@ -59,43 +53,11 @@ namespace KuruTools
         [FieldOffset(48)]
         public int addr7_offset;
         [FieldOffset(52)]
-        public int addr7_uncompressed_size;
+        public int addr7_size;
         [FieldOffset(56)]
         public int addr8_offset;
         [FieldOffset(60)]
-        public int addr8_uncompressed_size;
-        [FieldOffset(64)]
-        public int addr9_offset;
-        [FieldOffset(68)]
-        public int addr9_uncompressed_size;
-        [FieldOffset(72)]
-        public int addr10_offset;
-        [FieldOffset(76)]
-        public int addr10_uncompressed_size;
-        [FieldOffset(80)]
-        public int addr11_offset;
-        [FieldOffset(84)]
-        public int addr11_uncompressed_size;
-        [FieldOffset(88)]
-        public int addr12_offset;
-        [FieldOffset(92)]
-        public int addr12_uncompressed_size;
-        [FieldOffset(96)]
-        public int addr13_offset;
-        [FieldOffset(100)]
-        public int addr13_uncompressed_size;
-        [FieldOffset(104)]
-        public int addr14_offset;
-        [FieldOffset(108)]
-        public int addr14_uncompressed_size;
-        [FieldOffset(112)]
-        public int addr15_offset;
-        [FieldOffset(116)]
-        public int addr15_uncompressed_size;
-        [FieldOffset(120)]
-        public int addr16_offset;
-        [FieldOffset(124)]
-        public int addr16_uncompressed_size;
+        public int addr8_size;
     }
     [StructLayout(LayoutKind.Explicit, Size = 32)]
     struct LevelEntry
@@ -168,11 +130,15 @@ namespace KuruTools
             public int level;
             public string ShortName()
             {
-                return string.Format("{2:D2}_{0}_{1:D2}", Enum.GetName(typeof(World), world).ToLowerInvariant(), level+1, (int)world);
+                return string.Format("{0}_{1:D2}", WorldShortName(world), level+1);
             }
             public string ToString()
             {
                 return string.Format("{0} {1}", Enum.GetName(typeof(World), world), level + 1);
+            }
+            public static string WorldShortName(World world)
+            {
+                return string.Format("{1:D2}_{0}", Enum.GetName(typeof(World), world).ToLowerInvariant(), (int)world);
             }
         }
 
@@ -274,6 +240,39 @@ namespace KuruTools
             rom.Seek(info.MinimapBaseAddress, SeekOrigin.Begin);
             res.RawMinimap = (new BinaryReader(rom)).ReadBytes(info.MinimapSize);
 
+            return res;
+        }
+
+        byte[] DecompressWorldData(int w, int offset, int uncompressed_size)
+        {
+            if (uncompressed_size == 0)
+                return null;
+            int addr = world_entries[w].WorldDataBaseAddress + offset;
+            //Debug.Assert(rom.Position <= addr);
+            rom.Seek(addr, SeekOrigin.Begin);
+            return LzCompression.Decompress(rom, uncompressed_size);
+        }
+        byte[] ReadWorldData(int w, int offset, int size)
+        {
+            if (size == 0)
+                return null;
+            int addr = world_entries[w].WorldDataBaseAddress + offset;
+            //Debug.Assert(rom.Position <= addr);
+            rom.Seek(addr, SeekOrigin.Begin);
+            return new BinaryReader(rom).ReadBytes(size);
+        }
+        public byte[][] ExtractWorldData(World world)
+        {
+            byte[][] res = new byte[16][];
+            int w = (int)world;
+            WorldInfo wi = world_infos[w];
+            //rom.Seek(0, SeekOrigin.Begin);
+            res[0] = DecompressWorldData(w, wi.addr1_offset, wi.addr1_uncompressed_size);
+            res[1] = DecompressWorldData(w, wi.addr2_offset, wi.addr2_uncompressed_size);
+            res[4] = DecompressWorldData(w, wi.addr5_offset, wi.addr5_uncompressed_size);
+            res[5] = DecompressWorldData(w, wi.addr6_offset, wi.addr6_uncompressed_size);
+            res[6] = ReadWorldData(w, wi.addr7_offset, wi.addr7_size);
+            res[7] = ReadWorldData(w, wi.addr8_offset, wi.addr8_size);
             return res;
         }
 

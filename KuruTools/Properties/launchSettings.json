@@ -1,7 +1,8 @@
 {
   "profiles": {
     "KuruTools": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": "--extract-worlds-data \"worlds\""
     }
   }
 }

@@ -13,8 +13,10 @@ namespace KuruTools
         /// <param name="output">The target path for the altered ROM</param>
         /// <param name="workspace">The path to the directory containing the level data</param>
         /// <param name="relocate">Relocate the new maps at the end of the ROM (prevent overlapping, but increase ROM size)</param>
+        /// <param name="extractWorldsData">Path to the directory where worlds data will be extracted</param>
         /// <param name="debug">Print debug information</param>
-        static void Main(string input = "input.gba", string output = "output.gba", string workspace = "levels", bool relocate = true, bool debug = false)
+        static void Main(string input = "input.gba", string output = "output.gba", string workspace = "levels",
+            bool relocate = true, string extractWorldsData = null, bool debug = false)
         {
             Console.WriteLine("=== Kuru Kuru Kururin Tools ===");
             Console.WriteLine("");
@@ -38,6 +40,24 @@ namespace KuruTools
                         Console.WriteLine(string.Format("Level {1} Uncompressed Size: {0:X}", info.DataUncompressedSize, l + 1));
                     }
                     Console.WriteLine("");
+                }
+            }
+
+            if (!string.IsNullOrEmpty(extractWorldsData))
+            {
+                Directory.CreateDirectory(extractWorldsData);
+                foreach (Levels.World w in Enum.GetValues(typeof(Levels.World)))
+                {
+                    byte[][] data = levels.ExtractWorldData(w);
+                    for (int i = 0; i < data.Length; i++)
+                    {
+                        byte[] d = data[i];
+                        if (d != null)
+                        {
+                            string filename = string.Format("{0}.{1:D2}.bin", Levels.LevelIdentifier.WorldShortName(w), i);
+                            File.WriteAllBytes(Path.Combine(extractWorldsData, filename), d);
+                        }
+                    }
                 }
             }
 
