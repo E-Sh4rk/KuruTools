@@ -15,14 +15,20 @@ namespace KuruLevelEditor
 			TOP,
 			BOTTOM,
 			ZOOM_IN,
-			ZOOM_OUT
+			ZOOM_OUT,
+			SELECT_NEXT,
+			SELECT_PREVIOUS,
+			BRUSH_PLUS,
+			BRUSH_MINUS
 		}
 
 		static readonly TimeSpan MOVE_DELAY = new TimeSpan(0, 0, 0, 0, 50);
 		static readonly TimeSpan ZOOM_DELAY = new TimeSpan(0, 0, 0, 0, 50);
+		static readonly TimeSpan BRUSH_DELAY = new TimeSpan(0, 0, 0, 0, 100);
 
 		static TimeSpan last_direction_time = TimeSpan.Zero;
 		static TimeSpan last_zoom_time = TimeSpan.Zero;
+		static TimeSpan last_brush_time = TimeSpan.Zero;
 		static int last_scroll_wheel_value = 0;
 		public static List<Action> GetActionsGrid(KeyboardState state, MouseState mouse, GameTime gt)
 		{
@@ -64,6 +70,33 @@ namespace KuruLevelEditor
 					}
 				}
 			}
+			else if (state.IsKeyDown(Keys.LeftAlt))
+			{
+				if (mouse.ScrollWheelValue > last_scroll_wheel_value)
+					actions.Add(Action.BRUSH_PLUS);
+				if (mouse.ScrollWheelValue < last_scroll_wheel_value)
+					actions.Add(Action.BRUSH_MINUS);
+
+				if (last_brush_time.Add(BRUSH_DELAY).CompareTo(total_time) <= 0)
+				{
+					if (state.IsKeyDown(Keys.OemPlus) || state.IsKeyDown(Keys.OemMinus))
+					{
+						last_brush_time = total_time;
+						if (state.IsKeyDown(Keys.OemPlus))
+							actions.Add(Action.BRUSH_PLUS);
+						if (state.IsKeyDown(Keys.OemMinus))
+							actions.Add(Action.BRUSH_MINUS);
+					}
+				}
+			}
+			else
+            {
+				if (mouse.ScrollWheelValue > last_scroll_wheel_value)
+					actions.Add(Action.SELECT_NEXT);
+				if (mouse.ScrollWheelValue < last_scroll_wheel_value)
+					actions.Add(Action.SELECT_PREVIOUS);
+			}
+
 			last_scroll_wheel_value = mouse.ScrollWheelValue;
 
 			return actions;

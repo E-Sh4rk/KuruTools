@@ -1,8 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using Myra;
 using System;
 using System.Collections.Generic;
+using System.Runtime.ExceptionServices;
 using System.Text;
 
 namespace KuruLevelEditor
@@ -14,6 +16,7 @@ namespace KuruLevelEditor
         SpriteSet sprites;
         int[,] grid;
         Point position;
+        int brush_size = 1;
         public EditorGrid(Rectangle bounds, SpriteSet sprites, int[,] grid, Point position)
         {
             this.bounds = bounds;
@@ -29,7 +32,18 @@ namespace KuruLevelEditor
 
         public Rectangle TileCoordToScreenRect(int x, int y)
         {
-            return new Rectangle(TileCoordToScreenCoord(x, y), new Point(tile_size+1, tile_size));
+            return new Rectangle(TileCoordToScreenCoord(x, y), new Point(tile_size, tile_size));
+        }
+
+        public Point ScreenCoordToTileCoord(int x, int y)
+        {
+            Point p = new Point(x, y) + position - bounds.Location;
+            return new Point(p.X / tile_size, p.Y / tile_size);
+        }
+
+        public Rectangle ScreenCoordToTileRect(int x, int y)
+        {
+            return new Rectangle(ScreenCoordToTileCoord(x, y), new Point(tile_size, tile_size));
         }
 
         public int TileSize {
@@ -41,10 +55,42 @@ namespace KuruLevelEditor
                 tile_size = value;
             }
         }
+        public int BrushSize
+        {
+            get { return brush_size; }
+            set { brush_size = value; }
+        }
         public Point Position
         {
             get { return position; }
             set { position = value; }
+        }
+        public int[,] Grid
+        {
+            get { return grid; }
+        }
+
+        List<Rectangle> RectanglesAround(Rectangle r, int size)
+        {
+            List<Rectangle> res = new List<Rectangle>();
+            size--;
+            for (int i = -size; i <= size; i++)
+            {
+                for (int j = -size; j <= size; j++)
+                    res.Add(new Rectangle(r.Location + new Point(i*r.Width,j*r.Height), r.Size));
+            }
+            return res;
+        }
+        List<Point> PointsAround(Point pt, int size)
+        {
+            List<Point> res = new List<Point>();
+            size--;
+            for (int i = -size; i <= size; i++)
+            {
+                for (int j = -size; j <= size; j++)
+                    res.Add(pt + new Point(i,j));
+            }
+            return res;
         }
 
         public void PerformAction(Controller.Action action)
@@ -72,6 +118,33 @@ namespace KuruLevelEditor
                     if (tile_size > 1)
                         TileSize--;
                     break;
+                case Controller.Action.BRUSH_PLUS:
+                    if (brush_size < 0x20)
+                        BrushSize++;
+                    break;
+                case Controller.Action.BRUSH_MINUS:
+                    if (brush_size > 1)
+                        BrushSize--;
+                    break;
+            }
+        }
+
+        public void Update(MouseState mouse)
+        {
+            int index = -1;
+            if (mouse.LeftButton == ButtonState.Pressed)
+                index = sprites.Selected;
+            if (mouse.RightButton == ButtonState.Pressed)
+                index = 0;
+            if (index >= 0)
+            {
+                Point cpt = ScreenCoordToTileCoord(mouse.Position.X, mouse.Position.Y);
+                Rectangle map_bounds = new Rectangle(0, 0, grid.GetLength(1), grid.GetLength(0));
+                foreach (Point pt in PointsAround(cpt, brush_size))
+                {
+                    if (map_bounds.Contains(pt))
+                        grid[pt.Y, pt.X] = index;
+                }
             }
         }
 
@@ -82,9 +155,9 @@ namespace KuruLevelEditor
             sprite_batch.FillRectangle(new Rectangle(rect.Location + new Point(rect.Width, 0), new Point(1, rect.Height)), color);
             sprite_batch.FillRectangle(new Rectangle(rect.Location + new Point(0, rect.Height), new Point(rect.Width, 1)), color);
         }
-        public void Draw(SpriteBatch sprite_batch)
+        public void Draw(SpriteBatch sprite_batch, MouseState mouse)
         {
-            sprite_batch.FillRectangle(bounds, Color.White);
+            sprite_batch.FillRectangle(bounds, Color.CornflowerBlue);
             int h = grid.GetLength(0);
             int w = grid.GetLength(1);
             for (int y = 0; y < h; y++)
@@ -100,6 +173,14 @@ namespace KuruLevelEditor
             Rectangle map_bounds = Rectangle.Union(TileCoordToScreenRect(0, 0), TileCoordToScreenRect(w-1, h-1));
             // Issue with DrawRectangle: https://github.com/rds1983/Myra/issues/211
             DrawRectangle(sprite_batch, map_bounds, Color.Red);
+            // Draw selected element
+            Point pt = ScreenCoordToTileCoord(mouse.Position.X, mouse.Position.Y);
+            Rectangle cr = TileCoordToScreenRect(pt.X, pt.Y);//new Rectangle(mouse.Position, new Point(tile_size, tile_size));
+            foreach (Rectangle r in RectanglesAround(cr, brush_size))
+            {
+                if (r.Intersects(bounds))
+                    sprites.DrawSelected(sprite_batch, r);
+            }
         }
     }
 }

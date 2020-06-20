@@ -182,17 +182,20 @@ namespace KuruLevelEditor
 
         void SaveGrid()
         {
-
+            string[] lines = Levels.GetLinesFromGrid(editor.Grid, 1);
+            File.WriteAllLines(Levels.GetLevelPath(map, Levels.MapType.Minimap), lines);
         }
 
         EditorGrid editor;
+        SpriteSet sset;
         void LoadGrid()
         {
             int[,] grid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, Levels.MapType.Minimap)), 64, 64);
+            sset = new SpriteSet(Load.MinimapColors, false);
             editor = new EditorGrid(
                 new Rectangle(GraphicsDevice.Viewport.X + LATERAL_PANEL_WIDTH,
                 GraphicsDevice.Viewport.Y, GraphicsDevice.Viewport.Width - LATERAL_PANEL_WIDTH, GraphicsDevice.Viewport.Height),
-                new SpriteSet(Load.MinimapColors), grid, new Point(-8, -8));
+                sset, grid, new Point(-8, -8));
         }
 
         protected override void Update(GameTime gameTime)
@@ -200,12 +203,26 @@ namespace KuruLevelEditor
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            // TODO: Add your update logic here
             if (mode != Mode.Menu)
             {
                 List<Controller.Action> actions = Controller.GetActionsGrid(Keyboard.GetState(), Mouse.GetState(), gameTime);
                 foreach (Controller.Action action in actions)
-                    editor.PerformAction(action);
+                {
+                    switch (action)
+                    {
+                        case Controller.Action.SELECT_PREVIOUS:
+                            sset.SelectPrevious();
+                            break;
+                        case Controller.Action.SELECT_NEXT:
+                            sset.SelectNext();
+                            break;
+                        default:
+                            editor.PerformAction(action);
+                            break;
+                    }
+                    
+                }
+                editor.Update(Mouse.GetState());
             }
 
             base.Update(gameTime);
@@ -215,13 +232,12 @@ namespace KuruLevelEditor
         {
             GraphicsDevice.Clear(Color.Black);
 
-            // TODO: Add your drawing code here
             if (mode == Mode.Menu)
                 _mainMenuDesktop.Render();
             else
             {
                 _spriteBatch.Begin();
-                editor.Draw(_spriteBatch);
+                editor.Draw(_spriteBatch, Mouse.GetState());
                 _spriteBatch.End();
                 _lateralMenuDesktop.Render();
             }

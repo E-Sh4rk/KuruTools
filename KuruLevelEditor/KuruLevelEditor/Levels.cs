@@ -48,5 +48,19 @@ namespace KuruLevelEditor
             }
             return res;
         }
+        public static string[] GetLinesFromGrid(int[,] grid, int padding)
+        {
+            List<string> res = new List<string>();
+            for (int y = 0; y < grid.GetLength(0); y++)
+            {
+                StringBuilder b = new StringBuilder();
+                for (int x = 0; x < grid.GetLength(1); x++)
+                {
+                    b.Append(grid[y,x].ToString("X").PadLeft(padding, ' ') + " ");
+                }
+                res.Add(b.ToString());
+            }
+            return res.ToArray();
+        }
     }
 }
