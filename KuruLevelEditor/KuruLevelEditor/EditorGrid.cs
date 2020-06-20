@@ -129,14 +129,14 @@ namespace KuruLevelEditor
             }
         }
 
-        public void Update(MouseState mouse)
+        public void Update(MouseState mouse) // TODO: Translate if ctrl + mouse move
         {
             int index = -1;
             if (mouse.LeftButton == ButtonState.Pressed)
                 index = sprites.Selected;
             if (mouse.RightButton == ButtonState.Pressed)
                 index = 0;
-            if (index >= 0)
+            if (index >= 0 && bounds.Contains(mouse.Position))
             {
                 Point cpt = ScreenCoordToTileCoord(mouse.Position.X, mouse.Position.Y);
                 Rectangle map_bounds = new Rectangle(0, 0, grid.GetLength(1), grid.GetLength(0));
@@ -148,13 +148,6 @@ namespace KuruLevelEditor
             }
         }
 
-        public void DrawRectangle(SpriteBatch sprite_batch, Rectangle rect, Color color)
-        {
-            sprite_batch.FillRectangle(new Rectangle(rect.Location, new Point(1, rect.Height)), color);
-            sprite_batch.FillRectangle(new Rectangle(rect.Location, new Point(rect.Width, 1)), color);
-            sprite_batch.FillRectangle(new Rectangle(rect.Location + new Point(rect.Width, 0), new Point(1, rect.Height)), color);
-            sprite_batch.FillRectangle(new Rectangle(rect.Location + new Point(0, rect.Height), new Point(rect.Width, 1)), color);
-        }
         public void Draw(SpriteBatch sprite_batch, MouseState mouse)
         {
             sprite_batch.FillRectangle(bounds, Color.CornflowerBlue);
@@ -172,15 +165,18 @@ namespace KuruLevelEditor
             // Draw map bounds
             Rectangle map_bounds = Rectangle.Union(TileCoordToScreenRect(0, 0), TileCoordToScreenRect(w-1, h-1));
             // Issue with DrawRectangle: https://github.com/rds1983/Myra/issues/211
-            DrawRectangle(sprite_batch, map_bounds, Color.Red);
+            SpriteSet.DrawRectangle(sprite_batch, map_bounds, Color.Red, 2);
             // Draw selected element
             Point pt = ScreenCoordToTileCoord(mouse.Position.X, mouse.Position.Y);
             Rectangle cr = TileCoordToScreenRect(pt.X, pt.Y);//new Rectangle(mouse.Position, new Point(tile_size, tile_size));
+            Rectangle union = cr;
             foreach (Rectangle r in RectanglesAround(cr, brush_size))
             {
+                union = Rectangle.Union(union, r);
                 if (r.Intersects(bounds))
                     sprites.DrawSelected(sprite_batch, r);
             }
+            SpriteSet.DrawRectangle(sprite_batch, union, Color.White, 1);
         }
     }
 }

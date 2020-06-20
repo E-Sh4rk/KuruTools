@@ -103,6 +103,8 @@ namespace KuruLevelEditor
                 GridColumnSpan = 2,
                 GridRow = 2,
                 Text = "Edit",
+                Width = 50,
+                Height = 50
             };
 
             buttonEdit.Click += (s, a) =>
@@ -139,7 +141,7 @@ namespace KuruLevelEditor
                 ColumnSpacing = 8
             };
 
-            lateral.ColumnsProportions.Add(new Proportion(ProportionType.Part));
+            lateral.ColumnsProportions.Add(new Proportion(ProportionType.Auto));
             lateral.HorizontalAlignment = HorizontalAlignment.Left;
             lateral.RowsProportions.Add(new Proportion(ProportionType.Part));
             lateral.VerticalAlignment = VerticalAlignment.Top;
@@ -149,6 +151,8 @@ namespace KuruLevelEditor
                 GridColumn = 0,
                 GridRow = 0,
                 Text = "Save",
+                Width = 50,
+                Height = 50
             };
             buttonSave.Click += (s, a) =>
             {
@@ -156,28 +160,39 @@ namespace KuruLevelEditor
             };
             lateral.Widgets.Add(buttonSave);
 
-            var buttonQuit = new TextButton
+            var buttonSaveQuit = new TextButton
             {
                 GridColumn = 1,
                 GridRow = 0,
+                Text = "Save and quit",
+                Width = 75,
+                Height = 50
+            };
+            buttonSaveQuit.Click += (s, a) =>
+            {
+                SaveGrid();
+                mode = Mode.Menu;
+            };
+            lateral.Widgets.Add(buttonSaveQuit);
+
+            var buttonQuit = new TextButton
+            {
+                GridColumn = 2,
+                GridRow = 0,
                 Text = "Quit",
+                Width = 50,
+                Height = 50
             };
             buttonQuit.Click += (s, a) =>
             {
-                var messageBox = Dialog.CreateMessageBox("Save", "Do you want to save?");
-                messageBox.Closed += (s, a) =>
-                {
-                    if (messageBox.Result)
-                        SaveGrid();
-                    mode = Mode.Menu;
-                };
-                messageBox.ShowModal(_lateralMenuDesktop);
+                mode = Mode.Menu;
             };
             lateral.Widgets.Add(buttonQuit);
 
             panel.Widgets.Add(lateral);
             _lateralMenuDesktop = new Desktop();
             _lateralMenuDesktop.Root = panel;
+            // TODO: Display shortcuts
         }
 
         void SaveGrid()
@@ -191,7 +206,7 @@ namespace KuruLevelEditor
         void LoadGrid()
         {
             int[,] grid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, Levels.MapType.Minimap)), 64, 64);
-            sset = new SpriteSet(Load.MinimapColors, false);
+            sset = new SpriteSet(Load.MinimapColors, false, new Rectangle(0, 200, LATERAL_PANEL_WIDTH, GraphicsDevice.Viewport.Height - 200), 32);
             editor = new EditorGrid(
                 new Rectangle(GraphicsDevice.Viewport.X + LATERAL_PANEL_WIDTH,
                 GraphicsDevice.Viewport.Y, GraphicsDevice.Viewport.Width - LATERAL_PANEL_WIDTH, GraphicsDevice.Viewport.Height),
@@ -222,7 +237,9 @@ namespace KuruLevelEditor
                     }
                     
                 }
-                editor.Update(Mouse.GetState());
+                MouseState ms = Mouse.GetState();
+                editor.Update(ms);
+                sset.Update(ms);
             }
 
             base.Update(gameTime);
@@ -240,6 +257,9 @@ namespace KuruLevelEditor
                 editor.Draw(_spriteBatch, Mouse.GetState());
                 _spriteBatch.End();
                 _lateralMenuDesktop.Render();
+                _spriteBatch.Begin();
+                sset.DrawSet(_spriteBatch);
+                _spriteBatch.End();
             }
 
             base.Draw(gameTime);

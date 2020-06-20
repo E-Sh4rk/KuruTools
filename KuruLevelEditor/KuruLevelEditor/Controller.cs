@@ -92,9 +92,9 @@ namespace KuruLevelEditor
 			else
             {
 				if (mouse.ScrollWheelValue > last_scroll_wheel_value)
-					actions.Add(Action.SELECT_NEXT);
-				if (mouse.ScrollWheelValue < last_scroll_wheel_value)
 					actions.Add(Action.SELECT_PREVIOUS);
+				if (mouse.ScrollWheelValue < last_scroll_wheel_value)
+					actions.Add(Action.SELECT_NEXT);
 			}
 
 			last_scroll_wheel_value = mouse.ScrollWheelValue;
