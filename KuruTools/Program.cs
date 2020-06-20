@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.IO;
 
 namespace KuruTools
@@ -43,7 +44,6 @@ namespace KuruTools
                 }
             }
 
-            // TODO: Also extract the palette, and generate one image per palette
             if (!string.IsNullOrEmpty(extractWorldsData))
             {
                 Directory.CreateDirectory(extractWorldsData);
@@ -52,20 +52,26 @@ namespace KuruTools
                 foreach (Levels.World w in Enum.GetValues(typeof(Levels.World)))
                 {
                     byte[][] data = levels.ExtractWorldData(w);
+                    if (data[2] == null)
+                        data[2] = physicalTilesData;
+                    Palette palette = new Palette(data[4]);
                     for (int i = 0; i < data.Length; i++)
                     {
                         byte[] d = data[i];
                         if (d != null)
                         {
                             string filename_bin = string.Format("{0}.{1:D2}.bin", Levels.LevelIdentifier.WorldShortName(w), i);
-                            string filename_png = string.Format("{0}.{1:D2}.png", Levels.LevelIdentifier.WorldShortName(w), i);
                             File.WriteAllBytes(Path.Combine(extractWorldsData, filename_bin), d);
                             if (i < 4)
-                                Tiles.PreviewOfTilesData(d).Save(Path.Combine(extractWorldsData, filename_png));
+                            {
+                                for (int j = 0; j < palette.Colors.Length; j++)
+                                {
+                                    string filename_png = string.Format("{0}.{1:D2}.{2}.png", Levels.LevelIdentifier.WorldShortName(w), i, j);
+                                    Tiles.PreviewOfTilesData(d, palette.Colors[j]).Save(Path.Combine(extractWorldsData, filename_png));
+                                }
+                            }
                         }
                     }
-                    string filename_physical = string.Format("{0}.02.png", Levels.LevelIdentifier.WorldShortName(w));
-                    Tiles.PreviewOfTilesData(physicalTilesData).Save(Path.Combine(extractWorldsData, filename_physical));
                 }
             }
 
