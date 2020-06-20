@@ -129,21 +129,48 @@ namespace KuruLevelEditor
             }
         }
 
-        public void Update(MouseState mouse) // TODO: Translate if ctrl + mouse move
+        Point? initial_mouse_move_pos = null;
+        Point? initial_mouse_move_map_position = null;
+        public void Update(MouseState mouse, KeyboardState keyboard)
         {
-            int index = -1;
-            if (mouse.LeftButton == ButtonState.Pressed)
-                index = sprites.Selected;
-            if (mouse.RightButton == ButtonState.Pressed)
-                index = 0;
-            if (index >= 0 && bounds.Contains(mouse.Position))
+            if (initial_mouse_move_pos != null)
             {
-                Point cpt = ScreenCoordToTileCoord(mouse.Position.X, mouse.Position.Y);
-                Rectangle map_bounds = new Rectangle(0, 0, grid.GetLength(1), grid.GetLength(0));
-                foreach (Point pt in PointsAround(cpt, brush_size))
+                if (mouse.LeftButton == ButtonState.Released)
                 {
-                    if (map_bounds.Contains(pt))
-                        grid[pt.Y, pt.X] = index;
+                    initial_mouse_move_pos = null;
+                    initial_mouse_move_map_position = null;
+                }
+                else
+                {
+                    Point offset = initial_mouse_move_pos.Value - mouse.Position;
+                    Position = initial_mouse_move_map_position.Value + offset;
+                }
+            }
+
+            if (keyboard.IsKeyDown(Keys.LeftControl))
+            {
+                if (initial_mouse_move_pos == null && mouse.LeftButton == ButtonState.Pressed)
+                {
+                    initial_mouse_move_pos = mouse.Position;
+                    initial_mouse_move_map_position = position;
+                }
+            }
+            else
+            {
+                int index = -1;
+                if (mouse.LeftButton == ButtonState.Pressed)
+                    index = sprites.Selected;
+                if (mouse.RightButton == ButtonState.Pressed)
+                    index = 0;
+                if (index >= 0 && bounds.Contains(mouse.Position))
+                {
+                    Point cpt = ScreenCoordToTileCoord(mouse.Position.X, mouse.Position.Y);
+                    Rectangle map_bounds = new Rectangle(0, 0, grid.GetLength(1), grid.GetLength(0));
+                    foreach (Point pt in PointsAround(cpt, brush_size))
+                    {
+                        if (map_bounds.Contains(pt))
+                            grid[pt.Y, pt.X] = index;
+                    }
                 }
             }
         }

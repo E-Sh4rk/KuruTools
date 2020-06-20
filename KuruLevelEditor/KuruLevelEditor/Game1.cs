@@ -220,7 +220,9 @@ namespace KuruLevelEditor
 
             if (mode != Mode.Menu)
             {
-                List<Controller.Action> actions = Controller.GetActionsGrid(Keyboard.GetState(), Mouse.GetState(), gameTime);
+                MouseState ms = Mouse.GetState();
+                KeyboardState ks = Keyboard.GetState();
+                List<Controller.Action> actions = Controller.GetActionsGrid(ks, ms, gameTime);
                 foreach (Controller.Action action in actions)
                 {
                     switch (action)
@@ -237,8 +239,7 @@ namespace KuruLevelEditor
                     }
                     
                 }
-                MouseState ms = Mouse.GetState();
-                editor.Update(ms);
+                editor.Update(ms, ks);
                 sset.Update(ms);
             }
 
