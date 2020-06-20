@@ -41,7 +41,8 @@ namespace KuruTools
         public int addr2_offset; // Seems interesting
         [FieldOffset(12)]
         public int addr2_uncompressed_size;
-
+        /* addr3 and addr4 seem to correspond to physical tiles (walls, etc) and sprites (objects),
+           which are common to all levels. That's why they are always missing here. */
         [FieldOffset(32)]
         public int addr5_offset;
         [FieldOffset(36)]
@@ -81,6 +82,13 @@ namespace KuruTools
     }
     public class Levels
     {
+        // Uncomment for a preview of all the global tiles
+        /*const int PHYSICAL_TILES_ADDR = 0x1DA788 - 0x25000;
+        const int PHYSICAL_TILES_LENGTH = 0x40000;*/
+        // This is for the physical tiles (walls, safe zones)
+        const int PHYSICAL_TILES_ADDR = 0x1DA788 - 0x2000;
+        const int PHYSICAL_TILES_LENGTH = 0x2000;
+
         public enum World
         {
             TRAINING = 0,
@@ -274,6 +282,11 @@ namespace KuruTools
             res[6] = ReadWorldData(w, wi.addr7_offset, wi.addr7_size);
             res[7] = ReadWorldData(w, wi.addr8_offset, wi.addr8_size);
             return res;
+        }
+        public byte[] ExtractPhysicalTilesData()
+        {
+            rom.Seek(PHYSICAL_TILES_ADDR, SeekOrigin.Begin);
+            return new BinaryReader(rom).ReadBytes(PHYSICAL_TILES_LENGTH);
         }
 
         int floorToMultiple(int v, int multiple)
