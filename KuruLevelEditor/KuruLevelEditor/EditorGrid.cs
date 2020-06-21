@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Input;
 using Myra;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Text;
 
@@ -191,6 +192,34 @@ namespace KuruLevelEditor
                     {
                         if (type == Levels.MapType.Minimap)
                             sprites.Draw(sprite_batch, grid[y, x], 0, dst);
+                        else
+                        {
+                            int tile_index = grid[y, x];
+                            int tile_id = tile_index & 0x3FF;
+                            int palette = (tile_index & 0xF000) >> 12;
+                            SpriteEffects effects =
+                                ((tile_index & 0x400) != 0 ? SpriteEffects.FlipHorizontally : SpriteEffects.None) |
+                                ((tile_index & 0x800) != 0 ? SpriteEffects.FlipVertically : SpriteEffects.None);
+                            if (type == Levels.MapType.Physical)
+                            {
+                                if (tile_id >= PhysicalMapLogic.SPECIAL_MIN_ID && tile_id <= PhysicalMapLogic.SPECIAL_MAX_ID)
+                                {
+                                    // Rendering of non-graphic essential elements
+                                    Color? c = null;
+                                    if (PhysicalMapLogic.STARTING_ZONE_IDS.Contains(tile_id))
+                                        c = PhysicalMapLogic.StartingZoneColor(tile_id);
+                                    else if (PhysicalMapLogic.HEALING_ZONE_IDS.Contains(tile_id))
+                                        c = PhysicalMapLogic.HealingZoneColor(tile_id);
+                                    else if (PhysicalMapLogic.ENDING_ZONE_IDS.Contains(tile_id))
+                                        c = PhysicalMapLogic.EndingZoneColor(tile_id);
+                                    if (c.HasValue)
+                                        sprite_batch.FillRectangle(dst, c.Value);
+                                }
+                                else if (tile_id <= PhysicalMapLogic.VISIBLE_MAX_ID)
+                                    sprites.Draw(sprite_batch, palette, tile_id, dst, effects);
+                            }
+                            
+                        }
                     }
                 }
             }
