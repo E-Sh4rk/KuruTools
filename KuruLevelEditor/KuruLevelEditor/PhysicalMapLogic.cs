@@ -18,6 +18,8 @@ namespace KuruLevelEditor
         readonly static Color ENDING_ZONE_COLOR = new Color(0xAA, 0x86, 0x29, 0x80);
         readonly static Color ENDING_ZONE_BASE_COLOR = new Color(0xFF, 0xD6, 0x29, 0x80);
 
+        public readonly static Color UNSUPPORTED_COLOR = new Color(0x00, 0x00, 0x00, 0x80);
+
         public static Color HealingZoneColor(int tile_id)
         {
             Color c = HEALING_ZONE_BASE_COLOR;
@@ -54,5 +56,6 @@ namespace KuruLevelEditor
         public const int VISIBLE_MAX_ID = 0xE9;
         public const int SPECIAL_MIN_ID = 0xEA;
         public const int SPECIAL_MAX_ID = 0xFF;
+        public const int CONTROL_MIN_ID = 0xE0;
     }
 }
