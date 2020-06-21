@@ -108,24 +108,26 @@ namespace KuruLevelEditor
             grid = Utils.ResizeArray(grid, h, grid.GetLength(1));
         }
 
-        List<Rectangle> RectanglesAround(Rectangle r, int size)
+        List<Rectangle> RectanglesAround(Rectangle r, int sizeX, int sizeY)
         {
             List<Rectangle> res = new List<Rectangle>();
-            size--;
-            for (int i = -size; i <= size; i++)
+            sizeX--;
+            sizeY--;
+            for (int i = -sizeX; i <= sizeX; i++)
             {
-                for (int j = -size; j <= size; j++)
+                for (int j = -sizeY; j <= sizeY; j++)
                     res.Add(new Rectangle(r.Location + new Point(i*r.Width,j*r.Height), r.Size));
             }
             return res;
         }
-        List<Point> PointsAround(Point pt, int size)
+        List<Point> PointsAround(Point pt, int sizeX, int sizeY)
         {
             List<Point> res = new List<Point>();
-            size--;
-            for (int i = -size; i <= size; i++)
+            sizeX--;
+            sizeY--;
+            for (int i = -sizeX; i <= sizeX; i++)
             {
-                for (int j = -size; j <= size; j++)
+                for (int j = -sizeY; j <= sizeY; j++)
                     res.Add(pt + new Point(i,j));
             }
             return res;
@@ -222,26 +224,51 @@ namespace KuruLevelEditor
             }
             else
             {
-                // TODO: Case of non-minimap
-                // TODO: Case of selectionGrid
-                int index = -1;
-                if (mouse.LeftButton == ButtonState.Pressed)
-                    index = sprites.SelectedSet;
-                if (mouse.RightButton == ButtonState.Pressed)
-                    index = 0;
-                if (index >= 0 && bounds.Contains(mouse.Position))
+                if (initial_mouse_move_pos == null)
                 {
-                    Point cpt = ScreenCoordToTileCoord(mouse.Position.X, mouse.Position.Y);
-                    Rectangle map_bounds = new Rectangle(0, 0, grid.GetLength(1), grid.GetLength(0));
-                    foreach (Point pt in PointsAround(cpt, brush_size))
+                    if (selectionGrid == null || (selectionGrid.GetLength(0) == 1 && selectionGrid.GetLength(1) == 1))
                     {
-                        if (map_bounds.Contains(pt))
-                            grid[pt.Y, pt.X] = index;
+                        int selectedItem = -1;
+                        if (mouse.LeftButton == ButtonState.Pressed)
+                        {
+                            selectedItem = 0;
+                            if (selectionGrid != null)
+                                selectedItem = selectionGrid[0, 0];
+                        }
+                        if (mouse.RightButton == ButtonState.Pressed)
+                            selectedItem = 0;
+                        if (selectedItem >= 0 && bounds.Contains(mouse.Position))
+                        {
+                            Point cpt = ScreenCoordToTileCoord(mouse.Position.X, mouse.Position.Y);
+                            Rectangle map_bounds = new Rectangle(0, 0, grid.GetLength(1), grid.GetLength(0));
+                            foreach (Point pt in PointsAround(cpt, brush_size, brush_size))
+                            {
+                                if (map_bounds.Contains(pt))
+                                    grid[pt.Y, pt.X] = GetTileCode(selectedItem, true);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // TODO
                     }
                 }
             }
         }
 
+        int GetTileCode(int tile, bool overridePalette)
+        {
+            if (type == Levels.MapType.Minimap)
+                return overridePalette ? sprites.SelectedSet : tile;
+            else
+            {
+                int tile_index = tile;
+                int tile_id = tile_index & 0x3FF;
+                int palette = overridePalette ? sprites.SelectedSet << 12 : tile_index & 0xF000;
+                int flips = tile_index & 0xC00;
+                return tile_id + flips + palette;
+            }
+        }
         void DrawTile(SpriteBatch sprite_batch, Rectangle dst, int tile, bool overridePalette)
         {
             if (type == Levels.MapType.Minimap)
@@ -298,23 +325,40 @@ namespace KuruLevelEditor
             // Draw selected element
             if (!mouse_move_is_selecting)
             {
+                Point pt = ScreenCoordToTileCoord(mouse.Position.X, mouse.Position.Y);
+                Rectangle cr = TileCoordToScreenRect(pt.X, pt.Y);//new Rectangle(mouse.Position, new Point(tile_size, tile_size));
+                Rectangle union = cr;
                 if (selectionGrid == null || (selectionGrid.GetLength(0) == 1 && selectionGrid.GetLength(1) == 1))
                 {
                     int selectedItem = 0;
                     if (selectionGrid != null)
                         selectedItem = selectionGrid[0, 0];
-                    Point pt = ScreenCoordToTileCoord(mouse.Position.X, mouse.Position.Y);
-                    Rectangle cr = TileCoordToScreenRect(pt.X, pt.Y);//new Rectangle(mouse.Position, new Point(tile_size, tile_size));
-                    Rectangle union = cr;
-                    foreach (Rectangle r in RectanglesAround(cr, brush_size))
+                    
+                    foreach (Rectangle r in RectanglesAround(cr, brush_size, brush_size))
                     {
                         union = Rectangle.Union(union, r);
                         if (r.Intersects(bounds))
                             DrawTile(sprite_batch, r, selectedItem, true);
                     }
+                }
+                else
+                {
+                    Point selection_size = new Point(selectionGrid.GetLength(1), selectionGrid.GetLength(0));
+                    Point half_size = new Point(selection_size.X / 2, selection_size.Y / 2);
+                    foreach (Point offset in PointsAround(Point.Zero, half_size.X+1, half_size.Y+1))
+                    {
+                        Point selection_offset = offset + half_size;
+                        if (selection_offset.X >= selection_size.X || selection_offset.Y >= selection_size.Y)
+                            continue;
+                        int selectedItem = selectionGrid[selection_offset.Y, selection_offset.X];
+                        Rectangle r = new Rectangle(cr.Location + new Point(offset.X*cr.Size.X, offset.Y*cr.Size.Y), cr.Size);
+                        union = Rectangle.Union(union, r);
+                        if (r.Intersects(bounds))
+                            DrawTile(sprite_batch, r, selectedItem, false);
+                    }
                     TilesSet.DrawRectangle(sprite_batch, union, Color.White, 1);
                 }
-                // TODO: Case of SelectionGrid
+                TilesSet.DrawRectangle(sprite_batch, union, Color.White, 1);
             }
             else // Draw selection rectangle
             {
