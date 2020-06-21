@@ -196,6 +196,59 @@ namespace KuruLevelEditor
             };
             lateral.Widgets.Add(buttonQuit);
 
+            var buttonWP = new TextButton
+            {
+                GridColumn = 0,
+                GridRow = 1,
+                Text = "W+",
+                Width = 30,
+                Height = 30
+            };
+            buttonWP.Click += (s, a) =>
+            {
+                editor.IncreaseWidth();
+            };
+            lateral.Widgets.Add(buttonWP);
+            var buttonWM = new TextButton
+            {
+                GridColumn = 1,
+                GridRow = 1,
+                Text = "W-",
+                Width = 30,
+                Height = 30
+            };
+            buttonWM.Click += (s, a) =>
+            {
+                editor.DecreaseWidth();
+            };
+            lateral.Widgets.Add(buttonWM);
+            var buttonHP = new TextButton
+            {
+                GridColumn = 2,
+                GridRow = 1,
+                Text = "H+",
+                Width = 30,
+                Height = 30
+            };
+            buttonHP.Click += (s, a) =>
+            {
+                editor.IncreaseHeight();
+            };
+            lateral.Widgets.Add(buttonHP);
+            var buttonHM = new TextButton
+            {
+                GridColumn = 3,
+                GridRow = 1,
+                Text = "H-",
+                Width = 30,
+                Height = 30
+            };
+            buttonHM.Click += (s, a) =>
+            {
+                editor.DecreaseHeight();
+            };
+            lateral.Widgets.Add(buttonHM);
+
             panel.Widgets.Add(lateral);
             _lateralMenuDesktop = new Desktop();
             _lateralMenuDesktop.Root = panel;

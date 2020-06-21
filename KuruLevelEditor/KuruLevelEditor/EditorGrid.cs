@@ -12,6 +12,7 @@ namespace KuruLevelEditor
 {
     class EditorGrid
     {
+        const int MIN_LENGTH_UNIT = 0x40;
         int tile_size = 8;
         Rectangle bounds;
         TilesSet sprites;
@@ -71,6 +72,39 @@ namespace KuruLevelEditor
         public int[,] Grid
         {
             get { return grid; }
+        }
+
+        public void IncreaseWidth()
+        {
+            if (type == Levels.MapType.Minimap) return;
+            int w = grid.GetLength(1);
+            if (w < 0x200)
+                w += MIN_LENGTH_UNIT;
+            grid = Utils.ResizeArray(grid, grid.GetLength(0), w);
+        }
+        public void DecreaseWidth()
+        {
+            if (type == Levels.MapType.Minimap) return;
+            int w = grid.GetLength(1);
+            if (w > 0x40)
+                w -= MIN_LENGTH_UNIT;
+            grid = Utils.ResizeArray(grid, grid.GetLength(0), w);
+        }
+        public void IncreaseHeight()
+        {
+            if (type == Levels.MapType.Minimap) return;
+            int h = grid.GetLength(0);
+            if (h < 0x200)
+                h += MIN_LENGTH_UNIT;
+            grid = Utils.ResizeArray(grid, h, grid.GetLength(1));
+        }
+        public void DecreaseHeight()
+        {
+            if (type == Levels.MapType.Minimap) return;
+            int h = grid.GetLength(0);
+            if (h > 0x40)
+                h -= MIN_LENGTH_UNIT;
+            grid = Utils.ResizeArray(grid, h, grid.GetLength(1));
         }
 
         List<Rectangle> RectanglesAround(Rectangle r, int size)
