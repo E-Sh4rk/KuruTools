@@ -108,7 +108,7 @@ namespace KuruTools
         const int COMMON_PALETTE_13 = 0x1DCD88;
         const int COMMON_PALETTE_14 = 0x1DC948;
         const int COMMON_PALETTE_15 = 0x1DC968;
-        const int COLORSET_SIZE = 0x20;
+        public const int COLORSET_SIZE = 0x20;
 
         public enum World
         {

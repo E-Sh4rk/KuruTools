@@ -53,6 +53,7 @@ namespace KuruTools
                     if (data[2] == null)
                         data[2] = physicalTilesData;
 
+                    Array.Copy(data[6], 0, data[4], 0, Levels.COLORSET_SIZE);
                     Array.Copy(commonPaletteData, 0, data[4], data[4].Length - commonPaletteData.Length, commonPaletteData.Length);
                     Palette palette = new Palette(data[4]);
                     for (int i = 0; i < data.Length; i++)
