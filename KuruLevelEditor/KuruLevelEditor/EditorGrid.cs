@@ -168,6 +168,27 @@ namespace KuruLevelEditor
                     if (brush_size > 1)
                         BrushSize--;
                     break;
+                case Controller.Action.FLIP_VERTICAL:
+                case Controller.Action.FLIP_HORIZONTAL:
+                    bool vertical = action == Controller.Action.FLIP_VERTICAL;
+                    if (selectionGrid != null)
+                    {
+                        for (int i = 0; i < selectionGrid.GetLength(0); i++)
+                        {
+                            for (int j = 0; j < selectionGrid.GetLength(1); j++)
+                            {
+                                if (vertical)
+                                    selectionGrid[i, j] = FlipVertically(selectionGrid[i, j]);
+                                else
+                                    selectionGrid[i, j] = FlipHorizontally(selectionGrid[i, j]);
+                            }
+                        }
+                        if (vertical)
+                            selectionGrid = Utils.FlipVertically(selectionGrid);
+                        else
+                            selectionGrid = Utils.FlipHorizontally(selectionGrid);
+                    }
+                    break;
             }
         }
 
@@ -260,6 +281,17 @@ namespace KuruLevelEditor
                     }
                 }
             }
+        }
+
+        int FlipHorizontally(int tile)
+        {
+            if (type == Levels.MapType.Minimap || tile == 0) return tile;
+            return (tile ^ 0x400);
+        }
+        int FlipVertically(int tile)
+        {
+            if (type == Levels.MapType.Minimap || tile == 0) return tile;
+            return (tile ^ 0x800);
         }
 
         int GetTileCode(int tile, bool overridePalette)
