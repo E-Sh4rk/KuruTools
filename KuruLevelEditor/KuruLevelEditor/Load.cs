@@ -25,7 +25,7 @@ namespace KuruLevelEditor
             public readonly Levels.MapType type;
 			public readonly string world;
         }
-		public static Dictionary<WorldAndType, Texture2D[]> tiles;
+		public static Dictionary<WorldAndType, Texture2D[]> Tiles { get; private set; }
 
 		public static void LoadContent(ContentManager Content, GraphicsDevice graphics)
 		{
@@ -36,7 +36,7 @@ namespace KuruLevelEditor
 			/*Color[] data = new Color[] { Color.White };
 			RectTexture = new Texture2D(graphics, 1, 1);
 			RectTexture.SetData(data);*/
-			tiles = new Dictionary<WorldAndType, Texture2D[]>();
+			Tiles = new Dictionary<WorldAndType, Texture2D[]>();
 			foreach (string world in Levels.AllWorlds)
             {
 				foreach (Levels.MapType type in new Levels.MapType[] { Levels.MapType.Background, Levels.MapType.Graphical, Levels.MapType.Physical })
@@ -51,7 +51,7 @@ namespace KuruLevelEditor
 						fileStream.Close();
 						ts[i] = tile;
 					}
-					tiles.Add(lat, ts);
+					Tiles.Add(lat, ts);
                 }
             }
 		}

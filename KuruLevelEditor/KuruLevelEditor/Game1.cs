@@ -21,6 +21,7 @@ namespace KuruLevelEditor
         enum Mode
         {
             Menu,
+            Physical,
             Minimap
         }
         private Mode mode = Mode.Menu;
@@ -78,6 +79,7 @@ namespace KuruLevelEditor
                 GridColumn = 1,
                 GridRow = 0,
             };
+            comboType.Items.Add(new ListItem("Walls", Color.White));
             comboType.Items.Add(new ListItem("MiniMap", Color.White));
             grid.Widgets.Add(comboType);
 
@@ -118,7 +120,10 @@ namespace KuruLevelEditor
                 }
                 else
                 {
-                    mode = Mode.Minimap;
+                    if (comboType.SelectedIndex == 0)
+                        mode = Mode.Physical;
+                    else
+                        mode = Mode.Minimap;
                     map = comboMap.SelectedItem.Text;
                     LoadGrid();
                 }
@@ -199,12 +204,14 @@ namespace KuruLevelEditor
 
         void SaveGrid()
         {
-            string[] lines = Levels.GetLinesFromGrid(editor.Grid, 1);
-            File.WriteAllLines(Levels.GetLevelPath(map, Levels.MapType.Minimap), lines);
+            string[] lines = Levels.GetLinesFromGrid(editor.Grid, 1, mode != Mode.Minimap);
+            File.WriteAllLines(Levels.GetLevelPath(map, MapType()), lines);
         }
 
         Levels.MapType MapType()
         {
+            if (mode == Mode.Physical)
+                return Levels.MapType.Physical;
             if (mode == Mode.Minimap)
                 return Levels.MapType.Minimap;
             throw new System.Exception();
@@ -214,8 +221,18 @@ namespace KuruLevelEditor
         TilesSet sset;
         void LoadGrid()
         {
-            int[,] grid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, Levels.MapType.Minimap)), 64, 64);
-            sset = new TilesSet(Load.MinimapColors, false, new Rectangle(0, 200, LATERAL_PANEL_WIDTH, GraphicsDevice.Viewport.Height - 200), 32);
+            int[,] grid = null;
+            if (mode == Mode.Minimap)
+            {
+                grid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, Levels.MapType.Minimap)), 64, 64);
+                sset = new TilesSet(Load.MinimapColors, false, new Rectangle(0, 200, LATERAL_PANEL_WIDTH, GraphicsDevice.Viewport.Height - 200), 64);
+            }
+            else if (mode == Mode.Physical)
+            {
+                grid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, Levels.MapType.Physical)));
+                sset = new TilesSet(Load.Tiles[new Load.WorldAndType(Levels.GetWorldOfLevel(map), Levels.MapType.Physical)],
+                    true, new Rectangle(0, 200, LATERAL_PANEL_WIDTH, GraphicsDevice.Viewport.Height - 200), 64);
+            }
             editor = new EditorGrid(MapType(),
                 new Rectangle(GraphicsDevice.Viewport.X + LATERAL_PANEL_WIDTH,
                 GraphicsDevice.Viewport.Y, GraphicsDevice.Viewport.Width - LATERAL_PANEL_WIDTH, GraphicsDevice.Viewport.Height),
