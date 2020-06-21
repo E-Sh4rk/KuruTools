@@ -10,6 +10,10 @@ namespace KuruTools
 {
     class Tiles
     {
+        static byte PermuteHalfBytes(byte b)
+        {
+            return (byte)((b >> 4) + ((b & 0xF) << 4));
+        }
         const int WIDTH = 256;
         public static Bitmap PreviewOfTilesData(byte[] data, Color[] palette = null)
         {
@@ -50,7 +54,7 @@ namespace KuruTools
                 {
                     int x2 = x + (j % 4);
                     int y2 = y + (j / 4);
-                    rgbValues[y2 * WIDTH/2 + x2] = data[i*32+j];
+                    rgbValues[y2 * WIDTH/2 + x2] = PermuteHalfBytes(data[i*32+j]);
                 }
             }
 
