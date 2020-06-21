@@ -93,6 +93,7 @@ namespace KuruTools
         const int PHYSICAL_TILES_LENGTH = 0x40000;*/
         // This is for the physical tiles (walls, safe zones)
         const int PHYSICAL_TILES_ADDR = 0x1DA788 - 0x2000;
+        const int PHYSICAL_TILES_CHALLENGE_ADDR = 0x1DA788;
         const int PHYSICAL_TILES_LENGTH = 0x2000;
 
         // Common background palette (the 5 last color sets)
@@ -315,6 +316,11 @@ namespace KuruTools
         public byte[] ExtractPhysicalTilesData()
         {
             rom.Seek(PHYSICAL_TILES_ADDR, SeekOrigin.Begin);
+            return new BinaryReader(rom).ReadBytes(PHYSICAL_TILES_LENGTH);
+        }
+        public byte[] ExtractChallengePhysicalTilesData()
+        {
+            rom.Seek(PHYSICAL_TILES_CHALLENGE_ADDR, SeekOrigin.Begin);
             return new BinaryReader(rom).ReadBytes(PHYSICAL_TILES_LENGTH);
         }
         public byte[] ExtractCommonPaletteData()

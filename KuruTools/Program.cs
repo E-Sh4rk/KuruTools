@@ -45,13 +45,20 @@ namespace KuruTools
                 Directory.CreateDirectory(extractTiles);
                 byte[] physicalTilesData = levels.ExtractPhysicalTilesData();
                 //File.WriteAllBytes(Path.Combine(extractTiles, "physical_tiles.bin"), physicalTilesData);
+                byte[] challengePhysicalTilesData = levels.ExtractChallengePhysicalTilesData();
+                //File.WriteAllBytes(Path.Combine(extractTiles, "physical_tiles_challenge.bin"), challengePhysicalTilesData);
                 byte[] commonPaletteData = levels.ExtractCommonPaletteData();
                 //File.WriteAllBytes(Path.Combine(extractTiles, "common_palette.bin"), commonPaletteData);
                 foreach (Levels.World w in Enum.GetValues(typeof(Levels.World)))
                 {
                     byte[][] data = levels.ExtractWorldData(w);
                     if (data[2] == null)
-                        data[2] = physicalTilesData;
+                    {
+                        if (w == Levels.World.CHALLENGE)
+                            data[2] = challengePhysicalTilesData;
+                        else
+                            data[2] = physicalTilesData;
+                    } 
 
                     Array.Copy(data[6], 0, data[4], 0, Levels.COLORSET_SIZE);
                     Array.Copy(commonPaletteData, 0, data[4], data[4].Length - commonPaletteData.Length, commonPaletteData.Length);

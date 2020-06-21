@@ -173,7 +173,8 @@ namespace KuruLevelEditor
                 GridRow = 0,
                 Text = "Save and quit",
                 Width = 75,
-                Height = 50
+                Height = 50,
+                GridColumnSpan = 2
             };
             buttonSaveQuit.Click += (s, a) =>
             {
@@ -184,7 +185,7 @@ namespace KuruLevelEditor
 
             var buttonQuit = new TextButton
             {
-                GridColumn = 2,
+                GridColumn = 3,
                 GridRow = 0,
                 Text = "Quit",
                 Width = 50,
