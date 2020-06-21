@@ -59,10 +59,6 @@ namespace KuruLevelEditor
             int y = sprite_number / TILES_PER_ROW;
             sprite_batch.Draw(texture, dest, new Rectangle(x * WIDTH, y * HEIGHT, WIDTH, HEIGHT), Color.White, 0, Vector2.Zero, effects, 0);
         }
-        public void DrawSelected(SpriteBatch sprite_batch, int sprite_number, Rectangle dest, SpriteEffects effects = SpriteEffects.None)
-        {
-            Draw(sprite_batch, SelectedSet, sprite_number, dest, effects);
-        }
         public void DrawSets(SpriteBatch sprite_batch)
         {
             for (int i = index_min; i < NumberSets; i++)

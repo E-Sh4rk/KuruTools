@@ -20,6 +20,7 @@ namespace KuruLevelEditor
         Point position;
         int brush_size = 1;
         Levels.MapType type;
+        int[,] selectionGrid = null;
         public EditorGrid(Levels.MapType type, Rectangle bounds, TilesSet sprites, int[,] grid, Point position)
         {
             this.bounds = bounds;
@@ -132,6 +133,8 @@ namespace KuruLevelEditor
 
         public void PerformAction(Controller.Action action)
         {
+            if (mouse_move_is_selecting)
+                return;
             int amount = 16;
             switch (action)
             {
@@ -166,6 +169,7 @@ namespace KuruLevelEditor
             }
         }
 
+        bool mouse_move_is_selecting = false;
         Point? initial_mouse_move_pos = null;
         Point? initial_mouse_move_map_position = null;
         public void Update(MouseState mouse, KeyboardState keyboard)
@@ -174,10 +178,24 @@ namespace KuruLevelEditor
             {
                 if (mouse.LeftButton == ButtonState.Released)
                 {
+                    if (mouse_move_is_selecting)
+                    {
+                        Rectangle r = Rectangle.Union(new Rectangle(initial_mouse_move_pos.Value, Point.Zero), new Rectangle(mouse.Position, Point.Zero));
+                        Point coord1 = ScreenCoordToTileCoord(r.X, r.Y);
+                        Point coord2 = ScreenCoordToTileCoord(r.X + r.Width, r.Y + r.Height);
+                        Point size = coord2 - coord1 + new Point(1, 1);
+                        selectionGrid = new int[size.Y, size.X];
+                        for (int y = 0; y < size.Y; y++)
+                        {
+                            for (int x = 0; x < size.X; x++)
+                                selectionGrid[y, x] = grid[y + coord1.Y, x + coord1.X];
+                        }
+                    }
                     initial_mouse_move_pos = null;
                     initial_mouse_move_map_position = null;
+                    mouse_move_is_selecting = false;
                 }
-                else
+                else if (!mouse_move_is_selecting)
                 {
                     Point offset = initial_mouse_move_pos.Value - mouse.Position;
                     Position = initial_mouse_move_map_position.Value + offset;
@@ -190,10 +208,22 @@ namespace KuruLevelEditor
                 {
                     initial_mouse_move_pos = mouse.Position;
                     initial_mouse_move_map_position = position;
+                    mouse_move_is_selecting = false;
+                }
+            }
+            else if (keyboard.IsKeyDown(Keys.LeftAlt))
+            {
+                if (initial_mouse_move_pos == null && mouse.LeftButton == ButtonState.Pressed)
+                {
+                    initial_mouse_move_pos = mouse.Position;
+                    initial_mouse_move_map_position = position;
+                    mouse_move_is_selecting = true;
                 }
             }
             else
             {
+                // TODO: Case of non-minimap
+                // TODO: Case of selectionGrid
                 int index = -1;
                 if (mouse.LeftButton == ButtonState.Pressed)
                     index = sprites.SelectedSet;
@@ -212,6 +242,41 @@ namespace KuruLevelEditor
             }
         }
 
+        void DrawTile(SpriteBatch sprite_batch, Rectangle dst, int tile, bool overridePalette)
+        {
+            if (type == Levels.MapType.Minimap)
+                sprites.Draw(sprite_batch, overridePalette ? sprites.SelectedSet : tile, 0, dst);
+            else
+            {
+                int tile_index = tile;
+                int tile_id = tile_index & 0x3FF;
+                int palette = overridePalette ? sprites.SelectedSet : (tile_index & 0xF000) >> 12;
+                SpriteEffects effects =
+                    ((tile_index & 0x400) != 0 ? SpriteEffects.FlipHorizontally : SpriteEffects.None) |
+                    ((tile_index & 0x800) != 0 ? SpriteEffects.FlipVertically : SpriteEffects.None);
+                if (type == Levels.MapType.Physical)
+                {
+                    if (tile_id >= PhysicalMapLogic.SPECIAL_MIN_ID && tile_id <= PhysicalMapLogic.SPECIAL_MAX_ID)
+                    {
+                        // Rendering of non-graphic essential elements
+                        Color? c = null;
+                        if (PhysicalMapLogic.STARTING_ZONE_IDS.Contains(tile_id))
+                            c = PhysicalMapLogic.StartingZoneColor(tile_id);
+                        else if (PhysicalMapLogic.HEALING_ZONE_IDS.Contains(tile_id))
+                            c = PhysicalMapLogic.HealingZoneColor(tile_id);
+                        else if (PhysicalMapLogic.ENDING_ZONE_IDS.Contains(tile_id))
+                            c = PhysicalMapLogic.EndingZoneColor(tile_id);
+                        if (c.HasValue)
+                            sprite_batch.FillRectangle(dst, c.Value);
+                    }
+                    else if (tile_id >= PhysicalMapLogic.CONTROL_MIN_ID)
+                        sprite_batch.FillRectangle(dst, PhysicalMapLogic.UNSUPPORTED_COLOR);
+                    else if (tile_id <= PhysicalMapLogic.VISIBLE_MAX_ID)
+                        sprites.Draw(sprite_batch, palette, tile_id, dst, effects);
+                }
+
+            }
+        }
         public void Draw(SpriteBatch sprite_batch, MouseState mouse)
         {
             sprite_batch.FillRectangle(bounds, Color.CornflowerBlue);
@@ -223,40 +288,7 @@ namespace KuruLevelEditor
                 {
                     Rectangle dst = TileCoordToScreenRect(x,y);
                     if (dst.Intersects(bounds))
-                    {
-                        if (type == Levels.MapType.Minimap)
-                            sprites.Draw(sprite_batch, grid[y, x], 0, dst);
-                        else
-                        {
-                            int tile_index = grid[y, x];
-                            int tile_id = tile_index & 0x3FF;
-                            int palette = (tile_index & 0xF000) >> 12;
-                            SpriteEffects effects =
-                                ((tile_index & 0x400) != 0 ? SpriteEffects.FlipHorizontally : SpriteEffects.None) |
-                                ((tile_index & 0x800) != 0 ? SpriteEffects.FlipVertically : SpriteEffects.None);
-                            if (type == Levels.MapType.Physical)
-                            {
-                                if (tile_id >= PhysicalMapLogic.SPECIAL_MIN_ID && tile_id <= PhysicalMapLogic.SPECIAL_MAX_ID)
-                                {
-                                    // Rendering of non-graphic essential elements
-                                    Color? c = null;
-                                    if (PhysicalMapLogic.STARTING_ZONE_IDS.Contains(tile_id))
-                                        c = PhysicalMapLogic.StartingZoneColor(tile_id);
-                                    else if (PhysicalMapLogic.HEALING_ZONE_IDS.Contains(tile_id))
-                                        c = PhysicalMapLogic.HealingZoneColor(tile_id);
-                                    else if (PhysicalMapLogic.ENDING_ZONE_IDS.Contains(tile_id))
-                                        c = PhysicalMapLogic.EndingZoneColor(tile_id);
-                                    if (c.HasValue)
-                                        sprite_batch.FillRectangle(dst, c.Value);
-                                }
-                                else if (tile_id >= PhysicalMapLogic.CONTROL_MIN_ID)
-                                    sprite_batch.FillRectangle(dst, PhysicalMapLogic.UNSUPPORTED_COLOR);
-                                else if (tile_id <= PhysicalMapLogic.VISIBLE_MAX_ID)
-                                    sprites.Draw(sprite_batch, palette, tile_id, dst, effects);
-                            }
-                            
-                        }
-                    }
+                        DrawTile(sprite_batch, dst, grid[y, x], false);
                 }
             }
             // Draw map bounds
@@ -264,19 +296,31 @@ namespace KuruLevelEditor
             // Issue with DrawRectangle: https://github.com/rds1983/Myra/issues/211
             TilesSet.DrawRectangle(sprite_batch, map_bounds, Color.Red, 2);
             // Draw selected element
-            Point pt = ScreenCoordToTileCoord(mouse.Position.X, mouse.Position.Y);
-            Rectangle cr = TileCoordToScreenRect(pt.X, pt.Y);//new Rectangle(mouse.Position, new Point(tile_size, tile_size));
-            Rectangle union = cr;
-            foreach (Rectangle r in RectanglesAround(cr, brush_size))
+            if (!mouse_move_is_selecting)
             {
-                union = Rectangle.Union(union, r);
-                if (r.Intersects(bounds))
+                if (selectionGrid == null || (selectionGrid.GetLength(0) == 1 && selectionGrid.GetLength(1) == 1))
                 {
-                    if (type == Levels.MapType.Minimap)
-                        sprites.DrawSelected(sprite_batch, 0, r);
+                    int selectedItem = 0;
+                    if (selectionGrid != null)
+                        selectedItem = selectionGrid[0, 0];
+                    Point pt = ScreenCoordToTileCoord(mouse.Position.X, mouse.Position.Y);
+                    Rectangle cr = TileCoordToScreenRect(pt.X, pt.Y);//new Rectangle(mouse.Position, new Point(tile_size, tile_size));
+                    Rectangle union = cr;
+                    foreach (Rectangle r in RectanglesAround(cr, brush_size))
+                    {
+                        union = Rectangle.Union(union, r);
+                        if (r.Intersects(bounds))
+                            DrawTile(sprite_batch, r, selectedItem, true);
+                    }
+                    TilesSet.DrawRectangle(sprite_batch, union, Color.White, 1);
                 }
+                // TODO: Case of SelectionGrid
             }
-            TilesSet.DrawRectangle(sprite_batch, union, Color.White, 1);
+            else // Draw selection rectangle
+            {
+                Rectangle r = Rectangle.Union(new Rectangle(initial_mouse_move_pos.Value, Point.Zero), new Rectangle(mouse.Position, Point.Zero));
+                TilesSet.DrawRectangle(sprite_batch, r, Color.White, 1);
+            }
         }
     }
 }
