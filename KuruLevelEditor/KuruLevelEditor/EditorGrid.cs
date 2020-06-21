@@ -224,33 +224,39 @@ namespace KuruLevelEditor
             }
             else
             {
-                if (initial_mouse_move_pos == null)
+                if (initial_mouse_move_pos == null && bounds.Contains(mouse.Position))
                 {
-                    if (selectionGrid == null || (selectionGrid.GetLength(0) == 1 && selectionGrid.GetLength(1) == 1))
+                    if (mouse.LeftButton == ButtonState.Pressed || mouse.RightButton == ButtonState.Pressed)
                     {
-                        int selectedItem = -1;
-                        if (mouse.LeftButton == ButtonState.Pressed)
+                        bool clear = mouse.RightButton == ButtonState.Pressed;
+                        Point cpt = ScreenCoordToTileCoord(mouse.Position.X, mouse.Position.Y);
+                        Rectangle map_bounds = new Rectangle(0, 0, grid.GetLength(1), grid.GetLength(0));
+                        if (selectionGrid == null || (selectionGrid.GetLength(0) == 1 && selectionGrid.GetLength(1) == 1))
                         {
-                            selectedItem = 0;
-                            if (selectionGrid != null)
+                            int selectedItem = 0;
+                            if (!clear && selectionGrid != null)
                                 selectedItem = selectionGrid[0, 0];
-                        }
-                        if (mouse.RightButton == ButtonState.Pressed)
-                            selectedItem = 0;
-                        if (selectedItem >= 0 && bounds.Contains(mouse.Position))
-                        {
-                            Point cpt = ScreenCoordToTileCoord(mouse.Position.X, mouse.Position.Y);
-                            Rectangle map_bounds = new Rectangle(0, 0, grid.GetLength(1), grid.GetLength(0));
                             foreach (Point pt in PointsAround(cpt, brush_size, brush_size))
                             {
                                 if (map_bounds.Contains(pt))
-                                    grid[pt.Y, pt.X] = GetTileCode(selectedItem, true);
+                                    grid[pt.Y, pt.X] = GetTileCode(selectedItem, !clear);
                             }
                         }
-                    }
-                    else
-                    {
-                        // TODO
+                        else
+                        {
+                            Point selection_size = new Point(selectionGrid.GetLength(1), selectionGrid.GetLength(0));
+                            Point half_size = new Point(selection_size.X / 2, selection_size.Y / 2);
+                            foreach (Point offset in PointsAround(Point.Zero, half_size.X + 1, half_size.Y + 1))
+                            {
+                                Point selection_offset = offset + half_size;
+                                if (selection_offset.X >= selection_size.X || selection_offset.Y >= selection_size.Y)
+                                    continue;
+                                int selectedItem = clear ? 0 : selectionGrid[selection_offset.Y, selection_offset.X];
+                                Point pt = cpt + offset;
+                                if (map_bounds.Contains(pt))
+                                    grid[pt.Y, pt.X] = GetTileCode(selectedItem, false);
+                            }
+                        }
                     }
                 }
             }
@@ -301,10 +307,11 @@ namespace KuruLevelEditor
                     else if (tile_id <= PhysicalMapLogic.VISIBLE_MAX_ID)
                         sprites.Draw(sprite_batch, palette, tile_id, dst, effects);
                 }
-
+                else
+                    sprites.Draw(sprite_batch, palette, tile_id, dst, effects);
             }
         }
-        public void Draw(SpriteBatch sprite_batch, MouseState mouse)
+        public void Draw(SpriteBatch sprite_batch, MouseState mouse, KeyboardState keyboard)
         {
             sprite_batch.FillRectangle(bounds, Color.CornflowerBlue);
             int h = grid.GetLength(0);
@@ -325,40 +332,43 @@ namespace KuruLevelEditor
             // Draw selected element
             if (!mouse_move_is_selecting)
             {
-                Point pt = ScreenCoordToTileCoord(mouse.Position.X, mouse.Position.Y);
-                Rectangle cr = TileCoordToScreenRect(pt.X, pt.Y);//new Rectangle(mouse.Position, new Point(tile_size, tile_size));
-                Rectangle union = cr;
-                if (selectionGrid == null || (selectionGrid.GetLength(0) == 1 && selectionGrid.GetLength(1) == 1))
+                if (!keyboard.IsKeyDown(Keys.LeftControl) && !keyboard.IsKeyDown(Keys.LeftAlt))
                 {
-                    int selectedItem = 0;
-                    if (selectionGrid != null)
-                        selectedItem = selectionGrid[0, 0];
-                    
-                    foreach (Rectangle r in RectanglesAround(cr, brush_size, brush_size))
+                    Point pt = ScreenCoordToTileCoord(mouse.Position.X, mouse.Position.Y);
+                    Rectangle cr = TileCoordToScreenRect(pt.X, pt.Y);//new Rectangle(mouse.Position, new Point(tile_size, tile_size));
+                    Rectangle union = cr;
+                    if (selectionGrid == null || (selectionGrid.GetLength(0) == 1 && selectionGrid.GetLength(1) == 1))
                     {
-                        union = Rectangle.Union(union, r);
-                        if (r.Intersects(bounds))
-                            DrawTile(sprite_batch, r, selectedItem, true);
+                        int selectedItem = 0;
+                        if (selectionGrid != null)
+                            selectedItem = selectionGrid[0, 0];
+
+                        foreach (Rectangle r in RectanglesAround(cr, brush_size, brush_size))
+                        {
+                            union = Rectangle.Union(union, r);
+                            if (r.Intersects(bounds))
+                                DrawTile(sprite_batch, r, selectedItem, true);
+                        }
                     }
-                }
-                else
-                {
-                    Point selection_size = new Point(selectionGrid.GetLength(1), selectionGrid.GetLength(0));
-                    Point half_size = new Point(selection_size.X / 2, selection_size.Y / 2);
-                    foreach (Point offset in PointsAround(Point.Zero, half_size.X+1, half_size.Y+1))
+                    else
                     {
-                        Point selection_offset = offset + half_size;
-                        if (selection_offset.X >= selection_size.X || selection_offset.Y >= selection_size.Y)
-                            continue;
-                        int selectedItem = selectionGrid[selection_offset.Y, selection_offset.X];
-                        Rectangle r = new Rectangle(cr.Location + new Point(offset.X*cr.Size.X, offset.Y*cr.Size.Y), cr.Size);
-                        union = Rectangle.Union(union, r);
-                        if (r.Intersects(bounds))
-                            DrawTile(sprite_batch, r, selectedItem, false);
+                        Point selection_size = new Point(selectionGrid.GetLength(1), selectionGrid.GetLength(0));
+                        Point half_size = new Point(selection_size.X / 2, selection_size.Y / 2);
+                        foreach (Point offset in PointsAround(Point.Zero, half_size.X + 1, half_size.Y + 1))
+                        {
+                            Point selection_offset = offset + half_size;
+                            if (selection_offset.X >= selection_size.X || selection_offset.Y >= selection_size.Y)
+                                continue;
+                            int selectedItem = selectionGrid[selection_offset.Y, selection_offset.X];
+                            Rectangle r = new Rectangle(cr.Location + new Point(offset.X * cr.Size.X, offset.Y * cr.Size.Y), cr.Size);
+                            union = Rectangle.Union(union, r);
+                            if (r.Intersects(bounds))
+                                DrawTile(sprite_batch, r, selectedItem, false);
+                        }
+                        TilesSet.DrawRectangle(sprite_batch, union, Color.White, 1);
                     }
                     TilesSet.DrawRectangle(sprite_batch, union, Color.White, 1);
                 }
-                TilesSet.DrawRectangle(sprite_batch, union, Color.White, 1);
             }
             else // Draw selection rectangle
             {
