@@ -13,16 +13,18 @@ namespace KuruLevelEditor
     {
         int tile_size = 8;
         Rectangle bounds;
-        SpriteSet sprites;
+        TilesSet sprites;
         int[,] grid;
         Point position;
         int brush_size = 1;
-        public EditorGrid(Rectangle bounds, SpriteSet sprites, int[,] grid, Point position)
+        Levels.MapType type;
+        public EditorGrid(Levels.MapType type, Rectangle bounds, TilesSet sprites, int[,] grid, Point position)
         {
             this.bounds = bounds;
             this.sprites = sprites;
             this.grid = grid;
             this.position = position;
+            this.type = type;
         }
 
         public Point TileCoordToScreenCoord(int x, int y)
@@ -159,7 +161,7 @@ namespace KuruLevelEditor
             {
                 int index = -1;
                 if (mouse.LeftButton == ButtonState.Pressed)
-                    index = sprites.Selected;
+                    index = sprites.SelectedSet;
                 if (mouse.RightButton == ButtonState.Pressed)
                     index = 0;
                 if (index >= 0 && bounds.Contains(mouse.Position))
@@ -186,13 +188,16 @@ namespace KuruLevelEditor
                 {
                     Rectangle dst = TileCoordToScreenRect(x,y);
                     if (dst.Intersects(bounds))
-                        sprites.Draw(sprite_batch, grid[y, x], dst);
+                    {
+                        if (type == Levels.MapType.Minimap)
+                            sprites.Draw(sprite_batch, grid[y, x], 0, dst);
+                    }
                 }
             }
             // Draw map bounds
             Rectangle map_bounds = Rectangle.Union(TileCoordToScreenRect(0, 0), TileCoordToScreenRect(w-1, h-1));
             // Issue with DrawRectangle: https://github.com/rds1983/Myra/issues/211
-            SpriteSet.DrawRectangle(sprite_batch, map_bounds, Color.Red, 2);
+            TilesSet.DrawRectangle(sprite_batch, map_bounds, Color.Red, 2);
             // Draw selected element
             Point pt = ScreenCoordToTileCoord(mouse.Position.X, mouse.Position.Y);
             Rectangle cr = TileCoordToScreenRect(pt.X, pt.Y);//new Rectangle(mouse.Position, new Point(tile_size, tile_size));
@@ -201,9 +206,12 @@ namespace KuruLevelEditor
             {
                 union = Rectangle.Union(union, r);
                 if (r.Intersects(bounds))
-                    sprites.DrawSelected(sprite_batch, r);
+                {
+                    if (type == Levels.MapType.Minimap)
+                        sprites.DrawSelected(sprite_batch, 0, r);
+                }
             }
-            SpriteSet.DrawRectangle(sprite_batch, union, Color.White, 1);
+            TilesSet.DrawRectangle(sprite_batch, union, Color.White, 1);
         }
     }
 }

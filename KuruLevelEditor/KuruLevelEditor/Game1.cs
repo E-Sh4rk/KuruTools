@@ -5,6 +5,7 @@ using Myra;
 using Myra.Graphics2D.Brushes;
 using Myra.Graphics2D.UI;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 
 namespace KuruLevelEditor
@@ -48,6 +49,7 @@ namespace KuruLevelEditor
 
             MyraEnvironment.Game = this;
 
+            Levels.Init();
             Load.LoadContent(Content, GraphicsDevice);
 
             // ===== MAIN MENU =====
@@ -93,7 +95,7 @@ namespace KuruLevelEditor
                 GridColumn = 1,
                 GridRow = 1,
             };
-            foreach (string name in Levels.GetLevelNames())
+            foreach (string name in Levels.AllLevels)
                 comboMap.Items.Add(new ListItem(name, Color.White));
             grid.Widgets.Add(comboMap);
 
@@ -201,13 +203,20 @@ namespace KuruLevelEditor
             File.WriteAllLines(Levels.GetLevelPath(map, Levels.MapType.Minimap), lines);
         }
 
+        Levels.MapType MapType()
+        {
+            if (mode == Mode.Minimap)
+                return Levels.MapType.Minimap;
+            throw new System.Exception();
+        }
+
         EditorGrid editor;
-        SpriteSet sset;
+        TilesSet sset;
         void LoadGrid()
         {
             int[,] grid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, Levels.MapType.Minimap)), 64, 64);
-            sset = new SpriteSet(Load.MinimapColors, false, new Rectangle(0, 200, LATERAL_PANEL_WIDTH, GraphicsDevice.Viewport.Height - 200), 32);
-            editor = new EditorGrid(
+            sset = new TilesSet(Load.MinimapColors, false, new Rectangle(0, 200, LATERAL_PANEL_WIDTH, GraphicsDevice.Viewport.Height - 200), 32);
+            editor = new EditorGrid(MapType(),
                 new Rectangle(GraphicsDevice.Viewport.X + LATERAL_PANEL_WIDTH,
                 GraphicsDevice.Viewport.Y, GraphicsDevice.Viewport.Width - LATERAL_PANEL_WIDTH, GraphicsDevice.Viewport.Height),
                 sset, grid, new Point(-8, -8));
@@ -259,7 +268,7 @@ namespace KuruLevelEditor
                 _spriteBatch.End();
                 _lateralMenuDesktop.Render();
                 _spriteBatch.Begin();
-                sset.DrawSet(_spriteBatch);
+                sset.DrawSets(_spriteBatch);
                 _spriteBatch.End();
             }
 

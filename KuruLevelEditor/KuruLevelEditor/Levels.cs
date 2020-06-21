@@ -6,7 +6,7 @@ using System.Text;
 
 namespace KuruLevelEditor
 {
-    class Levels
+    public class Levels
     {
         public enum MapType
         {
@@ -15,8 +15,13 @@ namespace KuruLevelEditor
         static readonly string[] MAP_TYPE_STR = new string[] { "physical", "graphical", "background", "minimap" };
 
         const string DIR = "levels";
-        public static string[] GetLevelNames()
+        const string TILES_DIR = "tiles";
+
+        public static string[] AllLevels { get; private set; }
+        public static string[] AllWorlds { get; private set; }
+        public static void Init()
         {
+            if (AllLevels != null) return;
             List<string> res = new List<string>();
             foreach (string file in Directory.EnumerateFiles(DIR)) {
                 string name = Path.GetFileNameWithoutExtension(file);
@@ -27,12 +32,24 @@ namespace KuruLevelEditor
             }
             res.Sort();
             res = res.Distinct().ToList();
-            return res.ToArray();
+            AllLevels = res.ToArray();
+            for (int i = 0; i < res.Count; i++)
+                res[i] = GetWorldOfLevel(res[i]);
+            res = res.Distinct().ToList();
+            AllWorlds = res.ToArray();
         }
 
         public static string GetLevelPath(string name, MapType type)
         {
             return Path.Combine(DIR, name + "." + MAP_TYPE_STR[(int)type] + ".txt");
+        }
+        public static string GetTilePath(string world, MapType type, int nb)
+        {
+            return Path.Combine(TILES_DIR, world + "." + MAP_TYPE_STR[(int)type] + "." + nb.ToString("D2") + ".png");
+        }
+        public static string GetWorldOfLevel(string level)
+        {
+            return level.Substring(0, level.LastIndexOf('_'));
         }
 
         public static int[,] GetGridFromLines(string[] lines, int w, int h)
