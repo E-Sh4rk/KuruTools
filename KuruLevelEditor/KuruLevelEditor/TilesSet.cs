@@ -20,6 +20,13 @@ namespace KuruLevelEditor
         int nb_per_row;
         public int NumberSets { get; private set; }
         public int SelectedSet { get; private set; }
+        public Point NumberTiles
+        {
+            get
+            {
+                return new Point(textures[0].Width / WIDTH, textures[0].Height / HEIGHT);
+            }
+        }
         public void SelectNext()
         {
             SelectedSet++;

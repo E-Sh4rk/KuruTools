@@ -258,7 +258,7 @@ namespace KuruLevelEditor
 
         void SaveGrid()
         {
-            string[] lines = Levels.GetLinesFromGrid(editor.Grid, 1, mode != Mode.Minimap);
+            string[] lines = Levels.GetLinesFromGrid(editor.MapGrid, 1, mode != Mode.Minimap);
             File.WriteAllLines(Levels.GetLevelPath(map, MapType()), lines);
         }
 

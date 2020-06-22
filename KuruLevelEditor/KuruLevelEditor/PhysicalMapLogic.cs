@@ -53,9 +53,7 @@ namespace KuruLevelEditor
             return ENDING_ZONE_BASE_COLOR;
         }
 
-        public const int VISIBLE_MAX_ID = 0xE9;
-        public const int SPECIAL_MIN_ID = 0xEA;
-        public const int SPECIAL_MAX_ID = 0xFF;
+        public const int VISIBLE_MAX_ID = 0xDF;
         public const int CONTROL_MIN_ID = 0xE0;
     }
 }
