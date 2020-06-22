@@ -26,6 +26,8 @@ namespace KuruLevelEditor
         }
 
         const int MIN_LENGTH_UNIT = 0x40;
+        const int UNDO_CAPACITY = 100;
+
         int tile_size = 8;
         Rectangle bounds;
         TilesSet sprites;
@@ -39,6 +41,10 @@ namespace KuruLevelEditor
         Point inventoryPosition = new Point(-8, -8);
         int inventoryTileSize = 16;
         TimeSpan showBrushUntil = TimeSpan.Zero;
+
+        OverflowingStack<int[,]> undoHistory = new OverflowingStack<int[,]>(UNDO_CAPACITY);
+        Stack<int[,]> redoHistory = new Stack<int[,]>();
+
         public OverlayGrid[] Overlays { get; private set; }
         public EditorGrid(Levels.MapType type, Rectangle bounds, TilesSet sprites, int[,] grid, Point position, OverlayGrid[] overlays)
         {
@@ -68,10 +74,6 @@ namespace KuruLevelEditor
         int[,] Grid
         {
             get { return inventoryMode ? inventory : grid; }
-            set {
-                if (!inventoryMode)
-                    grid = value;
-            }
         }
         Point Position
         {
@@ -132,37 +134,55 @@ namespace KuruLevelEditor
             get { return grid; }
         }
 
+        void AddToUndoHistory(int[,] g = null)
+        {
+            if (g == null) g = Utils.CopyArray(grid);
+            undoHistory.Push(g);
+            redoHistory.Clear();
+        }
         public void IncreaseWidth()
         {
             if (type == Levels.MapType.Minimap) return;
             int w = grid.GetLength(1);
             if (w < 0x200)
+            {
+                AddToUndoHistory();
                 w += MIN_LENGTH_UNIT;
-            grid = Utils.ResizeArray(grid, grid.GetLength(0), w);
+                grid = Utils.ResizeArray(grid, grid.GetLength(0), w);
+            }
         }
         public void DecreaseWidth()
         {
             if (type == Levels.MapType.Minimap) return;
             int w = grid.GetLength(1);
             if (w > 0x40)
+            {
+                AddToUndoHistory();
                 w -= MIN_LENGTH_UNIT;
-            grid = Utils.ResizeArray(grid, grid.GetLength(0), w);
+                grid = Utils.ResizeArray(grid, grid.GetLength(0), w);
+            }
         }
         public void IncreaseHeight()
         {
             if (type == Levels.MapType.Minimap) return;
             int h = grid.GetLength(0);
             if (h < 0x200)
+            {
+                AddToUndoHistory();
                 h += MIN_LENGTH_UNIT;
-            grid = Utils.ResizeArray(grid, h, grid.GetLength(1));
+                grid = Utils.ResizeArray(grid, h, grid.GetLength(1));
+            }
         }
         public void DecreaseHeight()
         {
             if (type == Levels.MapType.Minimap) return;
             int h = grid.GetLength(0);
             if (h > 0x40)
+            {
+                AddToUndoHistory();
                 h -= MIN_LENGTH_UNIT;
-            grid = Utils.ResizeArray(grid, h, grid.GetLength(1));
+                grid = Utils.ResizeArray(grid, h, grid.GetLength(1));
+            }
         }
 
         List<Rectangle> RectanglesAround(Rectangle r, int sizeX, int sizeY)
@@ -258,6 +278,20 @@ namespace KuruLevelEditor
                     if (type != Levels.MapType.Minimap)
                         inventoryMode = !inventoryMode;
                     break;
+                case Controller.Action.UNDO:
+                    if (undoHistory.Count > 0)
+                    {
+                        redoHistory.Push(grid);
+                        grid = undoHistory.Pop();
+                    }
+                    break;
+                case Controller.Action.REDO:
+                    if (redoHistory.Count > 0)
+                    {
+                        undoHistory.Push(grid);
+                        grid = redoHistory.Pop();
+                    }
+                    break;
             }
         }
 
@@ -324,6 +358,7 @@ namespace KuruLevelEditor
                 {
                     if (mouse.LeftButton == ButtonState.Pressed || mouse.RightButton == ButtonState.Pressed)
                     {
+                        int[,] grid_bkp = null;
                         bool clear = mouse.RightButton == ButtonState.Pressed;
                         Point cpt = ScreenCoordToTileCoord(mouse.Position.X, mouse.Position.Y);
                         Rectangle map_bounds = new Rectangle(0, 0, grid.GetLength(1), grid.GetLength(0));
@@ -335,7 +370,12 @@ namespace KuruLevelEditor
                             foreach (Point pt in PointsAround(cpt, brush_size, brush_size))
                             {
                                 if (map_bounds.Contains(pt))
-                                    grid[pt.Y, pt.X] = GetTileCode(selectedItem, !clear);
+                                {
+                                    int nv = GetTileCode(selectedItem, !clear);
+                                    if (grid_bkp == null && grid[pt.Y, pt.X] != nv)
+                                        grid_bkp = Utils.CopyArray(grid);
+                                    grid[pt.Y, pt.X] = nv;
+                                }
                             }
                         }
                         else
@@ -350,9 +390,16 @@ namespace KuruLevelEditor
                                 int selectedItem = clear ? 0 : selectionGrid[selection_offset.Y, selection_offset.X];
                                 Point pt = cpt + offset;
                                 if (map_bounds.Contains(pt))
-                                    grid[pt.Y, pt.X] = GetTileCode(selectedItem, false);
+                                {
+                                    int nv = GetTileCode(selectedItem, false);
+                                    if (grid_bkp == null && grid[pt.Y, pt.X] != nv)
+                                        grid_bkp = Utils.CopyArray(grid);
+                                    grid[pt.Y, pt.X] = nv;
+                                }
                             }
                         }
+                        if (grid_bkp != null)
+                            AddToUndoHistory(grid_bkp);
                     }
                 }
             }

@@ -22,7 +22,9 @@ namespace KuruLevelEditor
 			BRUSH_MINUS,
 			FLIP_HORIZONTAL,
 			FLIP_VERTICAL,
-			TOGGLE_INVENTORY
+			TOGGLE_INVENTORY,
+			UNDO,
+			REDO
 		}
 
 		static readonly TimeSpan MOVE_DELAY = new TimeSpan(0, 0, 0, 0, 50);
@@ -30,12 +32,14 @@ namespace KuruLevelEditor
 		static readonly TimeSpan BRUSH_DELAY = new TimeSpan(0, 0, 0, 0, 100);
 		static readonly TimeSpan FLIP_DELAY = new TimeSpan(0, 0, 0, 0, 500);
 		static readonly TimeSpan INVENTORY_DELAY = new TimeSpan(0, 0, 0, 0, 500);
+		static readonly TimeSpan UNDO_DELAY = new TimeSpan(0, 0, 0, 0, 100);
 
 		static TimeSpan last_direction_time = TimeSpan.Zero;
 		static TimeSpan last_zoom_time = TimeSpan.Zero;
 		static TimeSpan last_brush_time = TimeSpan.Zero;
 		static TimeSpan last_flip_time = TimeSpan.Zero;
 		static TimeSpan last_inventory_time = TimeSpan.Zero;
+		static TimeSpan last_undo_time = TimeSpan.Zero;
 		static int last_scroll_wheel_value = 0;
 		static bool last_flip_direction = false;
 		static bool last_flip_wheel_direction = false;
@@ -64,6 +68,20 @@ namespace KuruLevelEditor
 				}
 				else
 					last_zoom_time = TimeSpan.Zero;
+
+				if (state.IsKeyDown(Keys.Z) || state.IsKeyDown(Keys.Y))
+				{
+					if (last_undo_time.Add(UNDO_DELAY) <= total_time)
+					{
+						last_undo_time = total_time;
+						if (state.IsKeyDown(Keys.Z))
+							actions.Add(Action.UNDO);
+						if (state.IsKeyDown(Keys.Y))
+							actions.Add(Action.REDO);
+					}
+				}
+				else
+					last_undo_time = TimeSpan.Zero;
 			}
 			else if (state.IsKeyDown(Keys.LeftAlt))
 			{

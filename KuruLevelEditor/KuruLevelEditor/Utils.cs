@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 
 namespace KuruLevelEditor
 {
@@ -14,6 +15,14 @@ namespace KuruLevelEditor
             for (int i = 0; i < minRows; i++)
                 for (int j = 0; j < minCols; j++)
                     newArray[i, j] = original[i, j];
+            return newArray;
+        }
+        public static T[,] CopyArray<T>(T[,] original)
+        {
+            int h = original.GetLength(0);
+            int w = original.GetLength(1);
+            var newArray = new T[h, w];
+            Array.Copy(original, newArray, h*w);
             return newArray;
         }
         public static T[,] FlipVertically<T>(T[,] arr)
@@ -41,4 +50,38 @@ namespace KuruLevelEditor
             return res;
         }
     }
+    class OverflowingStack<T>
+    {
+        private T[] items;
+        private int currentIndex;
+        private int count;
+
+        public OverflowingStack(int size)
+        {
+            this.items = new T[size];
+            this.currentIndex = 0;
+            this.count = 0;
+        }
+        public void Push(T item)
+        {
+            items[currentIndex] = item;
+            currentIndex++;
+            currentIndex %= items.Length;
+            if (count < items.Length)
+                count++;
+        }
+        public T Pop()
+        {
+            if (count == 0) throw new Exception("stack is empty");
+            currentIndex--;
+            if (currentIndex < 0) currentIndex += items.Length;
+            count--;
+            return items[currentIndex];
+        }
+        public int Count
+        {
+            get { return count; }
+        }
+    }
+
 }
