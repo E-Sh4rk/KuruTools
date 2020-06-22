@@ -314,7 +314,7 @@ namespace KuruLevelEditor
                             sset.SelectNext();
                             break;
                         default:
-                            editor.PerformAction(action);
+                            editor.PerformAction(gameTime, action);
                             break;
                     }
                     
@@ -335,7 +335,7 @@ namespace KuruLevelEditor
             else
             {
                 _spriteBatch.Begin();
-                editor.Draw(_spriteBatch, Mouse.GetState(), Keyboard.GetState());
+                editor.Draw(_spriteBatch, gameTime, Mouse.GetState(), Keyboard.GetState());
                 _spriteBatch.End();
                 _lateralMenuDesktop.Render();
                 _spriteBatch.Begin();

@@ -53,7 +53,7 @@ namespace KuruLevelEditor
 				
 				if (state.IsKeyDown(Keys.OemPlus) || state.IsKeyDown(Keys.OemMinus))
 				{
-					if (last_zoom_time.Add(ZOOM_DELAY).CompareTo(total_time) <= 0)
+					if (last_zoom_time.Add(ZOOM_DELAY) <= total_time)
 					{
 						last_zoom_time = total_time;
 						if (state.IsKeyDown(Keys.OemPlus))
@@ -74,7 +74,7 @@ namespace KuruLevelEditor
 
 				if (state.IsKeyDown(Keys.OemPlus) || state.IsKeyDown(Keys.OemMinus))
 				{
-					if (last_brush_time.Add(BRUSH_DELAY).CompareTo(total_time) <= 0)
+					if (last_brush_time.Add(BRUSH_DELAY) <= total_time)
 					{
 						last_brush_time = total_time;
 						if (state.IsKeyDown(Keys.OemPlus))
@@ -104,7 +104,7 @@ namespace KuruLevelEditor
 
 				if (state.IsKeyDown(Keys.Left) || state.IsKeyDown(Keys.Right) || state.IsKeyDown(Keys.Up) || state.IsKeyDown(Keys.Down))
 				{
-					if (last_flip_time.Add(FLIP_DELAY).CompareTo(total_time) <= 0)
+					if (last_flip_time.Add(FLIP_DELAY) <= total_time)
 					{
 						last_flip_time = total_time;
 						if (state.IsKeyDown(Keys.Left) || state.IsKeyDown(Keys.Right))
@@ -125,7 +125,7 @@ namespace KuruLevelEditor
 
 				if (state.IsKeyDown(Keys.Left) || state.IsKeyDown(Keys.Right) || state.IsKeyDown(Keys.Up) || state.IsKeyDown(Keys.Down))
 				{
-					if (last_direction_time.Add(MOVE_DELAY).CompareTo(total_time) <= 0)
+					if (last_direction_time.Add(MOVE_DELAY) <= total_time)
 					{
 						last_direction_time = total_time;
 						if (state.IsKeyDown(Keys.Left))
@@ -143,7 +143,7 @@ namespace KuruLevelEditor
 				
 				if (state.IsKeyDown(Keys.Space))
 				{
-					if (last_inventory_time.Add(INVENTORY_DELAY).CompareTo(total_time) <= 0)
+					if (last_inventory_time.Add(INVENTORY_DELAY) <= total_time)
 					{
 						last_inventory_time = total_time;
 						actions.Add(Action.TOGGLE_INVENTORY);

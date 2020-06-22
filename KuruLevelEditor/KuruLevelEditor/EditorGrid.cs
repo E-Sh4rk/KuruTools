@@ -25,6 +25,7 @@ namespace KuruLevelEditor
         int[,] inventory;
         Point inventoryPosition = new Point(-8, -8);
         int inventoryTileSize = 16;
+        TimeSpan showBrushUntil = TimeSpan.Zero;
         public EditorGrid(Levels.MapType type, Rectangle bounds, TilesSet sprites, int[,] grid, Point position)
         {
             this.bounds = bounds;
@@ -174,7 +175,12 @@ namespace KuruLevelEditor
             return res;
         }
 
-        public void PerformAction(Controller.Action action)
+        void ShowBrush(GameTime gt)
+        {
+            showBrushUntil = gt.TotalGameTime.Add(new TimeSpan(0, 0, 1));
+        }
+
+        public void PerformAction(GameTime gt, Controller.Action action)
         {
             if (mouse_move_is_selecting)
                 return;
@@ -202,15 +208,18 @@ namespace KuruLevelEditor
                         TileSize--;
                     break;
                 case Controller.Action.BRUSH_PLUS:
+                    ShowBrush(gt);
                     if (brush_size < 0x20)
                         BrushSize++;
                     break;
                 case Controller.Action.BRUSH_MINUS:
+                    ShowBrush(gt);
                     if (brush_size > 1)
                         BrushSize--;
                     break;
                 case Controller.Action.FLIP_VERTICAL:
                 case Controller.Action.FLIP_HORIZONTAL:
+                    ShowBrush(gt);
                     bool vertical = action == Controller.Action.FLIP_VERTICAL;
                     if (selectionGrid != null)
                     {
@@ -393,7 +402,7 @@ namespace KuruLevelEditor
                     sprites.Draw(sprite_batch, palette, tile_id, dst, effects);
             }
         }
-        public void Draw(SpriteBatch sprite_batch, MouseState mouse, KeyboardState keyboard)
+        public void Draw(SpriteBatch sprite_batch, GameTime gt, MouseState mouse, KeyboardState keyboard)
         {
             sprite_batch.FillRectangle(bounds, Color.CornflowerBlue);
             int h = Grid.GetLength(0);
@@ -414,7 +423,7 @@ namespace KuruLevelEditor
             // Draw selected element
             if (!mouse_move_is_selecting)
             {
-                if (!keyboard.IsKeyDown(Keys.LeftControl) && !keyboard.IsKeyDown(Keys.LeftAlt))
+                if ((!keyboard.IsKeyDown(Keys.LeftControl) && !keyboard.IsKeyDown(Keys.LeftAlt)) || gt.TotalGameTime <= showBrushUntil)
                 {
                     Point pt = ScreenCoordToTileCoord(mouse.Position.X, mouse.Position.Y);
                     Rectangle cr = TileCoordToScreenRect(pt.X, pt.Y);//new Rectangle(mouse.Position, new Point(TileSize, TileSize));
