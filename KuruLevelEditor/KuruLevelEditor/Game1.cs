@@ -287,7 +287,7 @@ namespace KuruLevelEditor
         TilesSet sset;
         void LoadGrid()
         {
-            int[,] grid = null;
+            int[,] grid;
             if (mode == Mode.Minimap)
             {
                 grid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, Levels.MapType.Minimap)), 64, 64);
@@ -299,10 +299,18 @@ namespace KuruLevelEditor
                 sset = new TilesSet(Load.Tiles[new Load.WorldAndType(Levels.GetWorldOfLevel(map), MapType())],
                     true, new Rectangle(0, 200, LATERAL_PANEL_WIDTH, GraphicsDevice.Viewport.Height - 200), 64);
             }
+            EditorGrid.OverlayGrid[] overlays = new EditorGrid.OverlayGrid[0];
+            if (mode == Mode.Graphical || mode == Mode.Background)
+            {
+                int[,] ogrid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, Levels.MapType.Physical)));
+                TilesSet osset = new TilesSet(Load.Tiles[new Load.WorldAndType(Levels.GetWorldOfLevel(map), Levels.MapType.Physical)],
+                    true, Rectangle.Empty, 0);
+                overlays = new EditorGrid.OverlayGrid[] { new EditorGrid.OverlayGrid(osset, ogrid, true) };
+            }
             editor = new EditorGrid(MapType(),
                 new Rectangle(GraphicsDevice.Viewport.X + LATERAL_PANEL_WIDTH,
                 GraphicsDevice.Viewport.Y, GraphicsDevice.Viewport.Width - LATERAL_PANEL_WIDTH, GraphicsDevice.Viewport.Height),
-                sset, grid, new Point(-8, -8));
+                sset, grid, new Point(-8, -8), overlays);
         }
 
         protected override void Update(GameTime gameTime)

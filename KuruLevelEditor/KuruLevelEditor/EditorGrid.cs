@@ -12,6 +12,19 @@ namespace KuruLevelEditor
 {
     class EditorGrid
     {
+        public struct OverlayGrid
+        {
+            public OverlayGrid(TilesSet ts, int[,] grid, bool enabled)
+            {
+                this.ts = ts;
+                this.grid = grid;
+                this.enabled = enabled;
+            }
+            public readonly TilesSet ts;
+            public readonly int[,] grid;
+            public bool enabled;
+        }
+
         const int MIN_LENGTH_UNIT = 0x40;
         int tile_size = 8;
         Rectangle bounds;
@@ -26,7 +39,8 @@ namespace KuruLevelEditor
         Point inventoryPosition = new Point(-8, -8);
         int inventoryTileSize = 16;
         TimeSpan showBrushUntil = TimeSpan.Zero;
-        public EditorGrid(Levels.MapType type, Rectangle bounds, TilesSet sprites, int[,] grid, Point position)
+        public OverlayGrid[] Overlays { get; private set; }
+        public EditorGrid(Levels.MapType type, Rectangle bounds, TilesSet sprites, int[,] grid, Point position, OverlayGrid[] overlays)
         {
             this.bounds = bounds;
             this.sprites = sprites;
@@ -48,6 +62,7 @@ namespace KuruLevelEditor
                     }
                 }
             }
+            Overlays = overlays;
         }
 
         int[,] Grid
@@ -366,7 +381,7 @@ namespace KuruLevelEditor
                 return tile_id + flips + palette;
             }
         }
-        void DrawTile(SpriteBatch sprite_batch, Rectangle dst, int tile, bool overridePalette)
+        void DrawTile(SpriteBatch sprite_batch, TilesSet sprites, Rectangle dst, int tile, bool overridePalette, bool showSpecial)
         {
             if (type == Levels.MapType.Minimap)
                 sprites.Draw(sprite_batch, overridePalette ? sprites.SelectedSet : tile, 0, dst);
@@ -378,11 +393,11 @@ namespace KuruLevelEditor
                 SpriteEffects effects =
                     ((tile_index & 0x400) != 0 ? SpriteEffects.FlipHorizontally : SpriteEffects.None) |
                     ((tile_index & 0x800) != 0 ? SpriteEffects.FlipVertically : SpriteEffects.None);
-                if (type == Levels.MapType.Physical)
+                if (showSpecial)
                 {
                     if (tile_id >= PhysicalMapLogic.CONTROL_MIN_ID)
                     {
-                        // Rendering of non-graphic essential elements
+                        // Rendering of non-graphic special elements
                         Color? c;
                         if (PhysicalMapLogic.STARTING_ZONE_IDS.Contains(tile_id))
                             c = PhysicalMapLogic.StartingZoneColor(tile_id);
@@ -402,22 +417,35 @@ namespace KuruLevelEditor
                     sprites.Draw(sprite_batch, palette, tile_id, dst, effects);
             }
         }
-        public void Draw(SpriteBatch sprite_batch, GameTime gt, MouseState mouse, KeyboardState keyboard)
+        void DrawGrid(SpriteBatch sprite_batch, int[,] grid, TilesSet sprites, bool overridePalette, bool showSpecial)
         {
-            sprite_batch.FillRectangle(bounds, Color.CornflowerBlue);
-            int h = Grid.GetLength(0);
-            int w = Grid.GetLength(1);
+            int h = grid.GetLength(0);
+            int w = grid.GetLength(1);
             for (int y = 0; y < h; y++)
             {
                 for (int x = 0; x < w; x++)
                 {
-                    Rectangle dst = TileCoordToScreenRect(x,y);
+                    Rectangle dst = TileCoordToScreenRect(x, y);
                     if (dst.Intersects(bounds))
-                        DrawTile(sprite_batch, dst, Grid[y, x], inventoryMode);
+                        DrawTile(sprite_batch, sprites, dst, grid[y, x], overridePalette, showSpecial);
+                }
+            }
+        }
+        public void Draw(SpriteBatch sprite_batch, GameTime gt, MouseState mouse, KeyboardState keyboard)
+        {
+            bool showSpecial = type == Levels.MapType.Physical;
+            sprite_batch.FillRectangle(bounds, Color.CornflowerBlue);
+            DrawGrid(sprite_batch, Grid, sprites, inventoryMode, showSpecial);
+            if (!inventoryMode)
+            {
+                foreach (OverlayGrid overlay in Overlays)
+                {
+                    if (overlay.enabled)
+                        DrawGrid(sprite_batch, overlay.grid, overlay.ts, false, false);
                 }
             }
             // Draw map bounds
-            Rectangle map_bounds = Rectangle.Union(TileCoordToScreenRect(0, 0), TileCoordToScreenRect(w-1, h-1));
+            Rectangle map_bounds = Rectangle.Union(TileCoordToScreenRect(0, 0), TileCoordToScreenRect(Grid.GetLength(1) - 1, Grid.GetLength(0) - 1));
             // Issue with DrawRectangle: https://github.com/rds1983/Myra/issues/211
             TilesSet.DrawRectangle(sprite_batch, map_bounds, Color.Red, 2);
             // Draw selected element
@@ -438,7 +466,7 @@ namespace KuruLevelEditor
                         {
                             union = Rectangle.Union(union, r);
                             if (r.Intersects(bounds))
-                                DrawTile(sprite_batch, r, selectedItem, true);
+                                DrawTile(sprite_batch, sprites, r, selectedItem, true, showSpecial);
                         }
                     }
                     else
@@ -454,7 +482,7 @@ namespace KuruLevelEditor
                             Rectangle r = new Rectangle(cr.Location + new Point(offset.X * cr.Size.X, offset.Y * cr.Size.Y), cr.Size);
                             union = Rectangle.Union(union, r);
                             if (r.Intersects(bounds))
-                                DrawTile(sprite_batch, r, selectedItem, false);
+                                DrawTile(sprite_batch, sprites, r, selectedItem, false, showSpecial);
                         }
                         TilesSet.DrawRectangle(sprite_batch, union, Color.White, 1);
                     }
