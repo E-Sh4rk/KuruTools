@@ -41,8 +41,6 @@ namespace KuruLevelEditor
 
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
-
             base.Initialize();
         }
 
@@ -305,6 +303,7 @@ namespace KuruLevelEditor
             _lateralMenuDesktop = new Desktop();
             _lateralMenuDesktop.Root = panel;
             // TODO: Display shortcuts
+            // TODO: Improve error handling
         }
 
         void SaveGrid()
