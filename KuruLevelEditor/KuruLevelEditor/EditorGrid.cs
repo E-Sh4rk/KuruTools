@@ -46,8 +46,6 @@ namespace KuruLevelEditor
                         i++;
                     }
                 }
-                // TODO: In inventory mode, do not require to press alt
-                // TODO: In inventory mode, always override palette
             }
         }
 
@@ -262,7 +260,7 @@ namespace KuruLevelEditor
                             {
                                 Point pt = new Point(x + coord1.X, y + coord1.Y);
                                 if (map_bounds.Contains(pt))
-                                    selectionGrid[y, x] = Grid[pt.Y, pt.X];
+                                    selectionGrid[y, x] = GetTileCode(Grid[pt.Y, pt.X], inventoryMode);
                             }
                         }
                     }
@@ -286,7 +284,7 @@ namespace KuruLevelEditor
                     mouse_move_is_selecting = false;
                 }
             }
-            else if (keyboard.IsKeyDown(Keys.LeftAlt))
+            else if (keyboard.IsKeyDown(Keys.LeftAlt) || inventoryMode)
             {
                 if (initial_mouse_move_pos == null && mouse.LeftButton == ButtonState.Pressed)
                 {
@@ -406,7 +404,7 @@ namespace KuruLevelEditor
                 {
                     Rectangle dst = TileCoordToScreenRect(x,y);
                     if (dst.Intersects(bounds))
-                        DrawTile(sprite_batch, dst, Grid[y, x], false);
+                        DrawTile(sprite_batch, dst, Grid[y, x], inventoryMode);
                 }
             }
             // Draw map bounds
