@@ -432,6 +432,18 @@ namespace KuruLevelEditor
                 }
             }
         }
+        struct DelayedSpriteDrawing
+        {
+            public DelayedSpriteDrawing(Rectangle r, int item, bool overridePalette)
+            {
+                this.r = r;
+                this.item = item;
+                this.overridePalette = overridePalette;
+            }
+            public Rectangle r;
+            public int item;
+            public bool overridePalette;
+        }
         public void Draw(SpriteBatch sprite_batch, GameTime gt, MouseState mouse, KeyboardState keyboard)
         {
             bool showSpecial = type == Levels.MapType.Physical;
@@ -452,11 +464,12 @@ namespace KuruLevelEditor
             // Draw selected element
             if (!mouse_move_is_selecting)
             {
-                if ((!keyboard.IsKeyDown(Keys.LeftControl) && !keyboard.IsKeyDown(Keys.LeftAlt)) || gt.TotalGameTime <= showBrushUntil)
+                if ((!keyboard.IsKeyDown(Keys.LeftControl) && !keyboard.IsKeyDown(Keys.LeftAlt) && !inventoryMode) || gt.TotalGameTime <= showBrushUntil)
                 {
                     Point pt = ScreenCoordToTileCoord(mouse.Position.X, mouse.Position.Y);
                     Rectangle cr = TileCoordToScreenRect(pt.X, pt.Y);//new Rectangle(mouse.Position, new Point(TileSize, TileSize));
                     Rectangle union = cr;
+                    List<DelayedSpriteDrawing> toDraw = new List<DelayedSpriteDrawing>();
                     if (selectionGrid == null || (selectionGrid.GetLength(0) == 1 && selectionGrid.GetLength(1) == 1))
                     {
                         int selectedItem = 0;
@@ -467,7 +480,7 @@ namespace KuruLevelEditor
                         {
                             union = Rectangle.Union(union, r);
                             if (r.Intersects(bounds))
-                                DrawTile(sprite_batch, sprites, r, selectedItem, true, showSpecial);
+                                toDraw.Add(new DelayedSpriteDrawing(r, selectedItem, true));
                         }
                     }
                     else
@@ -483,10 +496,12 @@ namespace KuruLevelEditor
                             Rectangle r = new Rectangle(cr.Location + new Point(offset.X * cr.Size.X, offset.Y * cr.Size.Y), cr.Size);
                             union = Rectangle.Union(union, r);
                             if (r.Intersects(bounds))
-                                DrawTile(sprite_batch, sprites, r, selectedItem, false, showSpecial);
+                                toDraw.Add(new DelayedSpriteDrawing(r, selectedItem, false));
                         }
-                        TilesSet.DrawRectangle(sprite_batch, union, Color.White, 1);
                     }
+                    sprite_batch.FillRectangle(union, Color.CornflowerBlue);
+                    foreach (DelayedSpriteDrawing d in toDraw)
+                        DrawTile(sprite_batch, sprites, d.r, d.item, d.overridePalette, showSpecial);
                     TilesSet.DrawRectangle(sprite_batch, union, Color.White, 1);
                 }
             }

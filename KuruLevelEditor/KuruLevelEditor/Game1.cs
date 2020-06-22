@@ -304,6 +304,9 @@ namespace KuruLevelEditor
             _lateralMenuDesktop.Root = panel;
             // TODO: Display shortcuts
             // TODO: Improve error handling
+            // TODO: Support for CTRL+Z
+            // TODO: Support for bonuses
+            // TODO: Support for moving objects
         }
 
         void SaveGrid()

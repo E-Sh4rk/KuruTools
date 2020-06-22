@@ -11,26 +11,24 @@ namespace KuruLevelEditor
         public readonly static int[] STARTING_ZONE_IDS = new int[] { 0xFB, 0xFC, 0xFD };
         public readonly static int[] ENDING_ZONE_IDS = new int[] { 0xFE, 0xFF };
 
-        readonly static Color HEALING_ZONE_BASE_COLOR = new Color(0xFF, 0x73, 0x73, 0x80);
-        readonly static Color STARTING_ZONE_BASE_COLOR = new Color(0x80, 0x8C, 0xFF, 0x80);
-        readonly static Color STARTING_ZONE_CW_COLOR = new Color(0x20, 0x5C, 0xFF, 0x80);
-        readonly static Color STARTING_ZONE_CCW_COLOR = new Color(0x00, 0x2C, 0xFF, 0x80);
-        readonly static Color ENDING_ZONE_COLOR = new Color(0xAA, 0x86, 0x29, 0x80);
-        readonly static Color ENDING_ZONE_BASE_COLOR = new Color(0xFF, 0xD6, 0x29, 0x80);
+        readonly static Color HEALING_ZONE_COLOR = new Color(0xFF, 0x33, 0x33, 0xFF);
+        readonly static Color HEALING_ZONE_BASE_COLOR = new Color(0xFF, 0x73, 0x73, 0xFF);
+        readonly static Color STARTING_ZONE_BASE_COLOR = new Color(0xA0, 0xA0, 0xFF, 0xFF);
+        readonly static Color STARTING_ZONE_CW_COLOR = new Color(0x20, 0x5C, 0xFF, 0xFF);
+        readonly static Color STARTING_ZONE_CCW_COLOR = new Color(0x5C, 0x20, 0xFF, 0xFF);
+        readonly static Color ENDING_ZONE_COLOR = new Color(0xAA, 0x86, 0x29, 0xFF);
+        readonly static Color ENDING_ZONE_BASE_COLOR = new Color(0xFF, 0xD6, 0x29, 0xFF);
 
-        public readonly static Color UNSUPPORTED_COLOR = new Color(0x00, 0x00, 0x00, 0x80);
+        public readonly static Color UNSUPPORTED_COLOR = new Color(0x00, 0x00, 0x00, 0xA0);
 
         public static Color HealingZoneColor(int tile_id)
         {
-            Color c = HEALING_ZONE_BASE_COLOR;
-            if (tile_id > 0xEC)
+            Color c = tile_id < 0xEC ? HEALING_ZONE_BASE_COLOR : HEALING_ZONE_COLOR;
+            if (tile_id == 0xEB || tile_id == 0xEE)
             {
-                c.G -= (byte)((tile_id - 0xEC) * 0x30);
-                c.B -= (byte)((tile_id - 0xEC) * 0x30);
-            }
-            else
-            {
-                c.G -= (byte)((tile_id - 0xEA) * 0x30);
+                c.B += 0x60;
+                c.G -= 0x30;
+                c.R -= 0x30;
             }
 
             return c;
