@@ -258,6 +258,49 @@ namespace KuruLevelEditor
             };
             lateral.Widgets.Add(buttonHM);
 
+            var buttonOP = new TextButton
+            {
+                GridColumn = 0,
+                GridRow = 2,
+                Text = "Overlay +",
+                Width = 75,
+                Height = 30,
+                GridColumnSpan = 2
+            };
+            buttonOP.Click += (s, a) =>
+            {
+                for(int i = editor.Overlays.Length - 1; i >= 0; i--)
+                {
+                    if (!editor.Overlays[i].enabled)
+                    {
+                        editor.Overlays[i].enabled = true;
+                        break;
+                    }
+                }
+            };
+            lateral.Widgets.Add(buttonOP);
+            var buttonOM = new TextButton
+            {
+                GridColumn = 2,
+                GridRow = 2,
+                Text = "Overlay -",
+                Width = 75,
+                Height = 30,
+                GridColumnSpan = 2
+            };
+            buttonOM.Click += (s, a) =>
+            {
+                for (int i = 0; i < editor.Overlays.Length; i++)
+                {
+                    if (editor.Overlays[i].enabled)
+                    {
+                        editor.Overlays[i].enabled = false;
+                        break;
+                    }
+                }
+            };
+            lateral.Widgets.Add(buttonOM);
+
             panel.Widgets.Add(lateral);
             _lateralMenuDesktop = new Desktop();
             _lateralMenuDesktop.Root = panel;
@@ -299,18 +342,27 @@ namespace KuruLevelEditor
                 sset = new TilesSet(Load.Tiles[new Load.WorldAndType(Levels.GetWorldOfLevel(map), MapType())],
                     true, new Rectangle(0, 200, LATERAL_PANEL_WIDTH, GraphicsDevice.Viewport.Height - 200), 64);
             }
-            EditorGrid.OverlayGrid[] overlays = new EditorGrid.OverlayGrid[0];
+            List<EditorGrid.OverlayGrid> overlays = new List<EditorGrid.OverlayGrid>();
             if (mode == Mode.Graphical || mode == Mode.Background)
             {
-                int[,] ogrid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, Levels.MapType.Physical)));
-                TilesSet osset = new TilesSet(Load.Tiles[new Load.WorldAndType(Levels.GetWorldOfLevel(map), Levels.MapType.Physical)],
+                int[,] ogrid;
+                TilesSet osset;
+                if (mode == Mode.Background)
+                {
+                    ogrid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, Levels.MapType.Graphical)));
+                    osset = new TilesSet(Load.Tiles[new Load.WorldAndType(Levels.GetWorldOfLevel(map), Levels.MapType.Graphical)],
+                        true, Rectangle.Empty, 0);
+                    overlays.Add(new EditorGrid.OverlayGrid(osset, ogrid, false));
+                }
+                ogrid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, Levels.MapType.Physical)));
+                osset = new TilesSet(Load.Tiles[new Load.WorldAndType(Levels.GetWorldOfLevel(map), Levels.MapType.Physical)],
                     true, Rectangle.Empty, 0);
-                overlays = new EditorGrid.OverlayGrid[] { new EditorGrid.OverlayGrid(osset, ogrid, true) };
+                overlays.Add(new EditorGrid.OverlayGrid(osset, ogrid, true));
             }
             editor = new EditorGrid(MapType(),
                 new Rectangle(GraphicsDevice.Viewport.X + LATERAL_PANEL_WIDTH,
                 GraphicsDevice.Viewport.Y, GraphicsDevice.Viewport.Width - LATERAL_PANEL_WIDTH, GraphicsDevice.Viewport.Height),
-                sset, grid, new Point(-8, -8), overlays);
+                sset, grid, new Point(-8, -8), overlays.ToArray());
         }
 
         protected override void Update(GameTime gameTime)
