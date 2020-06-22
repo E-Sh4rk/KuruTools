@@ -390,7 +390,7 @@ namespace KuruLevelEditor
                     }
                     
                 }
-                editor.Update(ms, ks);
+                editor.Update(gameTime, ms, ks);
                 sset.Update(ms);
             }
 

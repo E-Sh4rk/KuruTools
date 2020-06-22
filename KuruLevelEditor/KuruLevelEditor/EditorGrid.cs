@@ -264,7 +264,7 @@ namespace KuruLevelEditor
         bool mouse_move_is_selecting = false;
         Point? initial_mouse_move_pos = null;
         Point? initial_mouse_move_map_position = null;
-        public void Update(MouseState mouse, KeyboardState keyboard)
+        public void Update(GameTime gt, MouseState mouse, KeyboardState keyboard)
         {
             if (initial_mouse_move_pos != null)
             {
@@ -272,6 +272,7 @@ namespace KuruLevelEditor
                 {
                     if (mouse_move_is_selecting)
                     {
+                        ShowBrush(gt);
                         Rectangle map_bounds = new Rectangle(0, 0, Grid.GetLength(1), Grid.GetLength(0));
                         Rectangle r = Rectangle.Union(new Rectangle(initial_mouse_move_pos.Value, Point.Zero), new Rectangle(mouse.Position, Point.Zero));
                         Point coord1 = ScreenCoordToTileCoord(r.X, r.Y);
