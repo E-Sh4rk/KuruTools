@@ -336,7 +336,6 @@ namespace KuruLevelEditor
             _lateralMenuDesktop = new Desktop();
             _lateralMenuDesktop.Root = panel;
             // TODO: Improve error handling
-            // TODO: Logo
             // TODO: Integrate ROM building system
             // TODO: Integrate emulator testing
             // TODO: Support for bonuses

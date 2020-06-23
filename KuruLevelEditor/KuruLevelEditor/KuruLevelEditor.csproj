@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -27,7 +27,5 @@
     <PackageReference Include="MonoGame.Framework.DesktopGL" Version="3.8.0.1375-develop" />
     <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.0.1375-develop" />
     <PackageReference Include="Myra" Version="1.0.0.204" />
-    <PackageReference Include="Myra.Content.Pipeline" Version="0.5.6.113" />
-    <PackageReference Include="Myra.Editor" Version="0.7.6.147" />
   </ItemGroup>
 </Project>
