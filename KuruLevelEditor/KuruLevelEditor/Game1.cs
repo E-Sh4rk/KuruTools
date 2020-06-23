@@ -302,8 +302,13 @@ namespace KuruLevelEditor
             panel.Widgets.Add(lateral);
             _lateralMenuDesktop = new Desktop();
             _lateralMenuDesktop.Root = panel;
+            // TODO: Add overlays also in wall editing mode
+            // TODO: Support springs
             // TODO: Display shortcuts
             // TODO: Improve error handling
+            // TODO: Logo
+            // TODO: Integrate ROM building system
+            // TODO: Integrate emulator testing
             // TODO: Support for bonuses
             // TODO: Support for moving objects
         }
