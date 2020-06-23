@@ -15,7 +15,7 @@ namespace KuruTools
             return (byte)((b >> 4) + ((b & 0xF) << 4));
         }
         const int WIDTH = 256;
-        public static Bitmap PreviewOfTilesData(byte[] data, Color[] palette = null, bool treatFirstColorAsTransparency = false)
+        public static Bitmap PreviewOfTilesData(byte[] data, Color[] palette = null, Color? treatFirstColorAs = null)
         {
             int length = data.Length * 2;
             int height = length / WIDTH;
@@ -33,8 +33,8 @@ namespace KuruTools
                 for (int i = 0; i < 16; i++)
                     ncp.Entries[i] = palette[i];
             }
-            if (treatFirstColorAsTransparency)
-                ncp.Entries[0] = Color.Transparent;
+            if (treatFirstColorAs != null)
+                ncp.Entries[0] = treatFirstColorAs.Value;
             b.Palette = ncp;
 
             var BoundsRect = new Rectangle(0, 0, WIDTH, height);

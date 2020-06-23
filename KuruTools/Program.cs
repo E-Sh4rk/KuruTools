@@ -76,7 +76,8 @@ namespace KuruTools
                                 for (int j = 0; j < palette.Colors.Length; j++)
                                 {
                                     string filename_png = string.Format("{0}.{1}.{2:D2}.png", Levels.LevelIdentifier.WorldShortName(w), type, j);
-                                    Tiles.PreviewOfTilesData(d, palette.Colors[j], i != 1).Save(Path.Combine(extractTiles, filename_png));
+                                    Color firstColor = i == 1 ? palette.Colors[0][0] : Color.Transparent;
+                                    Tiles.PreviewOfTilesData(d, palette.Colors[j], firstColor).Save(Path.Combine(extractTiles, filename_png));
                                 }
                             }
                         }
