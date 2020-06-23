@@ -239,7 +239,7 @@ namespace KuruLevelEditor
                         TileSize++;
                     break;
                 case Controller.Action.ZOOM_OUT:
-                    if (TileSize > 1)
+                    if (TileSize > 3)
                         TileSize--;
                     break;
                 case Controller.Action.BRUSH_PLUS:
@@ -407,12 +407,14 @@ namespace KuruLevelEditor
 
         int FlipHorizontally(int tile)
         {
-            if (type == Levels.MapType.Minimap || tile == 0) return tile;
+            if (type == Levels.MapType.Minimap || tile == 0 /* Avoid generating many flipped zeros */)
+                return tile;
             return (tile ^ 0x400);
         }
         int FlipVertically(int tile)
         {
-            if (type == Levels.MapType.Minimap || tile == 0) return tile;
+            if (type == Levels.MapType.Minimap || tile == 0 /* Avoid generating many flipped zeros */)
+                return tile;
             return (tile ^ 0x800);
         }
 
@@ -506,8 +508,15 @@ namespace KuruLevelEditor
                         DrawGrid(sprite_batch, overlay.grid, overlay.ts, false, false);
                 }
             }
-            // Draw map bounds
+            // Draw map bounds and grid
             Rectangle map_bounds = Rectangle.Union(TileCoordToScreenRect(0, 0), TileCoordToScreenRect(Grid.GetLength(1) - 1, Grid.GetLength(0) - 1));
+            if (TileSize > 8)
+            {
+                for (int x = map_bounds.Location.X + TileSize; x < map_bounds.Location.X + map_bounds.Size.X; x += TileSize)
+                    sprite_batch.FillRectangle(new Rectangle(x, map_bounds.Location.Y, 1, map_bounds.Size.Y), Color.Gray);
+                for (int y = map_bounds.Location.Y + TileSize; y < map_bounds.Location.Y + map_bounds.Size.Y; y += TileSize)
+                    sprite_batch.FillRectangle(new Rectangle(map_bounds.Location.X, y, map_bounds.Size.X, 1), Color.Gray);
+            }
             // Issue with DrawRectangle: https://github.com/rds1983/Myra/issues/211
             TilesSet.DrawRectangle(sprite_batch, map_bounds, Color.Red, 2);
             // Draw selected element
