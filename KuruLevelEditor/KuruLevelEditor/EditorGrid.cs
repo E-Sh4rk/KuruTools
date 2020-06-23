@@ -27,6 +27,7 @@ namespace KuruLevelEditor
 
         const int MIN_LENGTH_UNIT = 0x40;
         const int UNDO_CAPACITY = 100;
+        readonly Color BACKGROUND_COLOR = Color.CornflowerBlue;
 
         int tile_size = 8;
         Rectangle bounds;
@@ -500,7 +501,7 @@ namespace KuruLevelEditor
         public void Draw(SpriteBatch sprite_batch, GameTime gt, MouseState mouse, KeyboardState keyboard)
         {
             bool showSpecial = type == Levels.MapType.Physical;
-            sprite_batch.FillRectangle(bounds, Color.CornflowerBlue);
+            sprite_batch.FillRectangle(bounds, BACKGROUND_COLOR);
             if (!inventoryMode)
             {
                 foreach (OverlayGrid underlay in Underlays)
@@ -567,7 +568,7 @@ namespace KuruLevelEditor
                                 toDraw.Add(new DelayedSpriteDrawing(r, selectedItem, false));
                         }
                     }
-                    sprite_batch.FillRectangle(union, Color.CornflowerBlue);
+                    sprite_batch.FillRectangle(union, BACKGROUND_COLOR);
                     foreach (DelayedSpriteDrawing d in toDraw)
                         DrawTile(sprite_batch, sprites, d.r, d.item, d.overridePalette, showSpecial);
                     TilesSet.DrawRectangle(sprite_batch, union, Color.White, 1);
