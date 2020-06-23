@@ -13,6 +13,7 @@ namespace KuruLevelEditor
     public class Game1 : Game
     {
         const int LATERAL_PANEL_WIDTH = 200;
+        const int PALETTE_SELECTOR_Y = 250;
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         private Desktop _mainMenuDesktop;
@@ -145,7 +146,7 @@ namespace KuruLevelEditor
             {
                 Left = 0,
                 Width = LATERAL_PANEL_WIDTH,
-                Background = new SolidBrush(Color.Black),
+                Background = new SolidBrush(Color.Transparent),
             };
 
             var lateral = new Grid
@@ -306,10 +307,34 @@ namespace KuruLevelEditor
             };
             lateral.Widgets.Add(buttonOM);
 
+            var buttonHelp = new TextButton
+            {
+                GridColumn = 0,
+                GridRow = 3,
+                Text = "Help",
+                Width = LATERAL_PANEL_WIDTH,
+                Height = 30,
+                GridColumnSpan = 4
+            };
+            buttonHelp.Click += (s, a) =>
+            {
+                var messageBox = Dialog.CreateMessageBox("Commands",
+                    "Move: CTRL+LeftClick or Arrows\n" +
+                    "Zoom: CTRL+Wheel or CTRL+[+/-]\n" +
+                    "Next / Previous palette: Wheel\n" +
+                    "Make a selection: ALT+LeftClick\n" +
+                    "Brush size: ALT+Wheel or ALT+[+/-]\n" +
+                    "Flip selection: SHIFT+Wheel or SHIFT+Arrows\n" +
+                    "Open/Close inventory: Space\n" +
+                    "Undo / Redo: CTRL+Z / CTRL+Y"
+                    );
+                messageBox.ShowModal(_lateralMenuDesktop);
+            };
+            lateral.Widgets.Add(buttonHelp);
+
             panel.Widgets.Add(lateral);
             _lateralMenuDesktop = new Desktop();
             _lateralMenuDesktop.Root = panel;
-            // TODO: Display shortcuts
             // TODO: Improve error handling
             // TODO: Logo
             // TODO: Integrate ROM building system
@@ -347,14 +372,15 @@ namespace KuruLevelEditor
             if (mode == Mode.Minimap)
             {
                 grid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, Levels.MapType.Minimap)), 64, 64);
-                sset = new TilesSet(Load.MinimapColors, false, new Rectangle(0, 200, LATERAL_PANEL_WIDTH, GraphicsDevice.Viewport.Height - 200), 64);
+                sset = new TilesSet(Load.MinimapColors, false,
+                    new Rectangle(0, PALETTE_SELECTOR_Y, LATERAL_PANEL_WIDTH, GraphicsDevice.Viewport.Height - PALETTE_SELECTOR_Y), 64);
             }
             else
             {
                 string world = Levels.GetWorldOfLevel(map);
                 grid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, MapType())));
                 sset = new TilesSet(Load.Tiles[new Load.WorldAndType(world, MapType())],
-                    true, new Rectangle(0, 200, LATERAL_PANEL_WIDTH, GraphicsDevice.Viewport.Height - 200), 64);
+                    true, new Rectangle(0, PALETTE_SELECTOR_Y, LATERAL_PANEL_WIDTH, GraphicsDevice.Viewport.Height - PALETTE_SELECTOR_Y), 64);
 
                 int[,] ogrid;
                 TilesSet osset;
@@ -395,7 +421,7 @@ namespace KuruLevelEditor
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            if (mode != Mode.Menu)
+            if (mode != Mode.Menu && !_lateralMenuDesktop.HasModalWidget)
             {
                 MouseState ms = Mouse.GetState();
                 KeyboardState ks = Keyboard.GetState();
@@ -433,11 +459,9 @@ namespace KuruLevelEditor
             {
                 _spriteBatch.Begin();
                 editor.Draw(_spriteBatch, gameTime, Mouse.GetState(), Keyboard.GetState());
-                _spriteBatch.End();
-                _lateralMenuDesktop.Render();
-                _spriteBatch.Begin();
                 sset.DrawSets(_spriteBatch);
                 _spriteBatch.End();
+                _lateralMenuDesktop.Render();
             }
 
             base.Draw(gameTime);
