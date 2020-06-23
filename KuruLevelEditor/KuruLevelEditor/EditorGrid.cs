@@ -12,7 +12,7 @@ namespace KuruLevelEditor
 {
     class EditorGrid
     {
-        public struct OverlayGrid
+        public class OverlayGrid
         {
             public OverlayGrid(TilesSet ts, int[,] grid, bool enabled)
             {
@@ -46,7 +46,8 @@ namespace KuruLevelEditor
         Stack<int[,]> redoHistory = new Stack<int[,]>();
 
         public OverlayGrid[] Overlays { get; private set; }
-        public EditorGrid(Levels.MapType type, Rectangle bounds, TilesSet sprites, int[,] grid, Point position, OverlayGrid[] overlays)
+        public OverlayGrid[] Underlays { get; private set; }
+        public EditorGrid(Levels.MapType type, Rectangle bounds, TilesSet sprites, int[,] grid, Point position, OverlayGrid[] overlays, OverlayGrid[] underlays)
         {
             this.bounds = bounds;
             this.sprites = sprites;
@@ -69,6 +70,7 @@ namespace KuruLevelEditor
                 }
             }
             Overlays = overlays;
+            Underlays = underlays;
         }
 
         int[,] Grid
@@ -499,6 +501,14 @@ namespace KuruLevelEditor
         {
             bool showSpecial = type == Levels.MapType.Physical;
             sprite_batch.FillRectangle(bounds, Color.CornflowerBlue);
+            if (!inventoryMode)
+            {
+                foreach (OverlayGrid underlay in Underlays)
+                {
+                    if (underlay.enabled)
+                        DrawGrid(sprite_batch, underlay.grid, underlay.ts, false, false);
+                }
+            }
             DrawGrid(sprite_batch, Grid, sprites, inventoryMode, showSpecial);
             if (!inventoryMode)
             {
