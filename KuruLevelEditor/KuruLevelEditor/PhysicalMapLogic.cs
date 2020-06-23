@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -10,6 +11,7 @@ namespace KuruLevelEditor
         public readonly static int[] HEALING_ZONE_IDS = new int[] { 0xEA, 0xEB, /*0xEC,*/ 0xED, 0xEE };
         public readonly static int[] STARTING_ZONE_IDS = new int[] { 0xFB, 0xFC, 0xFD };
         public readonly static int[] ENDING_ZONE_IDS = new int[] { 0xFE, 0xFF };
+        public readonly static int[] SPRING_IDS = new int[] { 0xF8, 0xF9 };
 
         readonly static Color HEALING_ZONE_COLOR = new Color(0xFF, 0x33, 0x33, 0xFF);
         readonly static Color HEALING_ZONE_BASE_COLOR = new Color(0xFF, 0x73, 0x73, 0xFF);
@@ -49,6 +51,14 @@ namespace KuruLevelEditor
                 return ENDING_ZONE_COLOR;
 
             return ENDING_ZONE_BASE_COLOR;
+        }
+
+        public static Texture2D TextureOfSpring(int tile_id)
+        {
+            if (tile_id == 0xF8)
+                return Load.SpringVertical;
+
+            return Load.SpringHorizontal;
         }
 
         public const int VISIBLE_MAX_ID = 0xDF;

@@ -446,13 +446,15 @@ namespace KuruLevelEditor
                     if (tile_id >= PhysicalMapLogic.CONTROL_MIN_ID)
                     {
                         // Rendering of non-graphic special elements
-                        Color? c;
+                        Color? c = null;
                         if (PhysicalMapLogic.STARTING_ZONE_IDS.Contains(tile_id))
                             c = PhysicalMapLogic.StartingZoneColor(tile_id);
                         else if (PhysicalMapLogic.HEALING_ZONE_IDS.Contains(tile_id))
                             c = PhysicalMapLogic.HealingZoneColor(tile_id);
                         else if (PhysicalMapLogic.ENDING_ZONE_IDS.Contains(tile_id))
                             c = PhysicalMapLogic.EndingZoneColor(tile_id);
+                        else if (PhysicalMapLogic.SPRING_IDS.Contains(tile_id))
+                            sprite_batch.Draw(PhysicalMapLogic.TextureOfSpring(tile_id), dst, null, Color.White, 0, Vector2.Zero, effects, 0F);
                         else
                             c = PhysicalMapLogic.UNSUPPORTED_COLOR;
                         if (c.HasValue)
