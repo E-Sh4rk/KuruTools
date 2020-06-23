@@ -472,8 +472,9 @@ namespace KuruLevelEditor
                     sprites.Draw(sprite_batch, palette, tile_id, dst, effects);
             }
         }
-        void DrawGrid(SpriteBatch sprite_batch, int[,] grid, TilesSet sprites, bool overridePalette, bool showSpecial)
+        void DrawGrid(SpriteBatch sprite_batch, int[,] grid, TilesSet sprites, bool overridePalette, bool showSpecial, Rectangle? ignoreArea = null)
         {
+            Rectangle notIn = ignoreArea.HasValue ? ignoreArea.Value : Rectangle.Empty;
             int h = grid.GetLength(0);
             int w = grid.GetLength(1);
             for (int y = 0; y < h; y++)
@@ -481,7 +482,7 @@ namespace KuruLevelEditor
                 for (int x = 0; x < w; x++)
                 {
                     Rectangle dst = TileCoordToScreenRect(x, y);
-                    if (dst.Intersects(bounds))
+                    if (dst.Intersects(bounds) && !dst.Intersects(notIn))
                         DrawTile(sprite_batch, sprites, dst, grid[y, x], overridePalette, showSpecial);
                 }
             }
@@ -502,6 +503,48 @@ namespace KuruLevelEditor
         {
             bool showSpecial = type == Levels.MapType.Physical;
             sprite_batch.FillRectangle(bounds, BACKGROUND_COLOR);
+            // Compute selected elements sprites
+            Rectangle? selectedElementsBounds = null;
+            List<DelayedSpriteDrawing> toDraw = new List<DelayedSpriteDrawing>();
+            if (!mouse_move_is_selecting)
+            {
+                if ((!keyboard.IsKeyDown(Keys.LeftControl) && !keyboard.IsKeyDown(Keys.LeftAlt) && !inventoryMode) || gt.TotalGameTime <= showBrushUntil)
+                {
+                    Point pt = ScreenCoordToTileCoord(mouse.Position.X, mouse.Position.Y);
+                    Rectangle cr = TileCoordToScreenRect(pt.X, pt.Y);
+                    selectedElementsBounds = cr;
+                    if (selectionGrid == null || (selectionGrid.GetLength(0) == 1 && selectionGrid.GetLength(1) == 1))
+                    {
+                        int selectedItem = 0;
+                        if (selectionGrid != null)
+                            selectedItem = selectionGrid[0, 0];
+
+                        foreach (Rectangle r in RectanglesAround(cr, brush_size, brush_size))
+                        {
+                            selectedElementsBounds = Rectangle.Union(selectedElementsBounds.Value, r);
+                            if (r.Intersects(bounds))
+                                toDraw.Add(new DelayedSpriteDrawing(r, selectedItem, true));
+                        }
+                    }
+                    else
+                    {
+                        Point selection_size = new Point(selectionGrid.GetLength(1), selectionGrid.GetLength(0));
+                        Point half_size = new Point(selection_size.X / 2, selection_size.Y / 2);
+                        foreach (Point offset in PointsAround(Point.Zero, half_size.X + 1, half_size.Y + 1))
+                        {
+                            Point selection_offset = offset + half_size;
+                            if (selection_offset.X >= selection_size.X || selection_offset.Y >= selection_size.Y)
+                                continue;
+                            int selectedItem = selectionGrid[selection_offset.Y, selection_offset.X];
+                            Rectangle r = new Rectangle(cr.Location + new Point(offset.X * cr.Size.X, offset.Y * cr.Size.Y), cr.Size);
+                            selectedElementsBounds = Rectangle.Union(selectedElementsBounds.Value, r);
+                            if (r.Intersects(bounds))
+                                toDraw.Add(new DelayedSpriteDrawing(r, selectedItem, false));
+                        }
+                    }
+                }
+            }
+            // Draw map and overlays
             if (!inventoryMode)
             {
                 foreach (OverlayGrid underlay in Underlays)
@@ -510,7 +553,7 @@ namespace KuruLevelEditor
                         DrawGrid(sprite_batch, underlay.grid, underlay.ts, false, false);
                 }
             }
-            DrawGrid(sprite_batch, Grid, sprites, inventoryMode, showSpecial);
+            DrawGrid(sprite_batch, Grid, sprites, inventoryMode, showSpecial, selectedElementsBounds);
             if (!inventoryMode)
             {
                 foreach (OverlayGrid overlay in Overlays)
@@ -528,53 +571,16 @@ namespace KuruLevelEditor
                 for (int y = map_bounds.Location.Y + TileSize; y < map_bounds.Location.Y + map_bounds.Size.Y; y += TileSize)
                     sprite_batch.FillRectangle(new Rectangle(map_bounds.Location.X, y, map_bounds.Size.X, 1), Color.Gray);
             }
-            // Issue with DrawRectangle: https://github.com/rds1983/Myra/issues/211
-            TilesSet.DrawRectangle(sprite_batch, map_bounds, Color.Red, 2);
-            // Draw selected element
-            if (!mouse_move_is_selecting)
+            TilesSet.DrawRectangle(sprite_batch, map_bounds, Color.Red, 2); // Issue with DrawRectangle: https://github.com/rds1983/Myra/issues/211
+            // Draw selected elements
+            if (selectedElementsBounds.HasValue)
             {
-                if ((!keyboard.IsKeyDown(Keys.LeftControl) && !keyboard.IsKeyDown(Keys.LeftAlt) && !inventoryMode) || gt.TotalGameTime <= showBrushUntil)
-                {
-                    Point pt = ScreenCoordToTileCoord(mouse.Position.X, mouse.Position.Y);
-                    Rectangle cr = TileCoordToScreenRect(pt.X, pt.Y);//new Rectangle(mouse.Position, new Point(TileSize, TileSize));
-                    Rectangle union = cr;
-                    List<DelayedSpriteDrawing> toDraw = new List<DelayedSpriteDrawing>();
-                    if (selectionGrid == null || (selectionGrid.GetLength(0) == 1 && selectionGrid.GetLength(1) == 1))
-                    {
-                        int selectedItem = 0;
-                        if (selectionGrid != null)
-                            selectedItem = selectionGrid[0, 0];
-
-                        foreach (Rectangle r in RectanglesAround(cr, brush_size, brush_size))
-                        {
-                            union = Rectangle.Union(union, r);
-                            if (r.Intersects(bounds))
-                                toDraw.Add(new DelayedSpriteDrawing(r, selectedItem, true));
-                        }
-                    }
-                    else
-                    {
-                        Point selection_size = new Point(selectionGrid.GetLength(1), selectionGrid.GetLength(0));
-                        Point half_size = new Point(selection_size.X / 2, selection_size.Y / 2);
-                        foreach (Point offset in PointsAround(Point.Zero, half_size.X + 1, half_size.Y + 1))
-                        {
-                            Point selection_offset = offset + half_size;
-                            if (selection_offset.X >= selection_size.X || selection_offset.Y >= selection_size.Y)
-                                continue;
-                            int selectedItem = selectionGrid[selection_offset.Y, selection_offset.X];
-                            Rectangle r = new Rectangle(cr.Location + new Point(offset.X * cr.Size.X, offset.Y * cr.Size.Y), cr.Size);
-                            union = Rectangle.Union(union, r);
-                            if (r.Intersects(bounds))
-                                toDraw.Add(new DelayedSpriteDrawing(r, selectedItem, false));
-                        }
-                    }
-                    sprite_batch.FillRectangle(union, BACKGROUND_COLOR);
-                    foreach (DelayedSpriteDrawing d in toDraw)
-                        DrawTile(sprite_batch, sprites, d.r, d.item, d.overridePalette, showSpecial);
-                    TilesSet.DrawRectangle(sprite_batch, union, Color.White, 1);
-                }
+                foreach (DelayedSpriteDrawing d in toDraw)
+                    DrawTile(sprite_batch, sprites, d.r, d.item, d.overridePalette, showSpecial);
+                TilesSet.DrawRectangle(sprite_batch, selectedElementsBounds.Value, Color.White, 1);
             }
-            else // Draw selection rectangle
+            // Draw selection rectangle
+            if (mouse_move_is_selecting)
             {
                 Rectangle r = Rectangle.Union(new Rectangle(initial_mouse_move_pos.Value, Point.Zero), new Rectangle(mouse.Position, Point.Zero));
                 TilesSet.DrawRectangle(sprite_batch, r, Color.White, 1);
