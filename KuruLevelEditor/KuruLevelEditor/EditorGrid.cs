@@ -544,7 +544,7 @@ namespace KuruLevelEditor
                     }
                 }
             }
-            // Draw map and overlays
+            // Draw map, selected elements and overlays
             if (!inventoryMode)
             {
                 foreach (OverlayGrid underlay in Underlays)
@@ -554,6 +554,11 @@ namespace KuruLevelEditor
                 }
             }
             DrawGrid(sprite_batch, Grid, sprites, inventoryMode, showSpecial, selectedElementsBounds);
+            if (selectedElementsBounds.HasValue)
+            {
+                foreach (DelayedSpriteDrawing d in toDraw)
+                    DrawTile(sprite_batch, sprites, d.r, d.item, d.overridePalette, showSpecial);
+            }
             if (!inventoryMode)
             {
                 foreach (OverlayGrid overlay in Overlays)
@@ -572,19 +577,14 @@ namespace KuruLevelEditor
                     sprite_batch.FillRectangle(new Rectangle(map_bounds.Location.X, y, map_bounds.Size.X, 1), Color.Gray);
             }
             TilesSet.DrawRectangle(sprite_batch, map_bounds, Color.Red, 2); // Issue with DrawRectangle: https://github.com/rds1983/Myra/issues/211
-            // Draw selected elements
-            if (selectedElementsBounds.HasValue)
-            {
-                foreach (DelayedSpriteDrawing d in toDraw)
-                    DrawTile(sprite_batch, sprites, d.r, d.item, d.overridePalette, showSpecial);
-                TilesSet.DrawRectangle(sprite_batch, selectedElementsBounds.Value, Color.White, 1);
-            }
             // Draw selection rectangle
             if (mouse_move_is_selecting)
             {
                 Rectangle r = Rectangle.Union(new Rectangle(initial_mouse_move_pos.Value, Point.Zero), new Rectangle(mouse.Position, Point.Zero));
                 TilesSet.DrawRectangle(sprite_batch, r, Color.White, 1);
             }
+            else if (selectedElementsBounds.HasValue)
+                TilesSet.DrawRectangle(sprite_batch, selectedElementsBounds.Value, Color.White, 1);
         }
     }
 }
