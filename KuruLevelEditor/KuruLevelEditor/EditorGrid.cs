@@ -97,9 +97,9 @@ namespace KuruLevelEditor
             get { return inventoryMode ? inventoryTileSize : tile_size; }
             set
             {
-                Rectangle view = new Rectangle(Position, new Point(bounds.Size.X, bounds.Size.Y));
+                Rectangle view = new Rectangle(Position, new Point(bounds.Width, bounds.Height));
                 Point center = view.Center;
-                Position = new Point(center.X * value / TileSize - bounds.Size.X / 2, center.Y * value / TileSize - bounds.Size.Y / 2);
+                Position = new Point(center.X * value / TileSize - bounds.Width / 2, center.Y * value / TileSize - bounds.Height / 2);
                 if (!inventoryMode)
                     tile_size = value;
                 else
@@ -139,7 +139,7 @@ namespace KuruLevelEditor
             get { return grid; }
         }
 
-        void AddToUndoHistory(int[,] g = null)
+        public void AddToUndoHistory(int[,] g = null)
         {
             if (g == null) g = Utils.CopyArray(grid);
             undoHistory.Push(g);
@@ -538,7 +538,7 @@ namespace KuruLevelEditor
                             if (selection_offset.X >= selection_size.X || selection_offset.Y >= selection_size.Y)
                                 continue;
                             int selectedItem = selectionGrid[selection_offset.Y, selection_offset.X];
-                            Rectangle r = new Rectangle(cr.Location + new Point(offset.X * cr.Size.X, offset.Y * cr.Size.Y), cr.Size);
+                            Rectangle r = new Rectangle(cr.Location + new Point(offset.X * cr.Width, offset.Y * cr.Height), cr.Size);
                             selectedElementsBounds = Rectangle.Union(selectedElementsBounds.Value, r);
                             if (r.Intersects(bounds))
                                 toDraw.Add(new DelayedSpriteDrawing(r, selectedItem, false));
@@ -573,11 +573,13 @@ namespace KuruLevelEditor
             Rectangle map_bounds = Rectangle.Union(TileCoordToScreenRect(0, 0), TileCoordToScreenRect(Grid.GetLength(1) - 1, Grid.GetLength(0) - 1));
             if (TileSize > 8 && GridEnabled)
             {
-                for (int x = map_bounds.Location.X + TileSize; x < map_bounds.Location.X + map_bounds.Size.X; x += TileSize)
-                    sprite_batch.FillRectangle(new Rectangle(x, map_bounds.Location.Y, 1, map_bounds.Size.Y), Color.Gray);
-                for (int y = map_bounds.Location.Y + TileSize; y < map_bounds.Location.Y + map_bounds.Size.Y; y += TileSize)
-                    sprite_batch.FillRectangle(new Rectangle(map_bounds.Location.X, y, map_bounds.Size.X, 1), Color.Gray);
+                for (int x = map_bounds.X + TileSize; x < map_bounds.X + map_bounds.Width; x += TileSize)
+                    sprite_batch.FillRectangle(new Rectangle(x, map_bounds.Y, 1, map_bounds.Height), Color.Gray);
+                for (int y = map_bounds.Y + TileSize; y < map_bounds.Y + map_bounds.Height; y += TileSize)
+                    sprite_batch.FillRectangle(new Rectangle(map_bounds.X, y, map_bounds.Width, 1), Color.Gray);
             }
+            if (showSpecial)
+                sprite_batch.FillRectangle(new Rectangle(map_bounds.X, map_bounds.Y + tile_size * PhysicalMapLogic.NUMBER_RESERVED_ROWS, map_bounds.Width, 1), Color.Orange);
             TilesSet.DrawRectangle(sprite_batch, map_bounds, Color.Red, 2); // Issue with DrawRectangle: https://github.com/rds1983/Myra/issues/211
             // Draw selection rectangle
             if (mouse_move_is_selecting)

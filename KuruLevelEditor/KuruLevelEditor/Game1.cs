@@ -19,6 +19,7 @@ namespace KuruLevelEditor
         private Desktop _mainMenuDesktop;
         private Desktop _lateralMenuDesktop;
         private SpecialItems _specialItemInterface = null;
+        private PhysicalMapLogic _physicalMapLogic = null;
 
         enum Mode
         {
@@ -351,7 +352,16 @@ namespace KuruLevelEditor
             };
             buttonSpecial.Click += (s, a) =>
             {
-                _specialItemInterface = new SpecialItems(this);
+                if (mode == Mode.Physical)
+                {
+                    _physicalMapLogic = new PhysicalMapLogic(editor.MapGrid);
+                    _specialItemInterface = new SpecialItems(this, _physicalMapLogic);
+                }
+                else
+                {
+                    var messageBox = Dialog.CreateMessageBox("Error", "Special items can only be edited in Wall edition mode.");
+                    messageBox.ShowModal(_lateralMenuDesktop);
+                }
             };
             lateral.Widgets.Add(buttonSpecial);
 
@@ -393,12 +403,15 @@ namespace KuruLevelEditor
         public void CloseSpecialItemMenu()
         {
             // TODO
+            editor.AddToUndoHistory();
+            _physicalMapLogic.OverrideGridData(editor.MapGrid);
+            _physicalMapLogic = null;
             _specialItemInterface = null;
         }
 
         void SaveGrid()
         {
-            string[] lines = Levels.GetLinesFromGrid(editor.MapGrid, 1, mode != Mode.Minimap);
+            string[] lines = Levels.GetLinesFromGrid(editor.MapGrid, mode != Mode.Minimap ? 4 : 1, mode != Mode.Minimap);
             File.WriteAllLines(Levels.GetLevelPath(map, MapType()), lines);
         }
 

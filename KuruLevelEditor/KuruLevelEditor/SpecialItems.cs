@@ -3,6 +3,7 @@ using Myra.Graphics2D.Brushes;
 using Myra.Graphics2D.UI;
 using System;
 using System.Collections.Generic;
+using System.Resources;
 using System.Text;
 
 namespace KuruLevelEditor
@@ -11,10 +12,12 @@ namespace KuruLevelEditor
     {
         private Desktop _desktop;
         private Game1 _game;
+        private PhysicalMapLogic _logic;
 
-        public SpecialItems(Game1 game)
+        public SpecialItems(Game1 game, PhysicalMapLogic logic)
         {
             _game = game;
+            _logic = logic;
 
             Panel panel = new Panel()
             {
@@ -35,10 +38,11 @@ namespace KuruLevelEditor
 
             // --- BONUS ---
 
+            PhysicalMapLogic.BonusInfo? bonus = _logic.GetBonusInfo();
             Label labelBonus = new Label()
             {
                 Id = "labelBonus",
-                Text = "Bonus",
+                Text = "Bonus (ID/X/Y)",
                 GridColumn = 0,
                 GridRow = 0
             };
@@ -48,7 +52,8 @@ namespace KuruLevelEditor
                 GridRow = 0,
                 GridColumn = 1,
                 HintText = "ID",
-                Width = 150
+                Width = 150,
+                Text = bonus.HasValue ? bonus.Value.ID.ToString() : ""
             };
             grid.Widgets.Add(bonusId);
             TextBox bonusX = new TextBox()
@@ -56,7 +61,8 @@ namespace KuruLevelEditor
                 GridRow = 0,
                 GridColumn = 2,
                 HintText = "X",
-                Width = 150
+                Width = 150,
+                Text = bonus.HasValue ? bonus.Value.x.ToString() : ""
             };
             grid.Widgets.Add(bonusX);
             TextBox bonusY = new TextBox()
@@ -64,7 +70,8 @@ namespace KuruLevelEditor
                 GridRow = 0,
                 GridColumn = 3,
                 HintText = "Y",
-                Width = 150
+                Width = 150,
+                Text = bonus.HasValue ? bonus.Value.y.ToString() : ""
             };
             grid.Widgets.Add(bonusY);
 
@@ -77,7 +84,9 @@ namespace KuruLevelEditor
             };
             bonusRemove.Click += (s, a) =>
             {
-                // TODO
+                bonusId.Text = "";
+                bonusX.Text = "";
+                bonusY.Text = "";
             };
             grid.Widgets.Add(bonusRemove);
 
@@ -105,6 +114,17 @@ namespace KuruLevelEditor
             };
             buttonQuit.Click += (s, a) =>
             {
+                PhysicalMapLogic.BonusInfo? bonus = null;
+                if (!string.IsNullOrWhiteSpace(bonusId.Text))
+                {
+                    try
+                    {
+                        bonus = new PhysicalMapLogic.BonusInfo(
+                            Convert.ToInt32(bonusId.Text), Convert.ToInt32(bonusX.Text), Convert.ToInt32(bonusY.Text));
+                    }
+                    catch { bonus = null; }
+                }
+                _logic.SetBonusInfo(bonus);
                 _game.CloseSpecialItemMenu();
             };
             grid.Widgets.Add(buttonQuit);

@@ -1,13 +1,17 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Myra.Graphics2D.UI;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
+using System.Threading.Tasks.Dataflow;
 
 namespace KuruLevelEditor
 {
     class PhysicalMapLogic
     {
+        // ===== CONTROL TYPES AND COLORS =====
         public readonly static int[] HEALING_ZONE_IDS = new int[] { 0xEA, 0xEB, /*0xEC,*/ 0xED, 0xEE };
         public readonly static int[] STARTING_ZONE_IDS = new int[] { 0xFB, 0xFC, 0xFD };
         public readonly static int[] ENDING_ZONE_IDS = new int[] { 0xFE, 0xFF };
@@ -63,5 +67,147 @@ namespace KuruLevelEditor
 
         public const int VISIBLE_MAX_ID = 0xDF;
         public const int CONTROL_MIN_ID = 0xE0;
+
+        // ===== MAP DATA MODIFIER =====
+        List<int> map_data;
+        int w;
+        int capacity;
+        public const int NUMBER_RESERVED_ROWS = 4;
+
+        public PhysicalMapLogic(int[,] grid)
+        {
+            w = grid.GetLength(1);
+            map_data = new List<int>();
+            capacity = 0;
+            for (int y = 0; y < NUMBER_RESERVED_ROWS; y++)
+            {
+                for (int x = 0; x < w; x++)
+                {
+                    int id = grid[y, x] & 0x3FF;
+                    if (id <= VISIBLE_MAX_ID && id != 0)
+                    {
+                        NormalizeData();
+                        return;
+                    }
+                    map_data.Add(grid[y, x]);
+                    capacity++;
+                }
+            }
+            NormalizeData();
+        }
+
+        public void OverrideGridData(int[,] grid)
+        {
+            for (int i = 0; i < capacity; i++)
+            {
+                int y = i / w;
+                int x = i % w;
+                if (map_data.Count > i)
+                    grid[y, x] = map_data[i];
+                else
+                    grid[y, x] = 0;
+            }
+        }
+
+        public struct BonusInfo
+        {
+            public BonusInfo(int ID, int x, int y)
+            {
+                this.ID = ID;
+                this.x = x;
+                this.y = y;
+            }
+            public int ID;
+            public int x;
+            public int y;
+        }
+
+        int GetMapInfoData(ref int offset)
+        {
+            int res = 0;
+            int tile = map_data[offset];
+            while (tile >= 0xE0 && tile <= 0xE9)
+            {
+                res = res * 10 + tile - 0xE0;
+                offset++;
+                tile = map_data[offset];
+            }
+            offset++;
+            return res;
+        }
+
+        List<int> GenerateMapInfoData(int[] vs)
+        {
+            List<int> res = new List<int>();
+
+            foreach(int v in vs)
+            {
+                int len = v.ToString().Length;
+                int remainder = v;
+                for (int i = len-1; i >= 0; i--)
+                {
+                    int nb = Utils.IntPow(10, (uint)i);
+                    int firstDigit = remainder / nb;
+                    remainder -= firstDigit * nb;
+                    res.Add(firstDigit + 0xE0);
+                }
+                res.Add(0);
+            }
+
+            return res;
+        }
+
+        public BonusInfo? GetBonusInfo()
+        {
+            int offset = 0;
+            int ID = GetMapInfoData(ref offset);
+            if (ID != 0)
+            {
+                BonusInfo bi = new BonusInfo();
+                bi.ID = ID;
+                bi.x = GetMapInfoData(ref offset)/* * 8 - 4*/;
+                bi.y = GetMapInfoData(ref offset)/* * 8 - 4*/;
+                return bi;
+            }
+            return null;
+        }
+
+        public void SetBonusInfo(BonusInfo? bonus)
+        {
+            int offset = 0;
+            int ID = GetMapInfoData(ref offset);
+            if (bonus.HasValue)
+            {
+                SetBonusInfo(null);
+                map_data.Insert(0, 0);
+                map_data.Insert(0, 0);
+                map_data.InsertRange(0, GenerateMapInfoData(new int[]{ bonus.Value.ID, bonus.Value.x, bonus.Value.y }));
+            }
+            else
+            {
+                if (ID != 0)
+                {
+                    GetMapInfoData(ref offset);
+                    GetMapInfoData(ref offset);
+                    for (int i = 0; i < offset; i++)
+                        map_data.RemoveAt(0);
+                }
+            }
+            NormalizeData();
+        }
+
+        void NormalizeData()
+        {
+            // Remove initial zeros
+            while (map_data.Count > 0 && map_data[0] == 0)
+                map_data.RemoveAt(0);
+            // Remove final zeros
+            while (map_data.Count > 0 && map_data[map_data.Count -1] == 0)
+                map_data.RemoveAt(map_data.Count - 1);
+            // TODO: Remove intermediate useless zeros
+            // If too large, truncate
+            while (map_data.Count > capacity)
+                map_data.RemoveAt(map_data.Count - 1);
+        }
     }
 }
