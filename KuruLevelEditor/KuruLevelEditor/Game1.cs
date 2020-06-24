@@ -59,8 +59,8 @@ namespace KuruLevelEditor
             // ===== MAIN MENU =====
             var grid = new Grid
             {
-                RowSpacing = 8,
-                ColumnSpacing = 8
+                RowSpacing = 10,
+                ColumnSpacing = 20
             };
 
             grid.ColumnsProportions.Add(new Proportion(ProportionType.Auto));
@@ -81,6 +81,7 @@ namespace KuruLevelEditor
             {
                 GridColumn = 1,
                 GridRow = 0,
+                Width = 150
             };
             comboType.Items.Add(new ListItem("Walls", Color.White));
             comboType.Items.Add(new ListItem("Ground", Color.White));
@@ -101,6 +102,7 @@ namespace KuruLevelEditor
             {
                 GridColumn = 1,
                 GridRow = 1,
+                Width = 150
             };
             foreach (string name in Levels.AllLevels)
                 comboMap.Items.Add(new ListItem(name, Color.White));
@@ -108,11 +110,11 @@ namespace KuruLevelEditor
 
             var buttonEdit = new TextButton
             {
-                GridColumn = 0,
-                GridColumnSpan = 2,
-                GridRow = 2,
+                GridColumn = 2,
+                GridRow = 0,
+                GridRowSpan = 2,
                 Text = "Edit",
-                Width = 50,
+                Width = 100,
                 Height = 50
             };
 
