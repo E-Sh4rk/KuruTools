@@ -48,6 +48,7 @@ namespace KuruLevelEditor
 
         public OverlayGrid[] Overlays { get; private set; }
         public OverlayGrid[] Underlays { get; private set; }
+        public bool GridEnabled { get; set; }
         public EditorGrid(Levels.MapType type, Rectangle bounds, TilesSet sprites, int[,] grid, Point position, OverlayGrid[] overlays, OverlayGrid[] underlays)
         {
             this.bounds = bounds;
@@ -55,6 +56,7 @@ namespace KuruLevelEditor
             this.grid = grid;
             this.position = position;
             this.type = type;
+            GridEnabled = true;
             // Load Inventory
             if (type != Levels.MapType.Minimap)
             {
@@ -569,7 +571,7 @@ namespace KuruLevelEditor
             }
             // Draw map bounds and grid
             Rectangle map_bounds = Rectangle.Union(TileCoordToScreenRect(0, 0), TileCoordToScreenRect(Grid.GetLength(1) - 1, Grid.GetLength(0) - 1));
-            if (TileSize > 8)
+            if (TileSize > 8 && GridEnabled)
             {
                 for (int x = map_bounds.Location.X + TileSize; x < map_bounds.Location.X + map_bounds.Size.X; x += TileSize)
                     sprite_batch.FillRectangle(new Rectangle(x, map_bounds.Location.Y, 1, map_bounds.Size.Y), Color.Gray);

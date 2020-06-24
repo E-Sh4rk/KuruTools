@@ -311,10 +311,39 @@ namespace KuruLevelEditor
             };
             lateral.Widgets.Add(buttonOM);
 
-            var buttonSpecial = new TextButton
+            var buttonGOn = new TextButton
             {
                 GridColumn = 0,
                 GridRow = 3,
+                Text = "Grid On",
+                Width = 90,
+                Height = 30,
+                GridColumnSpan = 2
+            };
+            buttonGOn.Click += (s, a) =>
+            {
+                editor.GridEnabled = true;
+            };
+            lateral.Widgets.Add(buttonGOn);
+            var buttonGOff = new TextButton
+            {
+                GridColumn = 2,
+                GridRow = 3,
+                Text = "Grid Off",
+                Width = 90,
+                Height = 30,
+                GridColumnSpan = 2
+            };
+            buttonGOff.Click += (s, a) =>
+            {
+                editor.GridEnabled = false;
+            };
+            lateral.Widgets.Add(buttonGOff);
+
+            var buttonSpecial = new TextButton
+            {
+                GridColumn = 0,
+                GridRow = 4,
                 Text = "Special Objects",
                 Width = 180,
                 Height = 30,
@@ -329,7 +358,7 @@ namespace KuruLevelEditor
             var buttonHelp = new TextButton
             {
                 GridColumn = 0,
-                GridRow = 4,
+                GridRow = 5,
                 Text = "Help",
                 Width = 180,
                 Height = 30,
