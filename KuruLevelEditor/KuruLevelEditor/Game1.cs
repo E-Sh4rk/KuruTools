@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Myra;
+using Myra.Graphics2D;
 using Myra.Graphics2D.Brushes;
 using Myra.Graphics2D.UI;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ namespace KuruLevelEditor
         private SpriteBatch _spriteBatch;
         private Desktop _mainMenuDesktop;
         private Desktop _lateralMenuDesktop;
+        private SpecialItems _specialItemInterface = null;
 
         enum Mode
         {
@@ -145,14 +147,15 @@ namespace KuruLevelEditor
             Panel panel = new Panel()
             {
                 Left = 0,
+                Padding = new Thickness(10, 10, 10, 10),
                 Width = LATERAL_PANEL_WIDTH,
                 Background = new SolidBrush(Color.Transparent),
             };
 
             var lateral = new Grid
             {
-                RowSpacing = 8,
-                ColumnSpacing = 8
+                RowSpacing = 10,
+                ColumnSpacing = 10
             };
 
             lateral.ColumnsProportions.Add(new Proportion(ProportionType.Auto));
@@ -165,8 +168,8 @@ namespace KuruLevelEditor
                 GridColumn = 0,
                 GridRow = 0,
                 Text = "Save",
-                Width = 50,
-                Height = 50
+                Width = 40,
+                Height = 30
             };
             buttonSave.Click += (s, a) =>
             {
@@ -178,9 +181,9 @@ namespace KuruLevelEditor
             {
                 GridColumn = 1,
                 GridRow = 0,
-                Text = "Save and quit",
-                Width = 75,
-                Height = 50,
+                Text = "Save + quit",
+                Width = 90,
+                Height = 30,
                 GridColumnSpan = 2
             };
             buttonSaveQuit.Click += (s, a) =>
@@ -195,8 +198,8 @@ namespace KuruLevelEditor
                 GridColumn = 3,
                 GridRow = 0,
                 Text = "Quit",
-                Width = 50,
-                Height = 50
+                Width = 40,
+                Height = 30
             };
             buttonQuit.Click += (s, a) =>
             {
@@ -209,7 +212,7 @@ namespace KuruLevelEditor
                 GridColumn = 0,
                 GridRow = 1,
                 Text = "W+",
-                Width = 30,
+                Width = 40,
                 Height = 30
             };
             buttonWP.Click += (s, a) =>
@@ -222,7 +225,7 @@ namespace KuruLevelEditor
                 GridColumn = 1,
                 GridRow = 1,
                 Text = "W-",
-                Width = 30,
+                Width = 40,
                 Height = 30
             };
             buttonWM.Click += (s, a) =>
@@ -235,7 +238,7 @@ namespace KuruLevelEditor
                 GridColumn = 2,
                 GridRow = 1,
                 Text = "H+",
-                Width = 30,
+                Width = 40,
                 Height = 30
             };
             buttonHP.Click += (s, a) =>
@@ -248,7 +251,7 @@ namespace KuruLevelEditor
                 GridColumn = 3,
                 GridRow = 1,
                 Text = "H-",
-                Width = 30,
+                Width = 40,
                 Height = 30
             };
             buttonHM.Click += (s, a) =>
@@ -262,7 +265,7 @@ namespace KuruLevelEditor
                 GridColumn = 0,
                 GridRow = 2,
                 Text = "Overlay +",
-                Width = 75,
+                Width = 90,
                 Height = 30,
                 GridColumnSpan = 2
             };
@@ -287,7 +290,7 @@ namespace KuruLevelEditor
                 GridColumn = 2,
                 GridRow = 2,
                 Text = "Overlay -",
-                Width = 75,
+                Width = 90,
                 Height = 30,
                 GridColumnSpan = 2
             };
@@ -307,12 +310,27 @@ namespace KuruLevelEditor
             };
             lateral.Widgets.Add(buttonOM);
 
-            var buttonHelp = new TextButton
+            var buttonSpecial = new TextButton
             {
                 GridColumn = 0,
                 GridRow = 3,
+                Text = "Special Objects",
+                Width = 180,
+                Height = 30,
+                GridColumnSpan = 4
+            };
+            buttonSpecial.Click += (s, a) =>
+            {
+                _specialItemInterface = new SpecialItems(this);
+            };
+            lateral.Widgets.Add(buttonSpecial);
+
+            var buttonHelp = new TextButton
+            {
+                GridColumn = 0,
+                GridRow = 4,
                 Text = "Help",
-                Width = LATERAL_PANEL_WIDTH,
+                Width = 180,
                 Height = 30,
                 GridColumnSpan = 4
             };
@@ -340,6 +358,12 @@ namespace KuruLevelEditor
             // TODO: Integrate emulator testing
             // TODO: Support for bonuses
             // TODO: Support for moving objects
+        }
+
+        public void CloseSpecialItemMenu()
+        {
+            // TODO
+            _specialItemInterface = null;
         }
 
         void SaveGrid()
@@ -420,7 +444,7 @@ namespace KuruLevelEditor
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
-            if (mode != Mode.Menu && !_lateralMenuDesktop.HasModalWidget)
+            if (mode != Mode.Menu && !_lateralMenuDesktop.HasModalWidget && _specialItemInterface == null)
             {
                 MouseState ms = Mouse.GetState();
                 KeyboardState ks = Keyboard.GetState();
@@ -454,6 +478,8 @@ namespace KuruLevelEditor
 
             if (mode == Mode.Menu)
                 _mainMenuDesktop.Render();
+            else if (_specialItemInterface != null)
+                _specialItemInterface.Render();
             else
             {
                 _spriteBatch.Begin();

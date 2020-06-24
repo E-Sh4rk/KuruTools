@@ -577,7 +577,7 @@ namespace KuruLevelEditor
             {
                 foreach (DelayedSpriteDrawing d in toDraw)
                     DrawTile(sprite_batch, sprites, d.r, d.item, d.overridePalette, showSpecial);
-                TilesSet.DrawRectangle(sprite_batch, selectedElementsBounds.Value, Color.White, 1);
+                TilesSet.DrawRectangle(sprite_batch, Rectangle.Intersect(selectedElementsBounds.Value, bounds), Color.White, 1);
             }
             // Draw selection rectangle
             if (mouse_move_is_selecting)
