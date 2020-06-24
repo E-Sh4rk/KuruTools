@@ -393,6 +393,7 @@ namespace KuruLevelEditor
             panel.Widgets.Add(lateral);
             _lateralMenuDesktop = new Desktop();
             _lateralMenuDesktop.Root = panel;
+            // TODO: Do not treat diagonal ending zones as special objects (242 and 243)
             // TODO: Improve error handling
             // TODO: Integrate ROM building system
             // TODO: Integrate emulator testing

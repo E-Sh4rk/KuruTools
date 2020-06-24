@@ -578,7 +578,7 @@ namespace KuruLevelEditor
                 for (int y = map_bounds.Y + TileSize; y < map_bounds.Y + map_bounds.Height; y += TileSize)
                     sprite_batch.FillRectangle(new Rectangle(map_bounds.X, y, map_bounds.Width, 1), Color.Gray);
             }
-            if (showSpecial)
+            if (showSpecial && !inventoryMode)
                 sprite_batch.FillRectangle(new Rectangle(map_bounds.X, map_bounds.Y + tile_size * PhysicalMapLogic.NUMBER_RESERVED_ROWS, map_bounds.Width, 1), Color.Orange);
             TilesSet.DrawRectangle(sprite_batch, map_bounds, Color.Red, 2); // Issue with DrawRectangle: https://github.com/rds1983/Myra/issues/211
             // Draw selection rectangle
