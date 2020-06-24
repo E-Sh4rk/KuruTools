@@ -6,7 +6,6 @@ using Myra.Graphics2D;
 using Myra.Graphics2D.Brushes;
 using Myra.Graphics2D.UI;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 
 namespace KuruLevelEditor
@@ -436,8 +435,7 @@ namespace KuruLevelEditor
             }
 
             editor = new EditorGrid(MapType(),
-                new Rectangle(GraphicsDevice.Viewport.X + LATERAL_PANEL_WIDTH,
-                GraphicsDevice.Viewport.Y, GraphicsDevice.Viewport.Width - LATERAL_PANEL_WIDTH, GraphicsDevice.Viewport.Height),
+                new Rectangle(LATERAL_PANEL_WIDTH, 0, GraphicsDevice.Viewport.Width - LATERAL_PANEL_WIDTH, GraphicsDevice.Viewport.Height),
                 sset, grid, new Point(-8, -8), overlays.ToArray(), underlays.ToArray());
         }
 
@@ -486,6 +484,7 @@ namespace KuruLevelEditor
             {
                 _spriteBatch.Begin();
                 editor.Draw(_spriteBatch, gameTime, Mouse.GetState(), Keyboard.GetState());
+                _spriteBatch.FillRectangle(new Rectangle(0, 0, LATERAL_PANEL_WIDTH, GraphicsDevice.Viewport.Height), Color.Black);
                 sset.DrawSets(_spriteBatch);
                 _spriteBatch.End();
                 _lateralMenuDesktop.Render();
