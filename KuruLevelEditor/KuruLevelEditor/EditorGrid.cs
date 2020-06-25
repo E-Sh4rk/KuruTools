@@ -467,7 +467,7 @@ namespace KuruLevelEditor
                         if (c.HasValue)
                             sprite_batch.FillRectangle(dst, c.Value);
                     }
-                    else if (tile_id <= PhysicalMapLogic.VISIBLE_MAX_ID)
+                    if (tile_id <= PhysicalMapLogic.VISIBLE_MAX_ID || PhysicalMapLogic.VISIBLE_CONTROL_TILES.Contains(tile_id))
                         sprites.Draw(sprite_batch, palette, tile_id, dst, effects);
                 }
                 else

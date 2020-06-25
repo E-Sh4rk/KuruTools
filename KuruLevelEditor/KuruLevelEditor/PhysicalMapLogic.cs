@@ -12,9 +12,10 @@ namespace KuruLevelEditor
     class PhysicalMapLogic
     {
         // ===== CONTROL TYPES AND COLORS =====
+        public readonly static int[] VISIBLE_CONTROL_TILES = new int[] { 0xF2, 0xF3 };
         public readonly static int[] HEALING_ZONE_IDS = new int[] { 0xEA, 0xEB, /*0xEC,*/ 0xED, 0xEE };
-        public readonly static int[] STARTING_ZONE_IDS = new int[] { 0xFB, 0xFC, 0xFD };
-        public readonly static int[] ENDING_ZONE_IDS = new int[] { 0xFE, 0xFF };
+        public readonly static int[] STARTING_ZONE_IDS = new int[] { 0xF2, 0xFB, 0xFC, 0xFD };
+        public readonly static int[] ENDING_ZONE_IDS = new int[] { 0xF3, 0xFE, 0xFF };
         public readonly static int[] SPRING_IDS = new int[] { 0xF8, 0xF9 };
 
         readonly static Color HEALING_ZONE_COLOR = new Color(0xFF, 0x33, 0x33, 0xFF);
