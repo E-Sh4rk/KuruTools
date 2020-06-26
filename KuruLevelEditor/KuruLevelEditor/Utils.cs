@@ -50,7 +50,7 @@ namespace KuruLevelEditor
             return res;
         }
 
-        public static int IntPow(int x, uint pow)
+        /*public static int IntPow(int x, uint pow)
         {
             int ret = 1;
             while (pow != 0)
@@ -61,7 +61,7 @@ namespace KuruLevelEditor
                 pow >>= 1;
             }
             return ret;
-        }
+        }*/
     }
     class OverflowingStack<T>
     {

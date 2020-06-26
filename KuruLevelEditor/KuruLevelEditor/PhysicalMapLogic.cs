@@ -4,6 +4,7 @@ using Myra.Graphics2D.UI;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks.Dataflow;
 
@@ -14,9 +15,10 @@ namespace KuruLevelEditor
         // ===== CONTROL TYPES AND COLORS =====
         public readonly static int[] VISIBLE_CONTROL_TILES = new int[] { 0xF2, 0xF3 };
         public readonly static int[] HEALING_ZONE_IDS = new int[] { 0xEA, 0xEB, /*0xEC,*/ 0xED, 0xEE };
-        public readonly static int[] STARTING_ZONE_IDS = new int[] { 0xF2, 0xFB, 0xFC, 0xFD };
-        public readonly static int[] ENDING_ZONE_IDS = new int[] { 0xF3, 0xFE, 0xFF };
+        public readonly static int[] STARTING_ZONE_IDS = new int[] { 0xFB, 0xFC, 0xFD };
+        public readonly static int[] ENDING_ZONE_IDS = new int[] { 0xFE, 0xFF };
         public readonly static int[] SPRING_IDS = new int[] { 0xF8, 0xF9 };
+        public readonly static int[] NUMBER_IDS = new int[] { 0xE0, 0xE1, 0xE2, 0xE3, 0xE4, 0xE5, 0xE6, 0xE7, 0xE8, 0xE9 };
 
         readonly static Color HEALING_ZONE_COLOR = new Color(0xFF, 0x33, 0x33, 0xFF);
         readonly static Color HEALING_ZONE_BASE_COLOR = new Color(0xFF, 0x73, 0x73, 0xFF);
@@ -26,7 +28,7 @@ namespace KuruLevelEditor
         readonly static Color ENDING_ZONE_COLOR = new Color(0xAA, 0x86, 0x29, 0xFF);
         readonly static Color ENDING_ZONE_BASE_COLOR = new Color(0xFF, 0xD6, 0x29, 0xFF);
 
-        public readonly static Color UNSUPPORTED_COLOR = new Color(0x00, 0x00, 0x00, 0xA0);
+        public readonly static Color UNSUPPORTED_COLOR = new Color(0x00, 0x00, 0x00, 0xFF);
 
         public static Color HealingZoneColor(int tile_id)
         {
@@ -64,6 +66,16 @@ namespace KuruLevelEditor
                 return Load.SpringVertical;
 
             return Load.SpringHorizontal;
+        }
+
+        public static Texture2D TextureOfNumber(int tile_id)
+        {
+            return Load.SpecialNumbers[tile_id - 0xE0];
+        }
+
+        public static Texture2D UnderlayOfVisibleControlTile(int tile_id)
+        {
+            return tile_id == 0xF2 ? Load.StartingDiagonal : Load.EndingDiagonal;
         }
 
         public const int VISIBLE_MAX_ID = 0xDF;
@@ -146,15 +158,9 @@ namespace KuruLevelEditor
 
             foreach(int v in vs)
             {
-                int len = v.ToString().Length;
-                int remainder = v;
-                for (int i = len-1; i >= 0; i--)
-                {
-                    int nb = Utils.IntPow(10, (uint)i);
-                    int firstDigit = remainder / nb;
-                    remainder -= firstDigit * nb;
-                    res.Add(firstDigit + 0xE0);
-                }
+                string vStr = v.ToString();
+                for (int i = 0; i < vStr.Length; i++)
+                    res.Add(Convert.ToInt32(vStr[i].ToString()) + 0xE0);
                 res.Add(0);
             }
 

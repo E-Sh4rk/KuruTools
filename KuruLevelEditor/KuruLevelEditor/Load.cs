@@ -28,6 +28,9 @@ namespace KuruLevelEditor
 		public static Dictionary<WorldAndType, Texture2D[]> Tiles { get; private set; }
 		public static Texture2D SpringHorizontal;
 		public static Texture2D SpringVertical;
+		public static Texture2D[] SpecialNumbers { get; private set; }
+		public static Texture2D StartingDiagonal;
+		public static Texture2D EndingDiagonal;
 
 		public static void LoadContent(ContentManager Content, GraphicsDevice graphics)
 		{
@@ -58,6 +61,11 @@ namespace KuruLevelEditor
             }
 			SpringHorizontal = Content.Load<Texture2D>("spring_horizontal");
 			SpringVertical = Content.Load<Texture2D>("spring_vertical");
+			SpecialNumbers = new Texture2D[10];
+			for (int i = 0; i < SpecialNumbers.Length; i++)
+				SpecialNumbers[i] = Content.Load<Texture2D>("special" + i.ToString());
+			StartingDiagonal = Content.Load<Texture2D>("starting_diagonal");
+			EndingDiagonal = Content.Load<Texture2D>("ending_diagonal");
 		}
 	}
 }
