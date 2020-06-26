@@ -14,6 +14,7 @@ namespace KuruLevelEditor
     {
         const int LATERAL_PANEL_WIDTH = 200;
         const int PALETTE_SELECTOR_Y = 250;
+
         private GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         private Desktop _mainMenuDesktop;
@@ -393,7 +394,6 @@ namespace KuruLevelEditor
             panel.Widgets.Add(lateral);
             _lateralMenuDesktop = new Desktop();
             _lateralMenuDesktop.Root = panel;
-            // TODO: Solve challenge background tiles (there seems to be a fixed offset for all tiles)
             // TODO: Improve error handling
             // TODO: Integrate ROM building system
             // TODO: Integrate emulator testing
@@ -432,7 +432,8 @@ namespace KuruLevelEditor
 
         void SaveGrid()
         {
-            string[] lines = Levels.GetLinesFromGrid(editor.MapGrid, mode != Mode.Minimap ? 4 : 1, mode != Mode.Minimap);
+            string[] lines = Levels.GetLinesFromGrid(editor.MapGrid, mode != Mode.Minimap ? 4 : 1, mode != Mode.Minimap,
+                Levels.TilesOffset(Levels.GetWorldOfLevel(map), MapType()));
             File.WriteAllLines(Levels.GetLevelPath(map, MapType()), lines);
         }
 
@@ -456,16 +457,17 @@ namespace KuruLevelEditor
             int[,] grid;
             List<EditorGrid.OverlayGrid> underlays = new List<EditorGrid.OverlayGrid>();
             List<EditorGrid.OverlayGrid> overlays = new List<EditorGrid.OverlayGrid>();
+            string world = Levels.GetWorldOfLevel(map);
             if (mode == Mode.Minimap)
             {
-                grid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, Levels.MapType.Minimap)), 64, 64);
+                grid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, Levels.MapType.Minimap)), 64, 64,
+                    Levels.TilesOffset(world, Levels.MapType.Minimap));
                 sset = new TilesSet(Load.MinimapColors, false,
                     new Rectangle(0, PALETTE_SELECTOR_Y, LATERAL_PANEL_WIDTH, GraphicsDevice.Viewport.Height - PALETTE_SELECTOR_Y), 64);
             }
             else
             {
-                string world = Levels.GetWorldOfLevel(map);
-                grid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, MapType())));
+                grid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, MapType())), Levels.TilesOffset(world, MapType()));
                 sset = new TilesSet(Load.Tiles[new Load.WorldAndType(world, MapType())],
                     true, new Rectangle(0, PALETTE_SELECTOR_Y, LATERAL_PANEL_WIDTH, GraphicsDevice.Viewport.Height - PALETTE_SELECTOR_Y), 64);
 
@@ -473,14 +475,16 @@ namespace KuruLevelEditor
                 TilesSet osset;
                 if (mode != Mode.Background)
                 {
-                    ogrid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, Levels.MapType.Background)));
+                    ogrid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, Levels.MapType.Background)),
+                        Levels.TilesOffset(world, Levels.MapType.Background));
                     osset = new TilesSet(Load.Tiles[new Load.WorldAndType(world, Levels.MapType.Background)],
                         true, Rectangle.Empty, 0);
                     underlays.Add(new EditorGrid.OverlayGrid(osset, ogrid, false));
                 }
                 if (mode != Mode.Graphical)
                 {
-                    ogrid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, Levels.MapType.Graphical)));
+                    ogrid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, Levels.MapType.Graphical)),
+                        Levels.TilesOffset(world, Levels.MapType.Graphical));
                     osset = new TilesSet(Load.Tiles[new Load.WorldAndType(world, Levels.MapType.Graphical)],
                         true, Rectangle.Empty, 0);
                     if (mode == Mode.Physical)
@@ -490,7 +494,8 @@ namespace KuruLevelEditor
                 }
                 if (mode != Mode.Physical)
                 {
-                    ogrid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, Levels.MapType.Physical)));
+                    ogrid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, Levels.MapType.Physical)),
+                        Levels.TilesOffset(world, Levels.MapType.Physical));
                     osset = new TilesSet(Load.Tiles[new Load.WorldAndType(world, Levels.MapType.Physical)],
                         true, Rectangle.Empty, 0);
                     overlays.Add(new EditorGrid.OverlayGrid(osset, ogrid, true));

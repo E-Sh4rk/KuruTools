@@ -8,6 +8,9 @@ namespace KuruLevelEditor
 {
     public class Levels
     {
+        const string CHALLENGE_NAME = "12_challenge";
+        const int CHALLENGE_BACKGROUND_OFFSET = 0x100;
+
         public enum MapType
         {
             Physical = 0, Graphical, Background, Minimap
@@ -52,7 +55,12 @@ namespace KuruLevelEditor
             return level.Substring(0, level.LastIndexOf('_'));
         }
 
-        public static int[,] GetGridFromLines(string[] lines, int w, int h)
+        public static int TilesOffset(string world, MapType type)
+        {
+            return type == MapType.Background && world == CHALLENGE_NAME ? CHALLENGE_BACKGROUND_OFFSET : 0;
+        }
+
+        public static int[,] GetGridFromLines(string[] lines, int w, int h, int tilesOffset)
         {
             int[,] res = new int[h, w];
             for (int y = 0; y < h; y++)
@@ -60,21 +68,21 @@ namespace KuruLevelEditor
                 string[] elts = lines[y].Split(' ', StringSplitOptions.RemoveEmptyEntries);
                 for (int x = 0; x < w; x++)
                 {
-                    res[y, x] = Convert.ToInt32(elts[x], 16);
+                    res[y, x] = Convert.ToInt32(elts[x], 16) - tilesOffset;
                 }
             }
             return res;
         }
-        public static int[,] GetGridFromLines(string[] lines)
+        public static int[,] GetGridFromLines(string[] lines, int tilesOffset)
         {
             string[] dims = lines[0].Split(' ', StringSplitOptions.RemoveEmptyEntries);
             int w = Convert.ToInt32(dims[0], 16);
             int h = Convert.ToInt32(dims[1], 16);
             string[] lines2 = new string[lines.Length - 1];
             Array.Copy(lines, 1, lines2, 0, lines2.Length);
-            return GetGridFromLines(lines2, w, h);
+            return GetGridFromLines(lines2, w, h, tilesOffset);
         }
-        public static string[] GetLinesFromGrid(int[,] grid, int padding, bool includeDimensions)
+        public static string[] GetLinesFromGrid(int[,] grid, int padding, bool includeDimensions, int tilesOffset)
         {
             List<string> res = new List<string>();
             if (includeDimensions)
@@ -84,7 +92,8 @@ namespace KuruLevelEditor
                 StringBuilder b = new StringBuilder();
                 for (int x = 0; x < grid.GetLength(1); x++)
                 {
-                    b.Append(grid[y,x].ToString("X").PadLeft(padding, ' ') + " ");
+                    int v = grid[y, x] + tilesOffset;
+                    b.Append(v.ToString("X").PadLeft(padding, ' ') + " ");
                 }
                 res.Add(b.ToString());
             }
