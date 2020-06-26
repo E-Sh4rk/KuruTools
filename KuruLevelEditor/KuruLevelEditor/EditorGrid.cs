@@ -477,13 +477,12 @@ namespace KuruLevelEditor
                 sprites.Draw(sprite_batch, overridePalette ? sprites.SelectedSet : tile, 0, dst);
             else
             {
-                int tile_index = tile;
-                int tile_id = tile_index & 0x3FF;
-                int palette = overridePalette ? sprites.SelectedSet : (tile_index & 0xF000) >> 12;
-                tile_index = (tile_index & 0x0FFF) + (palette << 12);
+                int tile_id = tile & 0x3FF;
+                int palette = overridePalette ? sprites.SelectedSet : (tile & 0xF000) >> 12;
+                tile = (tile & 0x0FFF) + (palette << 12);
                 SpriteEffects effects =
-                    ((tile_index & 0x400) != 0 ? SpriteEffects.FlipHorizontally : SpriteEffects.None) |
-                    ((tile_index & 0x800) != 0 ? SpriteEffects.FlipVertically : SpriteEffects.None);
+                    ((tile & 0x400) != 0 ? SpriteEffects.FlipHorizontally : SpriteEffects.None) |
+                    ((tile & 0x800) != 0 ? SpriteEffects.FlipVertically : SpriteEffects.None);
                 if (showSpecial)
                 {
                     if (tile_id >= PhysicalMapLogic.CONTROL_MIN_ID)
@@ -502,8 +501,8 @@ namespace KuruLevelEditor
                             sprite_batch.Draw(PhysicalMapLogic.UnderlayOfVisibleControlTile(tile_id), dst, null, Color.White, 0, Vector2.Zero, effects, 0F);
                         else if (PhysicalMapLogic.MOVING_OBJECTS_IDS.Contains(tile_id)) // Flips have no effect on moving objects tiles
                             sprite_batch.Draw(PhysicalMapLogic.TextureOfMovingObject(tile_id), dst, null, Color.White, 0, Vector2.Zero, SpriteEffects.None, 0F);
-                        else if (PhysicalMapLogic.NUMBER_INDEXES.Contains(tile_index)) // Palette and flips matters for numbers
-                            sprite_batch.Draw(PhysicalMapLogic.TextureOfNumber(tile_index), dst, null, Color.White, 0, Vector2.Zero, SpriteEffects.None, 0F);
+                        else if (PhysicalMapLogic.NUMBER_TILES.Contains(tile)) // Palette and flips matters for numbers
+                            sprite_batch.Draw(PhysicalMapLogic.TextureOfNumber(tile), dst, null, Color.White, 0, Vector2.Zero, SpriteEffects.None, 0F);
                         else
                             c = PhysicalMapLogic.UNSUPPORTED_COLOR;
                         if (c.HasValue)
