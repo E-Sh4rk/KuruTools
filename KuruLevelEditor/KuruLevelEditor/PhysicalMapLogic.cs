@@ -193,8 +193,10 @@ namespace KuruLevelEditor
                 {
                     GetMapInfoData(ref offset);
                     GetMapInfoData(ref offset);
-                    for (int i = 0; i < offset; i++)
+                    for (int i = 0; i < offset; i++) {
+                        if (map_data.Count == 0) break;
                         map_data.RemoveAt(0);
+                    }
                 }
             }
             NormalizeData();
