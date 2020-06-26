@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Microsoft.Xna.Framework.Media;
 using Myra;
 using System;
 using System.Collections.Generic;
@@ -29,6 +30,8 @@ namespace KuruLevelEditor
         const int UNDO_CAPACITY = 100;
         readonly Color BACKGROUND_COLOR = Color.CornflowerBlue;
 
+        Game1 game;
+
         int tile_size = 8;
         Rectangle bounds;
         TilesSet sprites;
@@ -43,14 +46,18 @@ namespace KuruLevelEditor
         int inventoryTileSize = 16;
         TimeSpan showBrushUntil = TimeSpan.Zero;
 
+        Color? specialItemMode = null;
+        Point? specialItemLocation = null;
+
         OverflowingStack<int[,]> undoHistory = new OverflowingStack<int[,]>(UNDO_CAPACITY);
         Stack<int[,]> redoHistory = new Stack<int[,]>();
 
         public OverlayGrid[] Overlays { get; private set; }
         public OverlayGrid[] Underlays { get; private set; }
         public bool GridEnabled { get; set; }
-        public EditorGrid(Levels.MapType type, Rectangle bounds, TilesSet sprites, int[,] grid, Point position, OverlayGrid[] overlays, OverlayGrid[] underlays)
+        public EditorGrid(Game1 game, Levels.MapType type, Rectangle bounds, TilesSet sprites, int[,] grid, Point position, OverlayGrid[] overlays, OverlayGrid[] underlays)
         {
+            this.game = game;
             this.bounds = bounds;
             this.sprites = sprites;
             this.grid = grid;
@@ -106,6 +113,16 @@ namespace KuruLevelEditor
                     inventoryTileSize = value;
 
             }
+        }
+
+        public void SpecialItemMode(Color c, Point? initialLocation)
+        {
+            specialItemMode = c;
+            specialItemLocation = initialLocation;
+        }
+        void QuitSpecialItemMode() {
+            specialItemMode = null;
+            specialItemLocation = null;
         }
 
         public Point TileCoordToScreenCoord(int x, int y)
@@ -311,6 +328,7 @@ namespace KuruLevelEditor
                 {
                     if (mouse_move_is_selecting)
                     {
+                        QuitSpecialItemMode();
                         ShowBrush(gt);
                         Rectangle map_bounds = new Rectangle(0, 0, Grid.GetLength(1), Grid.GetLength(0));
                         Rectangle r = Rectangle.Union(new Rectangle(initial_mouse_move_pos.Value, Point.Zero), new Rectangle(mouse.Position, Point.Zero));
@@ -352,6 +370,7 @@ namespace KuruLevelEditor
             {
                 if (initial_mouse_move_pos == null && mouse.LeftButton == ButtonState.Pressed)
                 {
+                    QuitSpecialItemMode();
                     initial_mouse_move_pos = mouse.Position;
                     initial_mouse_move_map_position = Position;
                     mouse_move_is_selecting = true;
@@ -367,7 +386,23 @@ namespace KuruLevelEditor
                         bool clear = mouse.RightButton == ButtonState.Pressed;
                         Point cpt = ScreenCoordToTileCoord(mouse.Position.X, mouse.Position.Y);
                         Rectangle map_bounds = new Rectangle(0, 0, grid.GetLength(1), grid.GetLength(0));
-                        if (selectionGrid == null || (selectionGrid.GetLength(0) == 1 && selectionGrid.GetLength(1) == 1))
+                        if (specialItemMode.HasValue)
+                        {
+                            if (map_bounds.Contains(cpt))
+                            {
+                                if (clear && specialItemLocation.HasValue && specialItemLocation.Value.Equals(cpt))
+                                {
+                                    specialItemLocation = null;
+                                    game.ChangeSpecialItemLocation(null);
+                                }
+                                else if (!clear && (!specialItemLocation.HasValue || !specialItemLocation.Value.Equals(cpt)))
+                                {
+                                    specialItemLocation = cpt;
+                                    game.ChangeSpecialItemLocation(cpt);
+                                }
+                            }
+                        }
+                        else if (selectionGrid == null || (selectionGrid.GetLength(0) == 1 && selectionGrid.GetLength(1) == 1))
                         {
                             int selectedItem = 0;
                             if (!clear && selectionGrid != null)
@@ -496,10 +531,19 @@ namespace KuruLevelEditor
                 this.r = r;
                 this.item = item;
                 this.overridePalette = overridePalette;
+                color = null;
+            }
+            public DelayedSpriteDrawing(Rectangle r, Color color)
+            {
+                this.r = r;
+                this.color = color;
+                item = null;
+                overridePalette = false;
             }
             public Rectangle r;
-            public int item;
+            public int? item;
             public bool overridePalette;
+            public Color? color;
         }
         public void Draw(SpriteBatch sprite_batch, GameTime gt, MouseState mouse, KeyboardState keyboard)
         {
@@ -515,7 +559,18 @@ namespace KuruLevelEditor
                     Point pt = ScreenCoordToTileCoord(mouse.Position.X, mouse.Position.Y);
                     Rectangle cr = TileCoordToScreenRect(pt.X, pt.Y);
                     selectedElementsBounds = cr;
-                    if (selectionGrid == null || (selectionGrid.GetLength(0) == 1 && selectionGrid.GetLength(1) == 1))
+                    if (specialItemMode.HasValue)
+                    {
+                        if (cr.Intersects(bounds))
+                            toDraw.Add(new DelayedSpriteDrawing(cr, specialItemMode.Value));
+                        if (specialItemLocation.HasValue)
+                        {
+                            Rectangle sil = TileCoordToScreenRect(specialItemLocation.Value.X, specialItemLocation.Value.Y);
+                            if (sil.Intersects(bounds))
+                                toDraw.Add(new DelayedSpriteDrawing(sil, specialItemMode.Value));
+                        }
+                    }
+                    else if (selectionGrid == null || (selectionGrid.GetLength(0) == 1 && selectionGrid.GetLength(1) == 1))
                     {
                         int selectedItem = 0;
                         if (selectionGrid != null)
@@ -559,7 +614,12 @@ namespace KuruLevelEditor
             if (selectedElementsBounds.HasValue)
             {
                 foreach (DelayedSpriteDrawing d in toDraw)
-                    DrawTile(sprite_batch, sprites, d.r, d.item, d.overridePalette, showSpecial);
+                {
+                    if (d.color.HasValue)
+                        sprite_batch.FillRectangle(d.r, d.color.Value);
+                    if (d.item.HasValue)
+                        DrawTile(sprite_batch, sprites, d.r, d.item.Value, d.overridePalette, showSpecial);
+                }
             }
             if (!inventoryMode)
             {

@@ -396,17 +396,37 @@ namespace KuruLevelEditor
             // TODO: Improve error handling
             // TODO: Integrate ROM building system
             // TODO: Integrate emulator testing
-            // TODO: Support for bonuses
             // TODO: Support for moving objects
         }
 
         public void CloseSpecialItemMenu()
         {
-            // TODO
             editor.AddToUndoHistory();
             _physicalMapLogic.OverrideGridData(editor.MapGrid);
             _physicalMapLogic = null;
             _specialItemInterface = null;
+        }
+
+        int _lastBonusId = -1;
+        public void SetBonusLocation(int id, Point? currentLocation)
+        {
+            CloseSpecialItemMenu();
+            _lastBonusId = id;
+            editor.SpecialItemMode(Color.Red, currentLocation);
+        }
+
+        public void ChangeSpecialItemLocation(Point? newLocation)
+        {
+            // Note: Can only be a bonus right now (moving objects not implemented)
+            _physicalMapLogic = new PhysicalMapLogic(editor.MapGrid);
+            if (newLocation.HasValue)
+                _physicalMapLogic.SetBonusInfo(new PhysicalMapLogic.BonusInfo(_lastBonusId, newLocation.Value.X, newLocation.Value.Y));
+            else
+                _physicalMapLogic.SetBonusInfo(null);
+
+            editor.AddToUndoHistory();
+            _physicalMapLogic.OverrideGridData(editor.MapGrid);
+            _physicalMapLogic = null;
         }
 
         void SaveGrid()
@@ -476,7 +496,7 @@ namespace KuruLevelEditor
                 }
             }
 
-            editor = new EditorGrid(MapType(),
+            editor = new EditorGrid(this, MapType(),
                 new Rectangle(LATERAL_PANEL_WIDTH, 0, GraphicsDevice.Viewport.Width - LATERAL_PANEL_WIDTH, GraphicsDevice.Viewport.Height),
                 sset, grid, new Point(-8, -8), overlays.ToArray(), underlays.ToArray());
         }

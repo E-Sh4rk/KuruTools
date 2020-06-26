@@ -14,6 +14,25 @@ namespace KuruLevelEditor
         private Game1 _game;
         private PhysicalMapLogic _logic;
 
+        private TextBox bonusId;
+        private TextBox bonusX;
+        private TextBox bonusY;
+
+        void saveChanges()
+        {
+            PhysicalMapLogic.BonusInfo? bonus = null;
+            if (!string.IsNullOrWhiteSpace(bonusId.Text))
+            {
+                try
+                {
+                    bonus = new PhysicalMapLogic.BonusInfo(
+                        Convert.ToInt32(bonusId.Text), Convert.ToInt32(bonusX.Text), Convert.ToInt32(bonusY.Text));
+                }
+                catch { bonus = null; }
+            }
+            _logic.SetBonusInfo(bonus);
+        }
+
         public SpecialItems(Game1 game, PhysicalMapLogic logic)
         {
             _game = game;
@@ -47,7 +66,7 @@ namespace KuruLevelEditor
                 GridRow = 0
             };
             grid.Widgets.Add(labelBonus);
-            TextBox bonusId = new TextBox()
+            bonusId = new TextBox()
             {
                 GridRow = 0,
                 GridColumn = 1,
@@ -56,7 +75,7 @@ namespace KuruLevelEditor
                 Text = bonus.HasValue ? bonus.Value.ID.ToString() : ""
             };
             grid.Widgets.Add(bonusId);
-            TextBox bonusX = new TextBox()
+            bonusX = new TextBox()
             {
                 GridRow = 0,
                 GridColumn = 2,
@@ -65,7 +84,7 @@ namespace KuruLevelEditor
                 Text = bonus.HasValue ? bonus.Value.x.ToString() : ""
             };
             grid.Widgets.Add(bonusX);
-            TextBox bonusY = new TextBox()
+            bonusY = new TextBox()
             {
                 GridRow = 0,
                 GridColumn = 3,
@@ -99,7 +118,20 @@ namespace KuruLevelEditor
             };
             bonusShow.Click += (s, a) =>
             {
-                // TODO
+                try
+                {
+                    if (!string.IsNullOrWhiteSpace(bonusId.Text))
+                    {
+                        int id = Convert.ToInt32(bonusId.Text);
+                        Point? loc = null;
+                        if (!string.IsNullOrWhiteSpace(bonusX.Text) && !string.IsNullOrWhiteSpace(bonusY.Text))
+                            loc = new Point(Convert.ToInt32(bonusX.Text), Convert.ToInt32(bonusY.Text));
+
+                        saveChanges();
+                        game.SetBonusLocation(id, loc);
+                    }
+                }
+                catch { }
             };
             grid.Widgets.Add(bonusShow);
 
@@ -114,17 +146,7 @@ namespace KuruLevelEditor
             };
             buttonQuit.Click += (s, a) =>
             {
-                PhysicalMapLogic.BonusInfo? bonus = null;
-                if (!string.IsNullOrWhiteSpace(bonusId.Text))
-                {
-                    try
-                    {
-                        bonus = new PhysicalMapLogic.BonusInfo(
-                            Convert.ToInt32(bonusId.Text), Convert.ToInt32(bonusX.Text), Convert.ToInt32(bonusY.Text));
-                    }
-                    catch { bonus = null; }
-                }
-                _logic.SetBonusInfo(bonus);
+                saveChanges();
                 _game.CloseSpecialItemMenu();
             };
             grid.Widgets.Add(buttonQuit);
