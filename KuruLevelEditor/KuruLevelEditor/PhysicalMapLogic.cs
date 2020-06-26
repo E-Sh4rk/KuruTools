@@ -125,12 +125,15 @@ namespace KuruLevelEditor
 
         int GetMapInfoData(ref int offset)
         {
+            if (offset >= map_data.Count)
+                return 0;
             int res = 0;
             int tile = map_data[offset];
             while (tile >= 0xE0 && tile <= 0xE9)
             {
                 res = res * 10 + tile - 0xE0;
                 offset++;
+                if (offset >= map_data.Count) break;
                 tile = map_data[offset];
             }
             offset++;
