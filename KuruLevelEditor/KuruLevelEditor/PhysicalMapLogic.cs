@@ -19,6 +19,7 @@ namespace KuruLevelEditor
         public readonly static int[] ENDING_ZONE_IDS = new int[] { 0xFE, 0xFF };
         public readonly static int[] SPRING_IDS = new int[] { 0xF8, 0xF9 };
         public readonly static int[] NUMBER_IDS = new int[] { 0xE0, 0xE1, 0xE2, 0xE3, 0xE4, 0xE5, 0xE6, 0xE7, 0xE8, 0xE9 };
+        public readonly static int[] MOVING_OBJECTS_IDS = new int[] { 0xF0, 0xF1, 0xF4, 0xF5, 0xF6, 0xF7 };
 
         readonly static Color HEALING_ZONE_COLOR = new Color(0xFF, 0x33, 0x33, 0xFF);
         readonly static Color HEALING_ZONE_BASE_COLOR = new Color(0xFF, 0x73, 0x73, 0xFF);
@@ -71,6 +72,26 @@ namespace KuruLevelEditor
         public static Texture2D TextureOfNumber(int tile_id)
         {
             return Load.SpecialNumbers[tile_id - 0xE0];
+        }
+
+        public static Texture2D TextureOfMovingObject(int tile_id)
+        {
+            switch (tile_id)
+            {
+                case 0xF0:
+                    return Load.Lookup;
+                case 0xF1:
+                    return Load.Info;
+                case 0xF4:
+                    return Load.Shooter;
+                case 0xF5:
+                    return Load.Piston;
+                case 0xF6:
+                    return Load.RollerCatcher;
+                case 0xF7:
+                    return Load.Roller;
+            }
+            return null;
         }
 
         public static Texture2D UnderlayOfVisibleControlTile(int tile_id)

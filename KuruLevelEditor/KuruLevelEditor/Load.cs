@@ -32,6 +32,13 @@ namespace KuruLevelEditor
 		public static Texture2D StartingDiagonal;
 		public static Texture2D EndingDiagonal;
 
+		public static Texture2D Lookup;
+		public static Texture2D Info;
+		public static Texture2D Shooter;
+		public static Texture2D Piston;
+		public static Texture2D Roller;
+		public static Texture2D RollerCatcher;
+
 		public static void LoadContent(ContentManager Content, GraphicsDevice graphics)
 		{
 			// Texture2D
@@ -66,6 +73,12 @@ namespace KuruLevelEditor
 				SpecialNumbers[i] = Content.Load<Texture2D>("special" + i.ToString());
 			StartingDiagonal = Content.Load<Texture2D>("starting_diagonal");
 			EndingDiagonal = Content.Load<Texture2D>("ending_diagonal");
+			Lookup = Content.Load<Texture2D>("lookup");
+			Info = Content.Load<Texture2D>("info");
+			Shooter = Content.Load<Texture2D>("shooter");
+			Piston = Content.Load<Texture2D>("piston");
+			Roller = Content.Load<Texture2D>("roller");
+			RollerCatcher = Content.Load<Texture2D>("roller_catcher");
 		}
 	}
 }

@@ -499,6 +499,8 @@ namespace KuruLevelEditor
                             sprite_batch.Draw(PhysicalMapLogic.TextureOfSpring(tile_id), dst, null, Color.White, 0, Vector2.Zero, effects, 0F);
                         else if (PhysicalMapLogic.NUMBER_IDS.Contains(tile_id))
                             sprite_batch.Draw(PhysicalMapLogic.TextureOfNumber(tile_id), dst, null, Color.White, 0, Vector2.Zero, effects, 0F);
+                        else if (PhysicalMapLogic.MOVING_OBJECTS_IDS.Contains(tile_id))
+                            sprite_batch.Draw(PhysicalMapLogic.TextureOfMovingObject(tile_id), dst, null, Color.White, 0, Vector2.Zero, effects, 0F);
                         else if (PhysicalMapLogic.VISIBLE_CONTROL_TILES.Contains(tile_id))
                             sprite_batch.Draw(PhysicalMapLogic.UnderlayOfVisibleControlTile(tile_id), dst, null, Color.White, 0, Vector2.Zero, effects, 0F);
                         else
