@@ -18,7 +18,7 @@ namespace KuruLevelEditor
         public readonly static int[] STARTING_ZONE_IDS = new int[] { 0xFB, 0xFC, 0xFD };
         public readonly static int[] ENDING_ZONE_IDS = new int[] { 0xFE, 0xFF };
         public readonly static int[] SPRING_IDS = new int[] { 0xF8, 0xF9 };
-        public readonly static int[] NUMBER_IDS = new int[] { 0xE0, 0xE1, 0xE2, 0xE3, 0xE4, 0xE5, 0xE6, 0xE7, 0xE8, 0xE9 };
+        public readonly static int[] NUMBER_INDEXES = new int[] { 0xE0, 0xE1, 0xE2, 0xE3, 0xE4, 0xE5, 0xE6, 0xE7, 0xE8, 0xE9 };
         public readonly static int[] MOVING_OBJECTS_IDS = new int[] { 0xF0, 0xF1, 0xF4, 0xF5, 0xF6, 0xF7 };
 
         readonly static Color HEALING_ZONE_COLOR = new Color(0xFF, 0x33, 0x33, 0xFF);
@@ -69,9 +69,9 @@ namespace KuruLevelEditor
             return Load.SpringHorizontal;
         }
 
-        public static Texture2D TextureOfNumber(int tile_id)
+        public static Texture2D TextureOfNumber(int tile_index)
         {
-            return Load.SpecialNumbers[tile_id - 0xE0];
+            return Load.SpecialNumbers[tile_index - 0xE0];
         }
 
         public static Texture2D TextureOfMovingObject(int tile_id)
