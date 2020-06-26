@@ -62,7 +62,7 @@ namespace KuruTools
                 if (len < PREFIX_MIN_LENGTH)
                 {
                     len = 1;
-                    while (len < 0x80 &&
+                    while (len < 0x80 && len + cursor < data.Length &&
                         PrefixLength(data, cursor + len + FindLongestPrefixOffset(data, cursor+len), cursor + len) < PREFIX_MIN_LENGTH)
                         len++;
                     if (NotEnoughSpace(len + 1))

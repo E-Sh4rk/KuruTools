@@ -393,6 +393,7 @@ namespace KuruLevelEditor
             panel.Widgets.Add(lateral);
             _lateralMenuDesktop = new Desktop();
             _lateralMenuDesktop.Root = panel;
+            // TODO: Solve challenge background tiles (there seems to be a fixed offset for all tiles)
             // TODO: Improve error handling
             // TODO: Integrate ROM building system
             // TODO: Integrate emulator testing
