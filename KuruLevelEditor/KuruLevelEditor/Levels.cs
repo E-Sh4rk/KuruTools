@@ -22,24 +22,30 @@ namespace KuruLevelEditor
 
         public static string[] AllLevels { get; private set; }
         public static string[] AllWorlds { get; private set; }
-        public static void Init()
+        public static bool Init()
         {
-            if (AllLevels != null) return;
-            List<string> res = new List<string>();
-            foreach (string file in Directory.EnumerateFiles(DIR)) {
-                string name = Path.GetFileNameWithoutExtension(file);
-                name = name.Substring(0, name.IndexOf('.'));
-                if (string.IsNullOrEmpty(name))
-                    continue;
-                res.Add(name);
+            try
+            {
+                List<string> res = new List<string>();
+                foreach (string file in Directory.EnumerateFiles(DIR))
+                {
+                    string name = Path.GetFileNameWithoutExtension(file);
+                    name = name.Substring(0, name.IndexOf('.'));
+                    if (string.IsNullOrEmpty(name))
+                        continue;
+                    res.Add(name);
+                }
+                res.Sort();
+                res = res.Distinct().ToList();
+                AllLevels = res.ToArray();
+                for (int i = 0; i < res.Count; i++)
+                    res[i] = GetWorldOfLevel(res[i]);
+                res = res.Distinct().ToList();
+                AllWorlds = res.ToArray();
+                return true;
             }
-            res.Sort();
-            res = res.Distinct().ToList();
-            AllLevels = res.ToArray();
-            for (int i = 0; i < res.Count; i++)
-                res[i] = GetWorldOfLevel(res[i]);
-            res = res.Distinct().ToList();
-            AllWorlds = res.ToArray();
+            catch { }
+            return false;
         }
 
         public static string GetLevelPath(string name, MapType type)

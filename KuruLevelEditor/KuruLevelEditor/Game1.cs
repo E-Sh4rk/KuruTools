@@ -24,13 +24,14 @@ namespace KuruLevelEditor
 
         enum Mode
         {
+            Loading,
             Menu,
             Physical,
             Graphical,
             Background,
             Minimap
         }
-        private Mode mode = Mode.Menu;
+        private Mode mode = Mode.Loading;
         private string map;
 
         public Game1()
@@ -51,12 +52,28 @@ namespace KuruLevelEditor
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-
             MyraEnvironment.Game = this;
 
-            Levels.Init();
-            Load.LoadContent(Content, GraphicsDevice);
+            if (!Load.LoadFixedContent(Content))
+            {
+                Exit();
+                return;
+            }
 
+            if (Levels.Init() && Load.LoadSpriteContent(GraphicsDevice))
+                LoadInterface();
+            else
+            {
+                // TODO
+            }
+
+            // TODO: Integrate ROM building system
+            // TODO: Button to reset all levels or a particular level
+            // TODO: Integrate emulator testing
+        }
+
+        void LoadInterface()
+        {
             // ===== MAIN MENU =====
             var grid = new Grid
             {
@@ -394,9 +411,8 @@ namespace KuruLevelEditor
             panel.Widgets.Add(lateral);
             _lateralMenuDesktop = new Desktop();
             _lateralMenuDesktop.Root = panel;
-            // TODO: Improve error handling
-            // TODO: Integrate ROM building system
-            // TODO: Integrate emulator testing
+
+            mode = Mode.Menu;
         }
 
         public void CloseSpecialItemMenu()
@@ -417,7 +433,7 @@ namespace KuruLevelEditor
 
         public void ChangeSpecialItemLocation(Point? newLocation)
         {
-            // Note: Can only be a bonus right now (moving objects not implemented)
+            // Note: Can only be a bonus
             _physicalMapLogic = new PhysicalMapLogic(editor.MapGrid);
             if (newLocation.HasValue)
                 _physicalMapLogic.Bonus = new PhysicalMapLogic.BonusInfo(_lastBonusId, newLocation.Value.X, newLocation.Value.Y);
@@ -508,10 +524,10 @@ namespace KuruLevelEditor
 
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
+            /*if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+                Exit();*/
 
-            if (mode != Mode.Menu && !_lateralMenuDesktop.HasModalWidget && _specialItemInterface == null)
+            if (mode != Mode.Loading && mode != Mode.Menu && !_lateralMenuDesktop.HasModalWidget && _specialItemInterface == null)
             {
                 MouseState ms = Mouse.GetState();
                 KeyboardState ks = Keyboard.GetState();
@@ -543,7 +559,14 @@ namespace KuruLevelEditor
         {
             GraphicsDevice.Clear(Color.Black);
 
-            if (mode == Mode.Menu)
+            if (mode == Mode.Loading) {
+                Point center = new Point(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2);
+                Point location = new Point(center.X - Load.LoadingScreen.Width/2, center.Y - Load.LoadingScreen.Height / 2);
+                _spriteBatch.Begin();
+                _spriteBatch.Draw(Load.LoadingScreen, new Rectangle(location, Load.LoadingScreen.Bounds.Size), Color.White);
+                _spriteBatch.End();
+            }
+            else if (mode == Mode.Menu)
                 _mainMenuDesktop.Render();
             else if (_specialItemInterface != null)
                 _specialItemInterface.Render();
