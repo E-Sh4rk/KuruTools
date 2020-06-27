@@ -23,6 +23,7 @@ namespace KuruLevelEditor
 
         void saveChanges()
         {
+            // Bonus
             PhysicalMapLogic.BonusInfo? bonus = null;
             if (!string.IsNullOrWhiteSpace(bonusId.Text))
             {
@@ -33,7 +34,39 @@ namespace KuruLevelEditor
                 }
                 catch { bonus = null; }
             }
-            _logic.SetBonusInfo(bonus);
+            _logic.Bonus = bonus;
+            // Moving objects
+            List<object> moving = new List<object>();
+            string[] lines = movingObjects.Text.Replace("\r", "").Split("\n", StringSplitOptions.RemoveEmptyEntries);
+            foreach (string line in lines)
+            {
+                try
+                {
+                    string[] elts = line.Split(" ", StringSplitOptions.RemoveEmptyEntries);
+                    int id = Convert.ToInt32(elts[0]);
+                    int p1 = Convert.ToInt32(elts[2]);
+                    int p2 = Convert.ToInt32(elts[3]);
+                    int p3 = Convert.ToInt32(elts[4]);
+                    int p4 = Convert.ToInt32(elts[5]);
+                    switch (elts[1])
+                    {
+                        case "S":
+                            moving.Add(new PhysicalMapLogic.ShooterInfo(id, p1, p2, p3, p4));
+                            break;
+                        case "P":
+                            moving.Add(new PhysicalMapLogic.PistonInfo(id, p1, p2, p3, p4));
+                            break;
+                        case "R":
+                            moving.Add(new PhysicalMapLogic.RollerInfo(id, p1, p2, p3, p4));
+                            break;
+                        default:
+                            // Unrecognized object
+                            break;
+                    }
+                }
+                catch { }
+            }
+            _logic.MovingObjects = moving;
         }
 
         void addToMovingObjectsBox(string ID, string type, string p1, string p2, string p3, string p4,
@@ -83,7 +116,7 @@ namespace KuruLevelEditor
 
             // --- BONUS ---
 
-            PhysicalMapLogic.BonusInfo? bonus = _logic.GetBonusInfo();
+            PhysicalMapLogic.BonusInfo? bonus = _logic.Bonus;
             Label labelBonus = new Label()
             {
                 Id = "labelBonus",
@@ -154,7 +187,7 @@ namespace KuruLevelEditor
                             loc = new Point(Convert.ToInt32(bonusX.Text), Convert.ToInt32(bonusY.Text));
 
                         saveChanges();
-                        game.SetBonusLocation(id, loc);
+                        _game.SetBonusLocation(id, loc);
                     }
                 }
                 catch { }
@@ -167,7 +200,7 @@ namespace KuruLevelEditor
                 GridRow = 2,
                 GridColumn = 0,
                 GridColumnSpan = 6,
-                GridRowSpan = 7,
+                GridRowSpan = 14,
                 ShowHorizontalScrollBar = false,
                 ShowVerticalScrollBar = true
             };
@@ -184,12 +217,12 @@ namespace KuruLevelEditor
                 Id = "labelShooter",
                 Text = "Shooter",
                 GridColumn = 0,
-                GridRow = 9
+                GridRow = 16
             };
             grid.Widgets.Add(labelShooter);
             TextBox shooterId = new TextBox()
             {
-                GridRow = 9,
+                GridRow = 16,
                 GridColumn = 1,
                 HintText = "ID",
                 Width = 150
@@ -197,7 +230,7 @@ namespace KuruLevelEditor
             grid.Widgets.Add(shooterId);
             TextBox shooterMinDir = new TextBox()
             {
-                GridRow = 9,
+                GridRow = 16,
                 GridColumn = 2,
                 HintText = "MinDir",
                 Width = 150
@@ -205,7 +238,7 @@ namespace KuruLevelEditor
             grid.Widgets.Add(shooterMinDir);
             TextBox shooterMaxDir = new TextBox()
             {
-                GridRow = 9,
+                GridRow = 16,
                 GridColumn = 3,
                 HintText = "MaxDir",
                 Width = 150
@@ -213,7 +246,7 @@ namespace KuruLevelEditor
             grid.Widgets.Add(shooterMaxDir);
             TextBox shooterStartTime = new TextBox()
             {
-                GridRow = 9,
+                GridRow = 16,
                 GridColumn = 4,
                 HintText = "StartTime",
                 Width = 150
@@ -221,7 +254,7 @@ namespace KuruLevelEditor
             grid.Widgets.Add(shooterStartTime);
             TextBox shooterPeriod = new TextBox()
             {
-                GridRow = 9,
+                GridRow = 16,
                 GridColumn = 5,
                 HintText = "Period",
                 Width = 150
@@ -230,7 +263,7 @@ namespace KuruLevelEditor
             var shooterAdd = new TextButton
             {
                 GridColumn = 6,
-                GridRow = 9,
+                GridRow = 16,
                 Text = "Add shooter",
                 Width = 150,
             };
@@ -246,12 +279,12 @@ namespace KuruLevelEditor
                 Id = "labelPiston",
                 Text = "Piston",
                 GridColumn = 0,
-                GridRow = 10
+                GridRow = 17
             };
             grid.Widgets.Add(labelPiston);
             TextBox pistonId = new TextBox()
             {
-                GridRow = 10,
+                GridRow = 17,
                 GridColumn = 1,
                 HintText = "ID",
                 Width = 150
@@ -259,7 +292,7 @@ namespace KuruLevelEditor
             grid.Widgets.Add(pistonId);
             TextBox pistonDir = new TextBox()
             {
-                GridRow = 10,
+                GridRow = 17,
                 GridColumn = 2,
                 HintText = "Dir",
                 Width = 150
@@ -267,7 +300,7 @@ namespace KuruLevelEditor
             grid.Widgets.Add(pistonDir);
             TextBox pistonStartTime = new TextBox()
             {
-                GridRow = 10,
+                GridRow = 17,
                 GridColumn = 3,
                 HintText = "StartTime",
                 Width = 150
@@ -275,7 +308,7 @@ namespace KuruLevelEditor
             grid.Widgets.Add(pistonStartTime);
             TextBox pistonWaitPeriod = new TextBox()
             {
-                GridRow = 10,
+                GridRow = 17,
                 GridColumn = 4,
                 HintText = "WaitPeriod",
                 Width = 150
@@ -283,7 +316,7 @@ namespace KuruLevelEditor
             grid.Widgets.Add(pistonWaitPeriod);
             TextBox pistonMovePeriod = new TextBox()
             {
-                GridRow = 10,
+                GridRow = 17,
                 GridColumn = 5,
                 HintText = "MovePeriod",
                 Width = 150
@@ -292,7 +325,7 @@ namespace KuruLevelEditor
             var pistonAdd = new TextButton
             {
                 GridColumn = 6,
-                GridRow = 10,
+                GridRow = 17,
                 Text = "Add piston",
                 Width = 150,
             };
@@ -308,12 +341,12 @@ namespace KuruLevelEditor
                 Id = "labelRoller",
                 Text = "Roller",
                 GridColumn = 0,
-                GridRow = 11
+                GridRow = 18
             };
             grid.Widgets.Add(labelRoller);
             TextBox rollerId = new TextBox()
             {
-                GridRow = 11,
+                GridRow = 18,
                 GridColumn = 1,
                 HintText = "ID",
                 Width = 150
@@ -321,7 +354,7 @@ namespace KuruLevelEditor
             grid.Widgets.Add(rollerId);
             TextBox rollerDir = new TextBox()
             {
-                GridRow = 11,
+                GridRow = 18,
                 GridColumn = 2,
                 HintText = "Dir",
                 Width = 150
@@ -329,7 +362,7 @@ namespace KuruLevelEditor
             grid.Widgets.Add(rollerDir);
             TextBox rollerStartTime = new TextBox()
             {
-                GridRow = 11,
+                GridRow = 18,
                 GridColumn = 3,
                 HintText = "StartTime",
                 Width = 150
@@ -337,7 +370,7 @@ namespace KuruLevelEditor
             grid.Widgets.Add(rollerStartTime);
             TextBox rollerPeriod = new TextBox()
             {
-                GridRow = 11,
+                GridRow = 18,
                 GridColumn = 4,
                 HintText = "Period",
                 Width = 150
@@ -345,7 +378,7 @@ namespace KuruLevelEditor
             grid.Widgets.Add(rollerPeriod);
             TextBox rollerSpeed = new TextBox()
             {
-                GridRow = 11,
+                GridRow = 18,
                 GridColumn = 5,
                 HintText = "Speed",
                 Width = 150
@@ -354,7 +387,7 @@ namespace KuruLevelEditor
             var rollerAdd = new TextButton
             {
                 GridColumn = 6,
-                GridRow = 11,
+                GridRow = 18,
                 Text = "Add roller",
                 Width = 150,
             };
@@ -365,12 +398,42 @@ namespace KuruLevelEditor
             };
             grid.Widgets.Add(rollerAdd);
 
+            foreach (object o in _logic.MovingObjects)
+            {
+                int id;
+                string type;
+                int[] param;
+                if (o is PhysicalMapLogic.ShooterInfo)
+                {
+                    PhysicalMapLogic.ShooterInfo si = (PhysicalMapLogic.ShooterInfo)o;
+                    id = si.ID;
+                    type = "S";
+                    param = si.Params();
+                }
+                else if (o is PhysicalMapLogic.PistonInfo)
+                {
+                    PhysicalMapLogic.PistonInfo pi = (PhysicalMapLogic.PistonInfo)o;
+                    id = pi.ID;
+                    type = "P";
+                    param = pi.Params();
+                }
+                else // if (o is PhysicalMapLogic.RollerInfo)
+                {
+                    PhysicalMapLogic.RollerInfo ri = (PhysicalMapLogic.RollerInfo)o;
+                    id = ri.ID;
+                    type = "R";
+                    param = ri.Params();
+                }
+                addToMovingObjectsBox(id.ToString(), type, param[0].ToString(), param[1].ToString(), param[2].ToString(),
+                    param[3].ToString(), 0, 0, 0, 0);
+            }
+
             // --- SUBMIT ---
 
             var buttonQuit = new TextButton
             {
                 GridColumn = 1,
-                GridRow = 13,
+                GridRow = 20,
                 Text = "Quit",
                 Width = 150,
             };

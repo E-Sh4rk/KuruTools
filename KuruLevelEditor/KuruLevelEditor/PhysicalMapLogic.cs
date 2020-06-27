@@ -103,44 +103,115 @@ namespace KuruLevelEditor
         public const int CONTROL_MIN_ID = 0xE0;
 
         // ===== MAP DATA MODIFIER =====
-        List<int> map_data;
-        int w;
+        BonusInfo? bonus;
+        List<object> movingObjects;
         int capacity;
         public const int NUMBER_RESERVED_ROWS = 4;
 
+        public BonusInfo? Bonus
+        {
+            get { return bonus; }
+            set { bonus = value; }
+        }
+
+        public List<object> MovingObjects
+        {
+            get { return movingObjects; }
+            set { movingObjects = value; }
+        }
+
         public PhysicalMapLogic(int[,] grid)
         {
-            w = grid.GetLength(1);
-            map_data = new List<int>();
-            capacity = 0;
+            List<int> map_data = new List<int>();
+            int w = grid.GetLength(1);
             for (int y = 0; y < NUMBER_RESERVED_ROWS; y++)
             {
                 for (int x = 0; x < w; x++)
                 {
                     int id = grid[y, x] & 0x3FF;
                     if (id <= VISIBLE_MAX_ID && id != 0)
-                    {
-                        NormalizeData();
-                        return;
-                    }
+                        goto ForEnd;
                     map_data.Add(grid[y, x]);
-                    capacity++;
                 }
             }
-            NormalizeData();
+        ForEnd:
+            capacity = map_data.Count;
+            bonus = GetBonusInfo(map_data);
+            movingObjects = GetMovingObjects(map_data);
         }
 
-        public void OverrideGridData(int[,] grid)
+        int GetMapInfoData(List<int> map_data, ref int offset)
         {
-            for (int i = 0; i < capacity; i++)
+            if (offset >= map_data.Count)
+                return 0;
+            int res = 0;
+            int tile = map_data[offset];
+            while (tile >= 0xE0 && tile <= 0xE9)
             {
-                int y = i / w;
-                int x = i % w;
-                if (map_data.Count > i)
-                    grid[y, x] = map_data[i];
-                else
-                    grid[y, x] = 0;
+                res = res * 10 + tile - 0xE0;
+                offset++;
+                if (offset >= map_data.Count) return res;
+                tile = map_data[offset];
             }
+            offset++;
+            return res;
+        }
+
+        BonusInfo? GetBonusInfo(List<int> map_data)
+        {
+            int offset = 0;
+            int ID = GetMapInfoData(map_data, ref offset);
+            if (ID != 0)
+            {
+                BonusInfo bi = new BonusInfo();
+                bi.ID = ID;
+                bi.x = GetMapInfoData(map_data, ref offset)/* * 8 - 4*/;
+                bi.y = GetMapInfoData(map_data, ref offset)/* * 8 - 4*/;
+                return bi;
+            }
+            return null;
+        }
+
+        List<object> GetMovingObjects(List<int> map_data)
+        {
+            List<object> res = new List<object>();
+            int offset = 0;
+            while (offset < map_data.Count)
+            {
+                if ((map_data[offset] & 0x3FF) == 0xF1)
+                {
+                    offset++;
+                    try
+                    {
+                        int id = GetMapInfoData(map_data, ref offset);
+                        int type = map_data[offset] & 0x3FF;
+                        offset++;
+                        int p1 = GetMapInfoData(map_data, ref offset);
+                        int p2 = GetMapInfoData(map_data, ref offset);
+                        int p3 = GetMapInfoData(map_data, ref offset);
+                        int p4 = GetMapInfoData(map_data, ref offset);
+                        switch (type)
+                        {
+                            case 0xF4:
+                                res.Add(new ShooterInfo(id, p1, p2, p3, p4));
+                                break;
+                            case 0xF5:
+                                res.Add(new PistonInfo(id, p1, p2, p3, p4));
+                                break;
+                            case 0xF7:
+                                res.Add(new RollerInfo(id, p1, p2, p3, p4));
+                                break;
+                            default:
+                                // Should not happen...
+                                break;
+                        }
+                    }
+                    catch { }
+                }
+                else
+                    offset++;
+            }
+            return res;
         }
 
         public struct BonusInfo
@@ -154,23 +225,6 @@ namespace KuruLevelEditor
             public int ID;
             public int x;
             public int y;
-        }
-
-        int GetMapInfoData(ref int offset)
-        {
-            if (offset >= map_data.Count)
-                return 0;
-            int res = 0;
-            int tile = map_data[offset];
-            while (tile >= 0xE0 && tile <= 0xE9)
-            {
-                res = res * 10 + tile - 0xE0;
-                offset++;
-                if (offset >= map_data.Count) break;
-                tile = map_data[offset];
-            }
-            offset++;
-            return res;
         }
 
         List<int> GenerateMapInfoData(int[] vs)
@@ -188,65 +242,93 @@ namespace KuruLevelEditor
             return res;
         }
 
-        public BonusInfo? GetBonusInfo()
+        List<int> GenerateBonusInfo(BonusInfo? bonus)
         {
-            int offset = 0;
-            int ID = GetMapInfoData(ref offset);
-            if (ID != 0)
-            {
-                BonusInfo bi = new BonusInfo();
-                bi.ID = ID;
-                bi.x = GetMapInfoData(ref offset)/* * 8 - 4*/;
-                bi.y = GetMapInfoData(ref offset)/* * 8 - 4*/;
-                return bi;
-            }
-            return null;
-        }
-
-        public void SetBonusInfo(BonusInfo? bonus)
-        {
-            int offset = 0;
-            int ID = GetMapInfoData(ref offset);
+            List<int> res = new List<int>();
             if (bonus.HasValue)
-            {
-                SetBonusInfo(null);
-                map_data.Insert(0, 0);
-                map_data.Insert(0, 0);
-                map_data.InsertRange(0, GenerateMapInfoData(new int[]{ bonus.Value.ID, bonus.Value.x, bonus.Value.y }));
-            }
-            else
-            {
-                if (ID != 0)
-                {
-                    GetMapInfoData(ref offset);
-                    GetMapInfoData(ref offset);
-                    for (int i = 0; i < offset; i++) {
-                        if (map_data.Count == 0) break;
-                        map_data.RemoveAt(0);
-                    }
-                }
-            }
-            NormalizeData();
+                res.AddRange(GenerateMapInfoData(new int[]{ bonus.Value.ID, bonus.Value.x, bonus.Value.y }));
+            return res;
         }
 
-        void NormalizeData()
+        List<List<int>> GenerateMovingObjects(List<object> objs)
         {
-            // Remove initial zeros
-            while (map_data.Count > 0 && map_data[0] == 0)
-                map_data.RemoveAt(0);
-            // Remove final zeros
-            while (map_data.Count > 0 && map_data[map_data.Count -1] == 0)
-                map_data.RemoveAt(map_data.Count - 1);
-            // TODO: Remove intermediate useless zeros
-            // If too large, truncate
-            while (map_data.Count > capacity)
-                map_data.RemoveAt(map_data.Count - 1);
+            List<List<int>> res = new List<List<int>>();
+            foreach (object o in objs)
+            {
+                try
+                {
+                    int id;
+                    int type;
+                    int[] param;
+                    if (o is ShooterInfo)
+                    {
+                        ShooterInfo si = (ShooterInfo)o;
+                        id = si.ID;
+                        type = 0xF4;
+                        param = si.Params();
+                    }
+                    else if (o is PistonInfo)
+                    {
+                        PistonInfo pi = (PistonInfo)o;
+                        id = pi.ID;
+                        type = 0xF5;
+                        param = pi.Params();
+                    }
+                    else // if (o is RollerInfo)
+                    {
+                        RollerInfo ri = (RollerInfo)o;
+                        id = ri.ID;
+                        type = 0xF7;
+                        param = ri.Params();
+                    }
+                    List<int> elt = new List<int>();
+                    elt.Add(0xF1);
+                    elt.AddRange(GenerateMapInfoData(new int[] { id }));
+                    elt.Add(type);
+                    elt.AddRange(GenerateMapInfoData(param));
+                    res.Add(elt);
+                }
+                catch { }
+            }
+            return res;
+        }
+
+        void WriteIfEnoughSpace(int[,] grid, List<int> data, ref int offset)
+        {
+            int w = grid.GetLength(1);
+            int lineRemaining = w - (offset % w);
+            if (lineRemaining < data.Count)
+            {
+                for (int i = 0; i < lineRemaining; i++) data.Insert(0, 0);
+            }
+
+            if (offset + data.Count > capacity) return;
+            foreach (int d in data)
+            {
+                grid[offset / w, offset % w] = d;
+                offset++;
+            }
+        }
+
+        public void OverrideGridData(int[,] grid)
+        {
+            int offset = 0;
+            WriteIfEnoughSpace(grid, GenerateBonusInfo(bonus), ref offset);
+            foreach (List<int> d in GenerateMovingObjects(movingObjects))
+                WriteIfEnoughSpace(grid, d, ref offset);
+
+            int w = grid.GetLength(1);
+            while (offset < capacity)
+            {
+                grid[offset / w, offset % w] = 0;
+                offset++;
+            }
         }
 
         public struct ShooterInfo
         {
             public const int DEFAULT_PERIOD = 0x90;
-            public ShooterInfo(string ID, int minDir, int maxDir, int startTime, int period = DEFAULT_PERIOD)
+            public ShooterInfo(int ID, int minDir, int maxDir, int startTime, int period = DEFAULT_PERIOD)
             {
                 this.ID = ID;
                 this.minDir = minDir;
@@ -254,17 +336,21 @@ namespace KuruLevelEditor
                 this.startTime = startTime;
                 this.period = period;
             }
-            public string ID;
+            public int ID;
             public int minDir;
             public int maxDir;
             public int startTime;
             public int period;
+            public int[] Params()
+            {
+                return new int[] { minDir, maxDir, startTime, period };
+            }
         }
         public struct PistonInfo
         {
             public const int DEFAULT_WAIT_PERIOD = 120;
             public const int DEFAULT_MOVE_PERIOD = 240;
-            public PistonInfo(string ID, int dir, int startTime, int waitPeriod = DEFAULT_WAIT_PERIOD, int movePeriod = DEFAULT_MOVE_PERIOD)
+            public PistonInfo(int ID, int dir, int startTime, int waitPeriod = DEFAULT_WAIT_PERIOD, int movePeriod = DEFAULT_MOVE_PERIOD)
             {
                 this.ID = ID;
                 this.dir = dir;
@@ -272,16 +358,20 @@ namespace KuruLevelEditor
                 this.waitPeriod = waitPeriod;
                 this.movePeriod = movePeriod;
             }
-            public string ID;
+            public int ID;
             public int dir;
             public int startTime;
             public int waitPeriod;
             public int movePeriod;
+            public int[] Params()
+            {
+                return new int[] { dir, startTime, waitPeriod, movePeriod };
+            }
         }
         public struct RollerInfo
         {
             public const int DEFAULT_SPEED = 0xC0;
-            public RollerInfo(string ID, int dir, int startTime, int period, int speed = DEFAULT_SPEED)
+            public RollerInfo(int ID, int dir, int startTime, int period, int speed = DEFAULT_SPEED)
             {
                 this.ID = ID;
                 this.dir = dir;
@@ -289,11 +379,15 @@ namespace KuruLevelEditor
                 this.period = period;
                 this.speed = speed;
             }
-            public string ID;
+            public int ID;
             public int dir;
             public int startTime;
             public int period;
             public int speed;
+            public int[] Params()
+            {
+                return new int[] { dir, startTime, period, speed };
+            }
         }
     }
 }

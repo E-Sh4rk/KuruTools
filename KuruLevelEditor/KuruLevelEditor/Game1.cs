@@ -397,7 +397,6 @@ namespace KuruLevelEditor
             // TODO: Improve error handling
             // TODO: Integrate ROM building system
             // TODO: Integrate emulator testing
-            // TODO: Support for moving objects
         }
 
         public void CloseSpecialItemMenu()
@@ -421,9 +420,9 @@ namespace KuruLevelEditor
             // Note: Can only be a bonus right now (moving objects not implemented)
             _physicalMapLogic = new PhysicalMapLogic(editor.MapGrid);
             if (newLocation.HasValue)
-                _physicalMapLogic.SetBonusInfo(new PhysicalMapLogic.BonusInfo(_lastBonusId, newLocation.Value.X, newLocation.Value.Y));
+                _physicalMapLogic.Bonus = new PhysicalMapLogic.BonusInfo(_lastBonusId, newLocation.Value.X, newLocation.Value.Y);
             else
-                _physicalMapLogic.SetBonusInfo(null);
+                _physicalMapLogic.Bonus = null;
 
             editor.AddToUndoHistory();
             _physicalMapLogic.OverrideGridData(editor.MapGrid);
