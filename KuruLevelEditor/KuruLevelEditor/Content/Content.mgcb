@@ -457,3 +457,10 @@
 /processorParam:TextureFormat=Color
 /build:../../Assets/starting_diagonal.png;starting_diagonal.png
 
+#begin monospace.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:monospace.spritefont
+

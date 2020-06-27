@@ -39,6 +39,8 @@ namespace KuruLevelEditor
 		public static Texture2D Roller;
 		public static Texture2D RollerCatcher;
 
+		public static SpriteFont Monospace;
+
 		public static void LoadContent(ContentManager Content, GraphicsDevice graphics)
 		{
 			// Texture2D
@@ -79,6 +81,8 @@ namespace KuruLevelEditor
 			Piston = Content.Load<Texture2D>("piston");
 			Roller = Content.Load<Texture2D>("roller");
 			RollerCatcher = Content.Load<Texture2D>("roller_catcher");
+
+			Monospace = Content.Load<SpriteFont>("monospace");
 		}
 	}
 }

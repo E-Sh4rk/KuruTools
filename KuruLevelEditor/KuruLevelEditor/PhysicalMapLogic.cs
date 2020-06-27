@@ -242,5 +242,58 @@ namespace KuruLevelEditor
             while (map_data.Count > capacity)
                 map_data.RemoveAt(map_data.Count - 1);
         }
+
+        public struct ShooterInfo
+        {
+            public const int DEFAULT_PERIOD = 0x90;
+            public ShooterInfo(string ID, int minDir, int maxDir, int startTime, int period = DEFAULT_PERIOD)
+            {
+                this.ID = ID;
+                this.minDir = minDir;
+                this.maxDir = maxDir;
+                this.startTime = startTime;
+                this.period = period;
+            }
+            public string ID;
+            public int minDir;
+            public int maxDir;
+            public int startTime;
+            public int period;
+        }
+        public struct PistonInfo
+        {
+            public const int DEFAULT_WAIT_PERIOD = 120;
+            public const int DEFAULT_MOVE_PERIOD = 240;
+            public PistonInfo(string ID, int dir, int startTime, int waitPeriod = DEFAULT_WAIT_PERIOD, int movePeriod = DEFAULT_MOVE_PERIOD)
+            {
+                this.ID = ID;
+                this.dir = dir;
+                this.startTime = startTime;
+                this.waitPeriod = waitPeriod;
+                this.movePeriod = movePeriod;
+            }
+            public string ID;
+            public int dir;
+            public int startTime;
+            public int waitPeriod;
+            public int movePeriod;
+        }
+        public struct RollerInfo
+        {
+            public const int DEFAULT_SPEED = 0xC0;
+            public RollerInfo(string ID, int dir, int startTime, int period, int speed = DEFAULT_SPEED)
+            {
+                this.ID = ID;
+                this.dir = dir;
+                this.startTime = startTime;
+                this.period = period;
+                this.speed = speed;
+            }
+            public string ID;
+            public int dir;
+            public int startTime;
+            public int period;
+            public int speed;
+        }
     }
 }
