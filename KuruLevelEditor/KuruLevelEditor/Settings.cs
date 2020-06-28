@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 
@@ -36,6 +37,13 @@ namespace KuruLevelEditor
             string escapedOutput = Output.Escape();
             string args = $"--input \"{escapedInput}\" --output \"{escapedOutput}\" {additionalArgs}";
             string cmd = ExtractorCommand.Replace("%ARGS%", args);
+            return cmd.RunCommand();
+        }
+        public static string RunEmulator()
+        {
+            string escapedROM = Path.GetFullPath(Output).Escape();
+            string args = $"\"{escapedROM}\"";
+            string cmd = EmulatorCommand.Replace("%ROM%", args);
             return cmd.RunCommand();
         }
     }

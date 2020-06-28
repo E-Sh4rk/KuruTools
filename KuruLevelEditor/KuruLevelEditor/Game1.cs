@@ -77,9 +77,7 @@ namespace KuruLevelEditor
                 });
             }
 
-            // TODO: Integrate ROM building system
-            // TODO: Button to reset all levels or a particular level
-            // TODO: Integrate emulator testing
+            // TODO: Test ROM extractor and Emulator commands (what if in an other directory??)
         }
 
         void PleaseSelectMapMsg()
@@ -287,7 +285,10 @@ namespace KuruLevelEditor
                 Task.Factory.StartNew(() => {
                     try
                     {
-                        // TODO
+                        mode = Mode.Loading;
+                        Settings.RunExtractor("");
+                        mode = Mode.Menu;
+                        Settings.RunEmulator();
                     }
                     catch { Exit(); }
                 });
@@ -541,6 +542,32 @@ namespace KuruLevelEditor
                 messageBox.ShowModal(_lateralMenuDesktop);
             };
             lateral.Widgets.Add(buttonHelp);
+
+            var buttonSBR = new TextButton
+            {
+                GridColumn = 0,
+                GridRow = 17,
+                Text = "Save, build and run",
+                Width = 180,
+                Height = 30,
+                GridColumnSpan = 4
+            };
+            buttonSBR.Click += (s, a) =>
+            {
+                SaveGrid();
+                Task.Factory.StartNew(() => {
+                    try
+                    {
+                        Mode mode_bkp = mode;
+                        mode = Mode.Loading;
+                        Settings.RunExtractor("");
+                        mode = mode_bkp;
+                        Settings.RunEmulator();
+                    }
+                    catch { Exit(); }
+                });
+            };
+            lateral.Widgets.Add(buttonSBR);
 
             panel.Widgets.Add(lateral);
             _lateralMenuDesktop = new Desktop();
