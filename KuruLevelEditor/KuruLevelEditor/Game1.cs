@@ -78,6 +78,7 @@ namespace KuruLevelEditor
             }
 
             // TODO: Test ROM extractor and Emulator commands (what if in an other directory??)
+            // TODO: Remember selection between grids so that it is possible to copy parts of other levels
         }
 
         void PleaseSelectMapMsg()
