@@ -54,7 +54,7 @@ namespace KuruLevelEditor
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             MyraEnvironment.Game = this;
 
-            if (!Load.LoadFixedContent(Content))
+            if (!Settings.LoadSettings() || !Load.LoadFixedContent(Content))
             {
                 Exit();
                 return;
