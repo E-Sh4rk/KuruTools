@@ -48,6 +48,10 @@ namespace KuruLevelEditor
             return false;
         }
 
+        public static void DeleteAllLevels()
+        {
+            Directory.Delete(DIR, true);
+        }
         public static string GetLevelPath(string name, MapType type)
         {
             return Path.Combine(DIR, name + "." + MAP_TYPE_STR[(int)type] + ".txt");

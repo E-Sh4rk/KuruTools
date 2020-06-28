@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 
 namespace KuruLevelEditor
 {
-    class Utils
+    static class Utils
     {
         public static T[,] ResizeArray<T>(T[,] original, int rows, int cols)
         {
@@ -48,6 +50,32 @@ namespace KuruLevelEditor
                     res[y, x] = arr[y, w - x - 1];
             }
             return res;
+        }
+
+        public static string Escape(this string cmd)
+        {
+            return cmd.Replace("\"", "\\\"");
+        }
+
+        public static string RunCommand(this string cmd)
+        {
+            var escapedArgs = cmd.Escape();
+
+            var process = new Process()
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = Environment.OSVersion.Platform == PlatformID.Win32NT ? "PowerShell.exe" : "/bin/bash",
+                    Arguments = $"-c \"{escapedArgs}\"",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                }
+            };
+            process.Start();
+            string result = process.StandardOutput.ReadToEnd();
+            process.WaitForExit();
+            return result;
         }
 
         /*public static int IntPow(int x, uint pow)

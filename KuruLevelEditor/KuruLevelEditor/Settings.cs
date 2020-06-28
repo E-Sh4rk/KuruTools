@@ -29,5 +29,14 @@ namespace KuruLevelEditor
             catch { }
             return false;
         }
+
+        public static string RunExtractor(string additionalArgs)
+        {
+            string escapedInput = Input.Escape();
+            string escapedOutput = Output.Escape();
+            string args = $"--input \"{escapedInput}\" --output \"{escapedOutput}\" {additionalArgs}";
+            string cmd = ExtractorCommand.Replace("%ARGS%", args);
+            return cmd.RunCommand();
+        }
     }
 }

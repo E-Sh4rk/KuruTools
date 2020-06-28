@@ -7,6 +7,8 @@ using Myra.Graphics2D.Brushes;
 using Myra.Graphics2D.UI;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace KuruLevelEditor
 {
@@ -64,12 +66,38 @@ namespace KuruLevelEditor
                 LoadInterface();
             else
             {
-                // TODO
+                Task.Factory.StartNew(() =>
+                {
+                    try
+                    {
+                        Settings.RunExtractor("--extract-tiles tiles");
+                        reloadAtNextFrame = true;
+                    }
+                    catch { Exit(); }
+                });
             }
 
             // TODO: Integrate ROM building system
             // TODO: Button to reset all levels or a particular level
             // TODO: Integrate emulator testing
+        }
+
+        void PleaseSelectMapMsg()
+        {
+            var messageBox = Dialog.CreateMessageBox("Error", "Please select an element and a map.");
+            messageBox.ShowModal(_mainMenuDesktop);
+        }
+        Mode IndexToSelectedMode(int? index)
+        {
+            if (index == 0)
+                return Mode.Physical;
+            else if (index == 1)
+                return Mode.Graphical;
+            else if (index == 2)
+                return Mode.Background;
+            else if (index == 3)
+                return Mode.Minimap;
+            return Mode.Menu;
         }
 
         void LoadInterface()
@@ -132,33 +160,139 @@ namespace KuruLevelEditor
                 GridRow = 0,
                 GridRowSpan = 2,
                 Text = "Edit",
-                Width = 100,
-                Height = 50
+                Width = 150,
+                Height = 60
             };
 
             buttonEdit.Click += (s, a) =>
             {
                 if (comboMap.SelectedIndex == null || comboType.SelectedIndex == null)
                 {
-                    var messageBox = Dialog.CreateMessageBox("Error", "Please select an element and a map.");
-                    messageBox.ShowModal(_mainMenuDesktop);
+                    PleaseSelectMapMsg();
                 }
                 else
                 {
-                    if (comboType.SelectedIndex == 0)
-                        mode = Mode.Physical;
-                    else if (comboType.SelectedIndex == 1)
-                        mode = Mode.Graphical;
-                    else if (comboType.SelectedIndex == 2)
-                        mode = Mode.Background;
-                    else
-                        mode = Mode.Minimap;
+                    mode = IndexToSelectedMode(comboType.SelectedIndex);
                     map = comboMap.SelectedItem.Text;
                     LoadGrid();
                 }
             };
 
             grid.Widgets.Add(buttonEdit);
+
+            var buttonReset = new TextButton
+            {
+                GridColumn = 3,
+                GridRow = 0,
+                Text = "Reset this map",
+                Width = 150,
+                Height = 25
+            };
+            buttonReset.Click += (s, a) =>
+            {
+                if (comboMap.SelectedIndex == null || comboType.SelectedIndex == null)
+                {
+                    PleaseSelectMapMsg();
+                }
+                else
+                {
+                    var messageBox = Dialog.CreateMessageBox("Confirmation", "Are you sure ? This level will be reset.");
+                    messageBox.Closed += (s, a) =>
+                    {
+                        if (messageBox.Result)
+                        {
+                            Task.Factory.StartNew(() => {
+                                try
+                                {
+                                    mode = Mode.Loading;
+                                    File.Delete(Levels.GetLevelPath(comboMap.SelectedItem.Text,
+                                        MapType(IndexToSelectedMode(comboType.SelectedIndex))));
+                                    Settings.RunExtractor("");
+                                    mode = Mode.Menu;
+                                }
+                                catch { Exit(); }
+                            });
+                        }
+                    };
+                    messageBox.ShowModal(_mainMenuDesktop);
+                }
+            };
+            grid.Widgets.Add(buttonReset);
+
+            var buttonResetAll = new TextButton
+            {
+                GridColumn = 3,
+                GridRow = 1,
+                Text = "Reset ALL maps",
+                Width = 150,
+                Height = 25
+            };
+            buttonResetAll.Click += (s, a) =>
+            {
+                var messageBox = Dialog.CreateMessageBox("Confirmation", "Are you sure ? ALL levels will be reset.");
+                messageBox.Closed += (s, a) =>
+                {
+                    if (messageBox.Result)
+                    {
+                        Task.Factory.StartNew(() => {
+                            try
+                            {
+                                mode = Mode.Loading;
+                                Levels.DeleteAllLevels();
+                                Settings.RunExtractor("");
+                                reloadAtNextFrame = true;
+                            }
+                            catch { Exit(); }
+                        });
+                    }
+                };
+                messageBox.ShowModal(_mainMenuDesktop);
+            };
+            grid.Widgets.Add(buttonResetAll);
+
+            var buttonBuild = new TextButton
+            {
+                GridColumn = 2,
+                GridRow = 2,
+                GridRowSpan = 2,
+                Text = "Build",
+                Width = 150,
+                Height = 60
+            };
+            buttonBuild.Click += (s, a) =>
+            {
+                Task.Factory.StartNew(() => {
+                    try
+                    {
+                        mode = Mode.Loading;
+                        Settings.RunExtractor("");
+                        mode = Mode.Menu;
+                    }
+                    catch { Exit(); }
+                });
+            };
+            grid.Widgets.Add(buttonBuild);
+
+            var buttonBuildAndRun = new TextButton
+            {
+                GridColumn = 3,
+                GridRow = 2,
+                GridRowSpan = 2,
+                Text = "Build and run",
+                Width = 150,
+                Height = 60
+            };
+            buttonBuildAndRun.Click += (s, a) =>
+            {
+                Task.Factory.StartNew(() => {
+                    try
+                    {
+                        // TODO
+                    }
+                    catch { Exit(); }
+                });
+            };
+            grid.Widgets.Add(buttonBuildAndRun);
 
             _mainMenuDesktop = new Desktop();
             _mainMenuDesktop.Root = grid;
@@ -452,8 +586,10 @@ namespace KuruLevelEditor
             File.WriteAllLines(Levels.GetLevelPath(map, MapType()), lines);
         }
 
-        Levels.MapType MapType()
+        Levels.MapType MapType(Mode? mode = null)
         {
+            if (!mode.HasValue)
+                mode = this.mode;
             if (mode == Mode.Physical)
                 return Levels.MapType.Physical;
             if (mode == Mode.Graphical)
@@ -522,12 +658,19 @@ namespace KuruLevelEditor
                 sset, grid, new Point(-8, -8), overlays.ToArray(), underlays.ToArray());
         }
 
+        bool reloadAtNextFrame = false;
         protected override void Update(GameTime gameTime)
         {
             /*if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();*/
-
-            if (mode != Mode.Loading && mode != Mode.Menu && !_lateralMenuDesktop.HasModalWidget && _specialItemInterface == null)
+            if (reloadAtNextFrame)
+            {
+                reloadAtNextFrame = false;
+                Levels.Init();
+                Load.LoadSpriteContent(GraphicsDevice);
+                LoadInterface();
+            }
+            else if (mode != Mode.Loading && mode != Mode.Menu && !_lateralMenuDesktop.HasModalWidget && _specialItemInterface == null)
             {
                 MouseState ms = Mouse.GetState();
                 KeyboardState ks = Keyboard.GetState();
