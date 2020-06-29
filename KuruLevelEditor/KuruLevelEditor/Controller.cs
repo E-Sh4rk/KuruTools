@@ -24,7 +24,8 @@ namespace KuruLevelEditor
 			FLIP_VERTICAL,
 			TOGGLE_INVENTORY,
 			UNDO,
-			REDO
+			REDO,
+			TOGGLE_FULLSCREEN
 		}
 
 		static readonly TimeSpan MOVE_DELAY = new TimeSpan(0, 0, 0, 0, 50);
@@ -33,6 +34,7 @@ namespace KuruLevelEditor
 		static readonly TimeSpan FLIP_DELAY = new TimeSpan(0, 0, 0, 0, 500);
 		static readonly TimeSpan INVENTORY_DELAY = new TimeSpan(0, 0, 0, 0, 500);
 		static readonly TimeSpan UNDO_DELAY = new TimeSpan(0, 0, 0, 0, 100);
+		static readonly TimeSpan FULLSCREEN_DELAY = new TimeSpan(0, 0, 0, 3);
 
 		static TimeSpan last_direction_time = TimeSpan.Zero;
 		static TimeSpan last_zoom_time = TimeSpan.Zero;
@@ -40,6 +42,7 @@ namespace KuruLevelEditor
 		static TimeSpan last_flip_time = TimeSpan.Zero;
 		static TimeSpan last_inventory_time = TimeSpan.Zero;
 		static TimeSpan last_undo_time = TimeSpan.Zero;
+		static TimeSpan last_fullscreen_time = TimeSpan.Zero;
 		static int last_scroll_wheel_value = 0;
 		static bool last_flip_direction = false;
 		static bool last_flip_wheel_direction = false;
@@ -103,6 +106,17 @@ namespace KuruLevelEditor
 				}
 				else
 					last_brush_time = TimeSpan.Zero;
+
+				if (state.IsKeyDown(Keys.Enter))
+				{
+					if (last_fullscreen_time.Add(FULLSCREEN_DELAY) <= total_time)
+					{
+						last_fullscreen_time = total_time;
+						actions.Add(Action.TOGGLE_FULLSCREEN);
+					}
+				}
+				else
+					last_fullscreen_time = TimeSpan.Zero;
 			}
 			else if (state.IsKeyDown(Keys.LeftShift))
             {

@@ -703,8 +703,10 @@ namespace KuruLevelEditor
         bool reloadAtNextFrame = false;
         protected override void Update(GameTime gameTime)
         {
-            /*if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();*/
+            KeyboardState ks = Keyboard.GetState();
+            if ((ks.IsKeyDown(Keys.LeftAlt) || ks.IsKeyDown(Keys.RightAlt)) && ks.IsKeyDown(Keys.F4))
+                Exit();
+
             if (reloadAtNextFrame)
             {
                 reloadAtNextFrame = false;
@@ -712,29 +714,39 @@ namespace KuruLevelEditor
                 Load.LoadSpriteContent(GraphicsDevice);
                 LoadInterface();
             }
-            else if (mode != Mode.Loading && mode != Mode.Menu && !_lateralMenuDesktop.HasModalWidget && _specialItemInterface == null)
+            else
             {
+                bool gridControls = mode != Mode.Loading && mode != Mode.Menu && !_lateralMenuDesktop.HasModalWidget && _specialItemInterface == null;
                 MouseState ms = Mouse.GetState();
-                KeyboardState ks = Keyboard.GetState();
                 List<Controller.Action> actions = Controller.GetActionsGrid(ks, ms, gameTime);
                 foreach (Controller.Action action in actions)
                 {
-                    switch (action)
+                    if (gridControls)
                     {
-                        case Controller.Action.SELECT_PREVIOUS:
-                            sset.SelectPrevious();
-                            break;
-                        case Controller.Action.SELECT_NEXT:
-                            sset.SelectNext();
-                            break;
-                        default:
-                            editor.PerformAction(gameTime, action);
-                            break;
+                        switch (action)
+                        {
+                            case Controller.Action.TOGGLE_FULLSCREEN:
+                                _graphics.ToggleFullScreen();
+                                break;
+                            case Controller.Action.SELECT_PREVIOUS:
+                                sset.SelectPrevious();
+                                break;
+                            case Controller.Action.SELECT_NEXT:
+                                sset.SelectNext();
+                                break;
+                            default:
+                                editor.PerformAction(gameTime, action);
+                                break;
+                        }
                     }
-                    
+                    else if (action == Controller.Action.TOGGLE_FULLSCREEN)
+                        _graphics.ToggleFullScreen();
                 }
-                editor.Update(gameTime, ms, ks);
-                sset.Update(ms);
+                if (gridControls)
+                {
+                    editor.Update(gameTime, ms, ks);
+                    sset.Update(ms);
+                }
             }
 
             base.Update(gameTime);
