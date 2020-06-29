@@ -710,9 +710,10 @@ namespace KuruLevelEditor
             if (reloadAtNextFrame)
             {
                 reloadAtNextFrame = false;
-                Levels.Init();
-                Load.LoadSpriteContent(GraphicsDevice);
-                LoadInterface();
+                if (Levels.Init() && Load.LoadSpriteContent(GraphicsDevice))
+                    LoadInterface();
+                else
+                    Exit();
             }
             else
             {
