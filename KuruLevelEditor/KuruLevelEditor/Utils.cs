@@ -66,6 +66,7 @@ namespace KuruLevelEditor
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = Environment.OSVersion.Platform == PlatformID.Win32NT ? "PowerShell.exe" : "/bin/bash",
+                    WorkingDirectory = AppDomain.CurrentDomain.BaseDirectory,
                     Arguments = $"-c \"{escapedArgs}\"",
                     RedirectStandardOutput = true,
                     UseShellExecute = false,

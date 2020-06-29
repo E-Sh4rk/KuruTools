@@ -70,14 +70,14 @@ namespace KuruLevelEditor
                 {
                     try
                     {
-                        Settings.RunExtractor("--extract-tiles tiles");
+                        string escapedTiles = Levels.TILES_DIR.Escape();
+                        Settings.RunExtractor($"--extract-tiles \"{escapedTiles}\"");
                         reloadAtNextFrame = true;
                     }
                     catch { Exit(); }
                 });
             }
 
-            // TODO: Test ROM extractor and Emulator commands (what if in an other directory??)
             // TODO: Remember selection between grids so that it is possible to copy parts of other levels
         }
 

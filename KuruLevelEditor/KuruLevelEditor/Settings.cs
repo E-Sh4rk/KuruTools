@@ -18,7 +18,7 @@ namespace KuruLevelEditor
             try
             {
                 var builder = new ConfigurationBuilder()
-                .SetBasePath(Environment.CurrentDirectory)
+                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
                 .AddIniFile("config.ini", optional: false);
                 var config = builder.Build();
                 ExtractorCommand = config.GetSection("ROM").GetSection("ExtractorCommand").Value;
@@ -33,9 +33,10 @@ namespace KuruLevelEditor
 
         public static string RunExtractor(string additionalArgs)
         {
-            string escapedInput = Input.Escape();
-            string escapedOutput = Output.Escape();
-            string args = $"--input \"{escapedInput}\" --output \"{escapedOutput}\" {additionalArgs}";
+            string escapedInput = Path.GetFullPath(Input).Escape();
+            string escapedOutput = Path.GetFullPath(Output).Escape();
+            string escapedWorkspace = Levels.LEVELS_DIR.Escape();
+            string args = $"--input \"{escapedInput}\" --output \"{escapedOutput}\" --workspace \"{escapedWorkspace}\" {additionalArgs}";
             string cmd = ExtractorCommand.Replace("%ARGS%", args);
             return cmd.RunCommand();
         }

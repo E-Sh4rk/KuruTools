@@ -17,8 +17,8 @@ namespace KuruLevelEditor
         }
         static readonly string[] MAP_TYPE_STR = new string[] { "physical", "graphical", "background", "minimap" };
 
-        const string DIR = "levels";
-        const string TILES_DIR = "tiles";
+        public static string LEVELS_DIR = Path.GetFullPath("levels");
+        public static string TILES_DIR = Path.GetFullPath("tiles");
 
         public static string[] AllLevels { get; private set; }
         public static string[] AllWorlds { get; private set; }
@@ -27,7 +27,7 @@ namespace KuruLevelEditor
             try
             {
                 List<string> res = new List<string>();
-                foreach (string file in Directory.EnumerateFiles(DIR))
+                foreach (string file in Directory.EnumerateFiles(LEVELS_DIR))
                 {
                     string name = Path.GetFileNameWithoutExtension(file);
                     name = name.Substring(0, name.IndexOf('.'));
@@ -50,11 +50,11 @@ namespace KuruLevelEditor
 
         public static void DeleteAllLevels()
         {
-            Directory.Delete(DIR, true);
+            Directory.Delete(LEVELS_DIR, true);
         }
         public static string GetLevelPath(string name, MapType type)
         {
-            return Path.Combine(DIR, name + "." + MAP_TYPE_STR[(int)type] + ".txt");
+            return Path.Combine(LEVELS_DIR, name + "." + MAP_TYPE_STR[(int)type] + ".txt");
         }
         public static string GetTilePath(string world, MapType type, int nb)
         {
