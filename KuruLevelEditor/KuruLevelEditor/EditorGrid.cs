@@ -55,7 +55,8 @@ namespace KuruLevelEditor
         public OverlayGrid[] Overlays { get; private set; }
         public OverlayGrid[] Underlays { get; private set; }
         public bool GridEnabled { get; set; }
-        public EditorGrid(Game1 game, Levels.MapType type, Rectangle bounds, TilesSet sprites, int[,] grid, Point position, OverlayGrid[] overlays, OverlayGrid[] underlays)
+        public EditorGrid(Game1 game, Levels.MapType type, Rectangle bounds, TilesSet sprites, int[,] grid,
+            Point position, OverlayGrid[] overlays, OverlayGrid[] underlays, int[,] selectionGrid)
         {
             this.game = game;
             this.bounds = bounds;
@@ -63,6 +64,7 @@ namespace KuruLevelEditor
             this.grid = grid;
             this.position = position;
             this.type = type;
+            this.selectionGrid = selectionGrid;
             GridEnabled = true;
             // Load Inventory
             if (type != Levels.MapType.Minimap)
@@ -154,6 +156,10 @@ namespace KuruLevelEditor
         public int[,] MapGrid
         {
             get { return grid; }
+        }
+        public int[,] SelectionGrid
+        {
+            get { return selectionGrid; }
         }
 
         public void AddToUndoHistory(int[,] g = null)

@@ -77,8 +77,18 @@ namespace KuruLevelEditor
                     catch { Exit(); }
                 });
             }
+        }
 
-            // TODO: Remember selection between grids so that it is possible to copy parts of other levels
+        int[,] _lastSelectionGrid;
+        string _lastWorld;
+        Levels.MapType _lastMapType;
+        void QuitEditor()
+        {
+            _lastSelectionGrid = editor.SelectionGrid;
+            _lastWorld = Levels.GetWorldOfLevel(map);
+            _lastMapType = MapType();
+            editor = null;
+            mode = Mode.Menu;
         }
 
         void PleaseSelectMapMsg()
@@ -345,7 +355,7 @@ namespace KuruLevelEditor
             buttonSaveQuit.Click += (s, a) =>
             {
                 SaveGrid();
-                mode = Mode.Menu;
+                QuitEditor();
             };
             lateral.Widgets.Add(buttonSaveQuit);
 
@@ -359,7 +369,7 @@ namespace KuruLevelEditor
             };
             buttonQuit.Click += (s, a) =>
             {
-                mode = Mode.Menu;
+                QuitEditor();
             };
             lateral.Widgets.Add(buttonQuit);
 
@@ -637,6 +647,7 @@ namespace KuruLevelEditor
             List<EditorGrid.OverlayGrid> underlays = new List<EditorGrid.OverlayGrid>();
             List<EditorGrid.OverlayGrid> overlays = new List<EditorGrid.OverlayGrid>();
             string world = Levels.GetWorldOfLevel(map);
+            Levels.MapType mapType = MapType();
             if (mode == Mode.Minimap)
             {
                 grid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, Levels.MapType.Minimap)), 64, 64,
@@ -646,8 +657,8 @@ namespace KuruLevelEditor
             }
             else
             {
-                grid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, MapType())), Levels.TilesOffset(world, MapType()));
-                sset = new TilesSet(Load.Tiles[new Load.WorldAndType(world, MapType())],
+                grid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, mapType)), Levels.TilesOffset(world, mapType));
+                sset = new TilesSet(Load.Tiles[new Load.WorldAndType(world, mapType)],
                     true, new Rectangle(0, PALETTE_SELECTOR_Y, LATERAL_PANEL_WIDTH, GraphicsDevice.Viewport.Height - PALETTE_SELECTOR_Y), 64);
 
                 int[,] ogrid;
@@ -681,9 +692,12 @@ namespace KuruLevelEditor
                 }
             }
 
+            int[,] selectionGrid = null;
+            if (_lastMapType == mapType && (_lastWorld == world || mapType == Levels.MapType.Physical || mapType == Levels.MapType.Minimap))
+                selectionGrid = _lastSelectionGrid;
             editor = new EditorGrid(this, MapType(),
                 new Rectangle(LATERAL_PANEL_WIDTH, 0, GraphicsDevice.Viewport.Width - LATERAL_PANEL_WIDTH, GraphicsDevice.Viewport.Height),
-                sset, grid, new Point(-8, -8), overlays.ToArray(), underlays.ToArray());
+                sset, grid, new Point(-8, -8), overlays.ToArray(), underlays.ToArray(), selectionGrid);
         }
 
         bool reloadAtNextFrame = false;
