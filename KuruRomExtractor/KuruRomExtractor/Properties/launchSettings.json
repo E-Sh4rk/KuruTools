@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "KuruTools": {
+    "KuruRomExtractor": {
       "commandName": "Project",
       "commandLineArgs": "--extract-tiles \"tiles\""
     }

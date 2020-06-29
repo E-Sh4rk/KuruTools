@@ -4,7 +4,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace KuruTools
+namespace KuruRomExtractor
 {
     static class Utils
     {

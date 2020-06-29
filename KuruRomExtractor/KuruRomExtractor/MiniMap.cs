@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace KuruTools
+namespace KuruRomExtractor
 {
     class MiniMap
     {

@@ -6,7 +6,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
 
-namespace KuruTools
+namespace KuruRomExtractor
 {
     [StructLayout(LayoutKind.Explicit, Size = 12)]
     struct WorldEntry

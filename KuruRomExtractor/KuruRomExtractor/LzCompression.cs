@@ -5,7 +5,7 @@ using System.Net;
 using System.Runtime.InteropServices.ComTypes;
 using System.Text;
 
-namespace KuruTools
+namespace KuruRomExtractor
 {
     public static class LzCompression
     {

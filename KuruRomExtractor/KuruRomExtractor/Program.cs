@@ -2,7 +2,7 @@
 using System.Drawing;
 using System.IO;
 
-namespace KuruTools
+namespace KuruRomExtractor
 {
     // TODO: Document public functions
     class Program
@@ -15,30 +15,13 @@ namespace KuruTools
         /// <param name="workspace">The path to the directory containing the level data</param>
         /// <param name="relocate">Relocate the new maps at the end of the ROM (prevent overlapping, but increase ROM size)</param>
         /// <param name="extractTiles">Path to the directory where tiles will be extracted</param>
-        /// <param name="debug">Print debug information</param>
         static void Main(string input = "input.gba", string output = "output.gba", string workspace = "levels",
-            bool relocate = true, string extractTiles = null, bool debug = false)
+            bool relocate = true, string extractTiles = null)
         {
-            Console.WriteLine("=== Kuru Kuru Kururin Tools ===");
+            Console.WriteLine("=== Kuru Kuru Kururin ROM Extractor ===");
             Console.WriteLine("");
             File.Copy(input, output, true);
             Levels levels = new Levels(output);
-
-            // Print all level infos
-            if (debug)
-            {
-                foreach (Levels.World w in Enum.GetValues(typeof(Levels.World)))
-                {
-                    Console.WriteLine(string.Format("===== {0} =====", Enum.GetName(typeof(Levels.World), w)));
-                    for (int l = 0; l < Levels.NumberOfLevels(w); l++)
-                    {
-                        Levels.LevelInfo info = levels.GetLevelInfo(new Levels.LevelIdentifier(w, l));
-                        Console.WriteLine(string.Format("Level {1} Data Base Address: {0:X}", info.DataBaseAddress, l + 1));
-                        Console.WriteLine(string.Format("Level {1} Uncompressed Size: {0:X}", info.DataUncompressedSize, l + 1));
-                    }
-                    Console.WriteLine("");
-                }
-            }
 
             if (!string.IsNullOrEmpty(extractTiles))
             {

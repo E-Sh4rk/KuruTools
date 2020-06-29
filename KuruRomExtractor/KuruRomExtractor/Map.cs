@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-namespace KuruTools
+namespace KuruRomExtractor
 {
     // TODO: Function to normalize the level (remove useless orientation data) and thus improve compression.
     public class Map
