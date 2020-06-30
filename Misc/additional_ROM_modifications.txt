@@ -1,5 +1,10 @@
 Additional ROM modifications:
 
 - Disable 'See map':
-0800A770 --> NOP (46C0)
+0800A770 --> nop (46C0, C046 in little endian)
 (for debugging: put a breakpoint on gamemode change: [3004440]!)
+
+- Disable Training:
+0800486C --> cmp r0,2h (2802, 0228 in little endian)
+08004892 --> mov r0,2h (2002, 0220 in little endian)
+(for debugging: put a breakpoint on menu selection change: [3007E61]!)
