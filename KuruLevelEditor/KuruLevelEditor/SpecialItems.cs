@@ -37,34 +37,37 @@ namespace KuruLevelEditor
             _logic.Bonus = bonus;
             // Moving objects
             List<object> moving = new List<object>();
-            string[] lines = movingObjects.Text.Replace("\r", "").Split("\n", StringSplitOptions.RemoveEmptyEntries);
-            foreach (string line in lines)
+            if (movingObjects.Text != null)
             {
-                try
+                string[] lines = movingObjects.Text.Replace("\r", "").Split("\n", StringSplitOptions.RemoveEmptyEntries);
+                foreach (string line in lines)
                 {
-                    string[] elts = line.Split(" ", StringSplitOptions.RemoveEmptyEntries);
-                    int id = Convert.ToInt32(elts[0]);
-                    int p1 = Convert.ToInt32(elts[2]);
-                    int p2 = Convert.ToInt32(elts[3]);
-                    int p3 = Convert.ToInt32(elts[4]);
-                    int p4 = Convert.ToInt32(elts[5]);
-                    switch (elts[1])
+                    try
                     {
-                        case "S":
-                            moving.Add(new PhysicalMapLogic.ShooterInfo(id, p1, p2, p3, p4));
-                            break;
-                        case "P":
-                            moving.Add(new PhysicalMapLogic.PistonInfo(id, p1, p2, p3, p4));
-                            break;
-                        case "R":
-                            moving.Add(new PhysicalMapLogic.RollerInfo(id, p1, p2, p3, p4));
-                            break;
-                        default:
-                            // Unrecognized object
-                            break;
+                        string[] elts = line.Split(" ", StringSplitOptions.RemoveEmptyEntries);
+                        int id = Convert.ToInt32(elts[0]);
+                        int p1 = Convert.ToInt32(elts[2]);
+                        int p2 = Convert.ToInt32(elts[3]);
+                        int p3 = Convert.ToInt32(elts[4]);
+                        int p4 = Convert.ToInt32(elts[5]);
+                        switch (elts[1])
+                        {
+                            case "S":
+                                moving.Add(new PhysicalMapLogic.ShooterInfo(id, p1, p2, p3, p4));
+                                break;
+                            case "P":
+                                moving.Add(new PhysicalMapLogic.PistonInfo(id, p1, p2, p3, p4));
+                                break;
+                            case "R":
+                                moving.Add(new PhysicalMapLogic.RollerInfo(id, p1, p2, p3, p4));
+                                break;
+                            default:
+                                // Unrecognized object
+                                break;
+                        }
                     }
+                    catch { }
                 }
-                catch { }
             }
             _logic.MovingObjects = moving;
         }
