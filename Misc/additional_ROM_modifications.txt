@@ -1,0 +1,5 @@
+Additional ROM modifications:
+
+- Disable 'See map':
+0800A770 --> NOP (46C0)
+(for debugging: put a breakpoint on gamemode change: [3004440]!)
