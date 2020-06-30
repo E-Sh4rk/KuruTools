@@ -320,6 +320,16 @@ namespace KuruLevelEditor
                         grid = redoHistory.Pop();
                     }
                     break;
+                case Controller.Action.FORCE_PALETTE:
+                    if (selectionGrid != null)
+                    {
+                        for (int i = 0; i < selectionGrid.GetLength(0); i++)
+                        {
+                            for (int j = 0; j < selectionGrid.GetLength(1); j++)
+                                selectionGrid[i, j] = ChangePalette(selectionGrid[i, j], sprites.SelectedSet);
+                        }
+                    }
+                    break;
             }
         }
 
@@ -477,15 +487,19 @@ namespace KuruLevelEditor
                 return tile_id + flips + palette;
             }
         }
+        int ChangePalette(int tile, int palette)
+        {
+            return (tile & 0x0FFF) + (palette << 12);
+        }
         void DrawTile(SpriteBatch sprite_batch, TilesSet sprites, Rectangle dst, int tile, bool overridePalette, bool showSpecial)
         {
             if (type == Levels.MapType.Minimap)
                 sprites.Draw(sprite_batch, overridePalette ? sprites.SelectedSet : tile, 0, dst);
             else
             {
+                tile = overridePalette ? ChangePalette(tile, sprites.SelectedSet) : tile;
                 int tile_id = tile & 0x3FF;
-                int palette = overridePalette ? sprites.SelectedSet : (tile & 0xF000) >> 12;
-                tile = (tile & 0x0FFF) + (palette << 12);
+                int palette = (tile & 0xF000) >> 12;
                 SpriteEffects effects =
                     ((tile & 0x400) != 0 ? SpriteEffects.FlipHorizontally : SpriteEffects.None) |
                     ((tile & 0x800) != 0 ? SpriteEffects.FlipVertically : SpriteEffects.None);

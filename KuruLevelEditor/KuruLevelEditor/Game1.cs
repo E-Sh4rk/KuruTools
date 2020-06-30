@@ -547,6 +547,7 @@ namespace KuruLevelEditor
                     "Make a selection: ALT+LeftClick\n" +
                     "Brush size: ALT+Wheel or ALT+[+/-]\n" +
                     "Flip selection: SHIFT+Wheel or SHIFT+Arrows\n" +
+                    "Force palette of selection: SHIFT+Space\n" +
                     "Open/Close inventory: Space\n" +
                     "Undo / Redo: CTRL+Z / CTRL+Y"
                     );

@@ -25,7 +25,8 @@ namespace KuruLevelEditor
 			TOGGLE_INVENTORY,
 			UNDO,
 			REDO,
-			TOGGLE_FULLSCREEN
+			TOGGLE_FULLSCREEN,
+			FORCE_PALETTE
 		}
 
 		static readonly TimeSpan MOVE_DELAY = new TimeSpan(0, 0, 0, 0, 50);
@@ -35,6 +36,7 @@ namespace KuruLevelEditor
 		static readonly TimeSpan INVENTORY_DELAY = new TimeSpan(0, 0, 0, 0, 500);
 		static readonly TimeSpan UNDO_DELAY = new TimeSpan(0, 0, 0, 0, 100);
 		static readonly TimeSpan FULLSCREEN_DELAY = new TimeSpan(0, 0, 0, 3);
+		static readonly TimeSpan FORCE_PALETTE_DELAY = new TimeSpan(0, 0, 0, 0, 500);
 
 		static TimeSpan last_direction_time = TimeSpan.Zero;
 		static TimeSpan last_zoom_time = TimeSpan.Zero;
@@ -43,6 +45,7 @@ namespace KuruLevelEditor
 		static TimeSpan last_inventory_time = TimeSpan.Zero;
 		static TimeSpan last_undo_time = TimeSpan.Zero;
 		static TimeSpan last_fullscreen_time = TimeSpan.Zero;
+		static TimeSpan last_force_palette_time = TimeSpan.Zero;
 		static int last_scroll_wheel_value = 0;
 		static bool last_flip_direction = false;
 		static bool last_flip_wheel_direction = false;
@@ -147,6 +150,17 @@ namespace KuruLevelEditor
 				}
 				else
 					last_flip_time = TimeSpan.Zero;
+
+				if (state.IsKeyDown(Keys.Space))
+				{
+					if (last_force_palette_time.Add(FORCE_PALETTE_DELAY) <= total_time)
+					{
+						last_force_palette_time = total_time;
+						actions.Add(Action.FORCE_PALETTE);
+					}
+				}
+				else
+					last_force_palette_time = TimeSpan.Zero;
 			}
 			else
             {
