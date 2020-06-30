@@ -19,7 +19,7 @@ namespace KuruRomExtractor
         [FieldOffset(4)]
         int world_data_mem_address;
         [FieldOffset(8)]
-        int dummy1; // Seems related to bonuses
+        int dummy1; // Seems related to bonuses or training mode
 
         public int WorldInfoBaseAddress
         {
@@ -54,7 +54,7 @@ namespace KuruRomExtractor
         [FieldOffset(36)]
         public int addr5_uncompressed_size;
         [FieldOffset(40)]
-        public int addr6_offset; // Palette (for birds and bonuses?)
+        public int addr6_offset; // Palette for background layers, for the training mode
         [FieldOffset(44)]
         public int addr6_uncompressed_size;
         [FieldOffset(48)]
