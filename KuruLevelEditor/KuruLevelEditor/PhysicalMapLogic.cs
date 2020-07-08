@@ -187,9 +187,13 @@ namespace KuruLevelEditor
                         int type = map_data[offset] & 0x3FF;
                         offset++;
                         int p1 = GetMapInfoData(map_data, ref offset);
-                        int p2 = GetMapInfoData(map_data, ref offset);
-                        int p3 = GetMapInfoData(map_data, ref offset);
-                        int p4 = GetMapInfoData(map_data, ref offset);
+                        int p2 = 0, p3 = 0, p4 = 0;
+                        if (type != 0xF6) // Not a catcher
+                        {
+                            p2 = GetMapInfoData(map_data, ref offset);
+                            p3 = GetMapInfoData(map_data, ref offset);
+                            p4 = GetMapInfoData(map_data, ref offset);
+                        }
                         switch (type)
                         {
                             case 0xF4:
@@ -200,6 +204,9 @@ namespace KuruLevelEditor
                                 break;
                             case 0xF7:
                                 res.Add(new RollerInfo(id, p1, p2, p3, p4));
+                                break;
+                            case 0xF6:
+                                res.Add(new CatcherInfo(id, p1));
                                 break;
                             default:
                                 // Should not happen...
@@ -274,12 +281,19 @@ namespace KuruLevelEditor
                         type = 0xF5;
                         param = pi.Params();
                     }
-                    else // if (o is RollerInfo)
+                    else if (o is RollerInfo)
                     {
                         RollerInfo ri = (RollerInfo)o;
                         id = ri.ID;
                         type = 0xF7;
                         param = ri.Params();
+                    }
+                    else // CatcherInfo
+                    {
+                        CatcherInfo ci = (CatcherInfo)o;
+                        id = ci.ID;
+                        type = 0xF6;
+                        param = ci.Params();
                     }
                     List<int> elt = new List<int>();
                     elt.Add(0xF1);
@@ -387,6 +401,20 @@ namespace KuruLevelEditor
             public int[] Params()
             {
                 return new int[] { dir, startTime, period, speed };
+            }
+        }
+        public struct CatcherInfo
+        {
+            public CatcherInfo(int ID, int dir)
+            {
+                this.ID = ID;
+                this.dir = dir;
+            }
+            public int ID;
+            public int dir;
+            public int[] Params()
+            {
+                return new int[] { dir };
             }
         }
     }

@@ -46,11 +46,16 @@ namespace KuruLevelEditor
                     {
                         string[] elts = line.Split(" ", StringSplitOptions.RemoveEmptyEntries);
                         int id = Convert.ToInt32(elts[0]);
+                        string type = elts[1];
                         int p1 = Convert.ToInt32(elts[2]);
-                        int p2 = Convert.ToInt32(elts[3]);
-                        int p3 = Convert.ToInt32(elts[4]);
-                        int p4 = Convert.ToInt32(elts[5]);
-                        switch (elts[1])
+                        int p2 = 0, p3 = 0, p4 = 0;
+                        if (type != "C")
+                        {
+                            p2 = Convert.ToInt32(elts[3]);
+                            p3 = Convert.ToInt32(elts[4]);
+                            p4 = Convert.ToInt32(elts[5]);
+                        }
+                        switch (type)
                         {
                             case "S":
                                 moving.Add(new PhysicalMapLogic.ShooterInfo(id, p1, p2, p3, p4));
@@ -60,6 +65,9 @@ namespace KuruLevelEditor
                                 break;
                             case "R":
                                 moving.Add(new PhysicalMapLogic.RollerInfo(id, p1, p2, p3, p4));
+                                break;
+                            case "C":
+                                moving.Add(new PhysicalMapLogic.CatcherInfo(id, p1));
                                 break;
                             default:
                                 // Unrecognized object
@@ -72,7 +80,7 @@ namespace KuruLevelEditor
             _logic.MovingObjects = moving;
         }
 
-        void addToMovingObjectsBox(string ID, string type, string p1, string p2, string p3, string p4,
+        void add4pToMovingObjectsBox(string ID, string type, string p1, string p2, string p3, string p4,
             int p1d, int p2d, int p3d, int p4d)
         {
             if (string.IsNullOrWhiteSpace(ID)) return;
@@ -93,6 +101,21 @@ namespace KuruLevelEditor
 
             movingObjects.Text += ID.PadLeft(5, ' ') + " " + type + " " + p1.PadLeft(5, ' ') + " "
                 + p2.PadLeft(5, ' ') + " " + p3.PadLeft(5, ' ') + " " + p4.PadLeft(5, ' ') + Environment.NewLine;
+        }
+
+        void add1pToMovingObjectsBox(string ID, string type, string p1, int p1d)
+        {
+            if (string.IsNullOrWhiteSpace(ID)) return;
+
+            if (string.IsNullOrWhiteSpace(movingObjects.Text))
+                movingObjects.Text = "";
+            else if (!movingObjects.Text.EndsWith('\n'))
+                movingObjects.Text += Environment.NewLine;
+
+            if (string.IsNullOrWhiteSpace(p1))
+                p1 = p1d.ToString();
+
+            movingObjects.Text += ID.PadLeft(5, ' ') + " " + type + " " + p1.PadLeft(5, ' ') + Environment.NewLine;
         }
 
         public SpecialItems(Game1 game, PhysicalMapLogic logic)
@@ -272,7 +295,7 @@ namespace KuruLevelEditor
             };
             shooterAdd.Click += (s, a) =>
             {
-                addToMovingObjectsBox(shooterId.Text, "S", shooterMinDir.Text, shooterMaxDir.Text, shooterStartTime.Text, shooterPeriod.Text,
+                add4pToMovingObjectsBox(shooterId.Text, "S", shooterMinDir.Text, shooterMaxDir.Text, shooterStartTime.Text, shooterPeriod.Text,
                     0, 0, 0, PhysicalMapLogic.ShooterInfo.DEFAULT_PERIOD);
             };
             grid.Widgets.Add(shooterAdd);
@@ -334,7 +357,7 @@ namespace KuruLevelEditor
             };
             pistonAdd.Click += (s, a) =>
             {
-                addToMovingObjectsBox(pistonId.Text, "P", pistonDir.Text, pistonStartTime.Text, pistonWaitPeriod.Text, pistonMovePeriod.Text,
+                add4pToMovingObjectsBox(pistonId.Text, "P", pistonDir.Text, pistonStartTime.Text, pistonWaitPeriod.Text, pistonMovePeriod.Text,
                     0, 0, PhysicalMapLogic.PistonInfo.DEFAULT_WAIT_PERIOD, PhysicalMapLogic.PistonInfo.DEFAULT_MOVE_PERIOD);
             };
             grid.Widgets.Add(pistonAdd);
@@ -396,39 +419,87 @@ namespace KuruLevelEditor
             };
             rollerAdd.Click += (s, a) =>
             {
-                addToMovingObjectsBox(rollerId.Text, "R", rollerDir.Text, rollerStartTime.Text, rollerPeriod.Text, rollerSpeed.Text,
+                add4pToMovingObjectsBox(rollerId.Text, "R", rollerDir.Text, rollerStartTime.Text, rollerPeriod.Text, rollerSpeed.Text,
                     0, 0, 120, PhysicalMapLogic.RollerInfo.DEFAULT_SPEED);
             };
             grid.Widgets.Add(rollerAdd);
+
+            Label labelCatcher = new Label()
+            {
+                Id = "labelCatcher",
+                Text = "Roller Catcher",
+                GridColumn = 0,
+                GridRow = 19
+            };
+            grid.Widgets.Add(labelCatcher);
+            TextBox catcherId = new TextBox()
+            {
+                GridRow = 19,
+                GridColumn = 1,
+                HintText = "ID",
+                Width = 150
+            };
+            grid.Widgets.Add(catcherId);
+            TextBox catcherDir = new TextBox()
+            {
+                GridRow = 19,
+                GridColumn = 2,
+                HintText = "Dir",
+                Width = 150
+            };
+            grid.Widgets.Add(catcherDir);
+            var catcherAdd = new TextButton
+            {
+                GridColumn = 6,
+                GridRow = 19,
+                Text = "Add catcher",
+                Width = 150,
+            };
+            catcherAdd.Click += (s, a) =>
+            {
+                add1pToMovingObjectsBox(catcherId.Text, "C", catcherDir.Text, 0);
+            };
+            grid.Widgets.Add(catcherAdd);
 
             foreach (object o in _logic.MovingObjects)
             {
                 int id;
                 string type;
                 int[] param;
-                if (o is PhysicalMapLogic.ShooterInfo)
+                if (o is PhysicalMapLogic.CatcherInfo)
                 {
-                    PhysicalMapLogic.ShooterInfo si = (PhysicalMapLogic.ShooterInfo)o;
-                    id = si.ID;
-                    type = "S";
-                    param = si.Params();
+                    PhysicalMapLogic.CatcherInfo ci = (PhysicalMapLogic.CatcherInfo)o;
+                    id = ci.ID;
+                    type = "C";
+                    param = ci.Params();
+                    add1pToMovingObjectsBox(id.ToString(), type, param[0].ToString(), 0);
                 }
-                else if (o is PhysicalMapLogic.PistonInfo)
+                else
                 {
-                    PhysicalMapLogic.PistonInfo pi = (PhysicalMapLogic.PistonInfo)o;
-                    id = pi.ID;
-                    type = "P";
-                    param = pi.Params();
+                    if (o is PhysicalMapLogic.ShooterInfo)
+                    {
+                        PhysicalMapLogic.ShooterInfo si = (PhysicalMapLogic.ShooterInfo)o;
+                        id = si.ID;
+                        type = "S";
+                        param = si.Params();
+                    }
+                    else if (o is PhysicalMapLogic.PistonInfo)
+                    {
+                        PhysicalMapLogic.PistonInfo pi = (PhysicalMapLogic.PistonInfo)o;
+                        id = pi.ID;
+                        type = "P";
+                        param = pi.Params();
+                    }
+                    else // if (o is PhysicalMapLogic.RollerInfo)
+                    {
+                        PhysicalMapLogic.RollerInfo ri = (PhysicalMapLogic.RollerInfo)o;
+                        id = ri.ID;
+                        type = "R";
+                        param = ri.Params();
+                    }
+                    add4pToMovingObjectsBox(id.ToString(), type, param[0].ToString(), param[1].ToString(), param[2].ToString(),
+                        param[3].ToString(), 0, 0, 0, 0);
                 }
-                else // if (o is PhysicalMapLogic.RollerInfo)
-                {
-                    PhysicalMapLogic.RollerInfo ri = (PhysicalMapLogic.RollerInfo)o;
-                    id = ri.ID;
-                    type = "R";
-                    param = ri.Params();
-                }
-                addToMovingObjectsBox(id.ToString(), type, param[0].ToString(), param[1].ToString(), param[2].ToString(),
-                    param[3].ToString(), 0, 0, 0, 0);
             }
 
             // --- SUBMIT ---
@@ -436,7 +507,7 @@ namespace KuruLevelEditor
             var buttonQuit = new TextButton
             {
                 GridColumn = 1,
-                GridRow = 20,
+                GridRow = 21,
                 Text = "Quit",
                 Width = 150,
             };
