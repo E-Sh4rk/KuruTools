@@ -694,7 +694,8 @@ namespace KuruLevelEditor
             }
 
             int[,] selectionGrid = null;
-            if (_lastMapType == mapType && (_lastWorld == world || mapType == Levels.MapType.Physical || mapType == Levels.MapType.Minimap))
+            if (_lastMapType == mapType /*&& (_lastWorld == world || mapType == Levels.MapType.Physical || mapType == Levels.MapType.Minimap)*/)
+                // Sometimes, inter-world copy paste can be relevant even for grounds and backgrounds
                 selectionGrid = _lastSelectionGrid;
             editor = new EditorGrid(this, MapType(),
                 new Rectangle(LATERAL_PANEL_WIDTH, 0, GraphicsDevice.Viewport.Width - LATERAL_PANEL_WIDTH, GraphicsDevice.Viewport.Height),
