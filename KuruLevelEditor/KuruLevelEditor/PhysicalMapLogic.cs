@@ -14,7 +14,7 @@ namespace KuruLevelEditor
     {
         // ===== CONTROL TYPES AND COLORS =====
         public readonly static int[] VISIBLE_CONTROL_TILES = new int[] { 0xF2, 0xF3 };
-        public readonly static int[] HEALING_ZONE_IDS = new int[] { 0xEA, 0xEB, /*0xEC,*/ 0xED, 0xEE };
+        public readonly static int[] HEALING_ZONE_IDS = new int[] { 0xEA, 0xEB, 0xEC, 0xED, 0xEE, 0xEF };
         public readonly static int[] STARTING_ZONE_IDS = new int[] { 0xFB, 0xFC, 0xFD };
         public readonly static int[] ENDING_ZONE_IDS = new int[] { 0xFE, 0xFF };
         public readonly static int[] SPRING_IDS = new int[] { 0xF8, 0xF9 };
@@ -22,7 +22,7 @@ namespace KuruLevelEditor
         public readonly static int[] MOVING_OBJECTS_IDS = new int[] { 0xF0, 0xF1, 0xF4, 0xF5, 0xF6, 0xF7 };
 
         readonly static Color HEALING_ZONE_COLOR = new Color(0xFF, 0x33, 0x33, 0xFF);
-        readonly static Color HEALING_ZONE_BASE_COLOR = new Color(0xFF, 0x73, 0x73, 0xFF);
+        readonly static Color HEALING_ZONE_BASE_COLOR = new Color(0xFF, 0x63, 0x73, 0xFF);
         readonly static Color STARTING_ZONE_BASE_COLOR = new Color(0xA0, 0xA0, 0xFF, 0xFF);
         readonly static Color STARTING_ZONE_CW_COLOR = new Color(0x20, 0x5C, 0xFF, 0xFF);
         readonly static Color STARTING_ZONE_CCW_COLOR = new Color(0x5C, 0x20, 0xFF, 0xFF);
@@ -33,12 +33,18 @@ namespace KuruLevelEditor
 
         public static Color HealingZoneColor(int tile_id)
         {
-            Color c = tile_id < 0xEC ? HEALING_ZONE_BASE_COLOR : HEALING_ZONE_COLOR;
+            Color c = tile_id < 0xED ? HEALING_ZONE_BASE_COLOR : HEALING_ZONE_COLOR;
             if (tile_id == 0xEB || tile_id == 0xEE)
             {
                 c.B += 0x60;
-                c.G -= 0x30;
+                c.G -= 0x18;
                 c.R -= 0x30;
+            }
+            else if (tile_id == 0xEC || tile_id == 0xEF)
+            {
+                c.B += 0x60;
+                c.G -= 0x30;
+                c.R -= 0x60;
             }
 
             return c;
