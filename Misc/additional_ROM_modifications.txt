@@ -8,8 +8,8 @@ Additional ROM modifications:
 0800486C --> cmp r0,2h (2802, 0228 in little endian)
 08004892 --> mov r0,2h (2002, 0220 in little endian)
 (for debugging: put a breakpoint on menu selection change: [3007E61]!)
+(for debugging: put a breakpoint on mode change: [3004436]!)
 
 - Disable Easy:
-08004874 -> mov r0, 1h (2001, 0120 in little endian)
-0800488A -> cmp r1, 1h (2901, 0129 in little endian)
+0800D210 -> nop (46C0, C046 in little endian)
 (for debugging: put a breakpoint on menu selection change: [3007E8D]!)
