@@ -20,7 +20,7 @@ namespace KuruLevelEditor
                 Rectangle view = new Rectangle(Position, new Point(bounds.Width, bounds.Height));
                 Point center = view.Center;
                 Position = new Point(center.X * value / TileSize - bounds.Width / 2, center.Y * value / TileSize - bounds.Height / 2);
-
+                tileSize = value;
             }
         }
 

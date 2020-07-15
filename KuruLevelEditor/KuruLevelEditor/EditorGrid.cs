@@ -50,9 +50,6 @@ namespace KuruLevelEditor
         Color? specialItemMode = null;
         Point? specialItemLocation = null;
 
-        OverflowingStack<int[,]> undoHistory = new OverflowingStack<int[,]>(UNDO_CAPACITY);
-        Stack<int[,]> redoHistory = new Stack<int[,]>();
-
         public OverlayGrid[] Overlays { get; private set; }
         public OverlayGrid[] Underlays { get; private set; }
         public bool GridEnabled { get; set; }
@@ -141,7 +138,9 @@ namespace KuruLevelEditor
         public Point ScreenCoordToTileCoord(int x, int y)
         {
             Point p = new Point(x, y) + Position - bounds.Location;
-            return new Point(p.X / TileSize, p.Y / TileSize);
+            int pxo = p.X < 0 ? -TileSize + 1 : 0;
+            int pyo = p.Y < 0 ? -TileSize + 1 : 0;
+            return new Point((p.X + pxo) / TileSize, (p.Y + pyo) / TileSize);
         }
 
         public Rectangle ScreenCoordToTileRect(int x, int y)
@@ -660,7 +659,8 @@ namespace KuruLevelEditor
                 }
             }
             // Draw map bounds and grid
-            Rectangle map_bounds = Rectangle.Union(TileCoordToScreenRect(0, 0), TileCoordToScreenRect(Grid.GetLength(1) - 1, Grid.GetLength(0) - 1));
+            Point tlCoord = TileCoordToScreenCoord(0, 0);
+            Rectangle map_bounds = new Rectangle(tlCoord, TileCoordToScreenCoord(Grid.GetLength(1), Grid.GetLength(0)) - tlCoord);
             if (TileSize > 8 && GridEnabled)
             {
                 for (int x = map_bounds.X + TileSize; x < map_bounds.X + map_bounds.Width; x += TileSize)
