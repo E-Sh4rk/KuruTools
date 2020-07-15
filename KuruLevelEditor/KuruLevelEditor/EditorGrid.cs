@@ -13,6 +13,10 @@ namespace KuruLevelEditor
 {
     class EditorGrid
     {
+        enum InventoryMode
+        {
+            No, Base, Custom
+        }
         public class OverlayGrid
         {
             public OverlayGrid(TilesSet ts, int[,] grid, bool enabled)
@@ -40,11 +44,12 @@ namespace KuruLevelEditor
         int brush_size = 1;
         Levels.MapType type;
         int[,] selectionGrid = null;
-        bool inventoryMode = false;
+        InventoryMode inventoryMode = InventoryMode.No;
         int[,] inventory;
         Point inventoryPosition = new Point(-8, -8);
         int inventoryTileSize = 16;
         TimeSpan showBrushUntil = TimeSpan.Zero;
+        CustomInventory customInventory;
 
         Color? specialItemMode = null;
         Point? specialItemLocation = null;
@@ -56,7 +61,7 @@ namespace KuruLevelEditor
         public OverlayGrid[] Underlays { get; private set; }
         public bool GridEnabled { get; set; }
         public EditorGrid(Game1 game, Levels.MapType type, Rectangle bounds, TilesSet sprites, int[,] grid,
-            Point position, OverlayGrid[] overlays, OverlayGrid[] underlays, int[,] selectionGrid)
+            Point position, OverlayGrid[] overlays, OverlayGrid[] underlays, int[,] selectionGrid, CustomInventory customInventory)
         {
             this.game = game;
             this.bounds = bounds;
@@ -65,6 +70,7 @@ namespace KuruLevelEditor
             this.position = position;
             this.type = type;
             this.selectionGrid = selectionGrid;
+            this.customInventory = customInventory;
             GridEnabled = true;
             // Load Inventory
             if (type != Levels.MapType.Minimap)
@@ -87,33 +93,69 @@ namespace KuruLevelEditor
 
         int[,] Grid
         {
-            get { return inventoryMode ? inventory : grid; }
+            get {
+                switch (inventoryMode)
+                {
+                    case InventoryMode.No: return grid;
+                    case InventoryMode.Base: return inventory;
+                    case InventoryMode.Custom: return customInventory.Grid(type);
+                }
+                return null;
+            }
+            set
+            {
+                switch (inventoryMode)
+                {
+                    case InventoryMode.No: grid = value; break;
+                    case InventoryMode.Base: break;
+                    case InventoryMode.Custom: customInventory.SetGrid(type, value); break;
+                }
+            }
         }
         Point Position
         {
-            get { return inventoryMode ? inventoryPosition : position; }
+            get {
+                switch (inventoryMode)
+                {
+                    case InventoryMode.No: return position;
+                    case InventoryMode.Base: return inventoryPosition;
+                    case InventoryMode.Custom: return customInventory.Position(type);
+                }
+                return Point.Zero;
+            }
             set
             {
-                if (!inventoryMode)
-                    position = value;
-                else
-                    inventoryPosition = value;
-
+                switch (inventoryMode)
+                {
+                    case InventoryMode.No: position = value; break;
+                    case InventoryMode.Base: inventoryPosition = value; break;
+                    case InventoryMode.Custom: customInventory.SetPosition(type, value); break;
+                }
             }
         }
         int TileSize
         {
-            get { return inventoryMode ? inventoryTileSize : tile_size; }
+            get
+            {
+                switch (inventoryMode)
+                {
+                    case InventoryMode.No: return tile_size;
+                    case InventoryMode.Base: return inventoryTileSize;
+                    case InventoryMode.Custom: return customInventory.TileSize(type);
+                }
+                return 0;
+            }
             set
             {
                 Rectangle view = new Rectangle(Position, new Point(bounds.Width, bounds.Height));
                 Point center = view.Center;
                 Position = new Point(center.X * value / TileSize - bounds.Width / 2, center.Y * value / TileSize - bounds.Height / 2);
-                if (!inventoryMode)
-                    tile_size = value;
-                else
-                    inventoryTileSize = value;
-
+                switch (inventoryMode)
+                {
+                    case InventoryMode.No: tile_size = value; break;
+                    case InventoryMode.Base: inventoryTileSize = value; break;
+                    case InventoryMode.Custom: customInventory.SetTileSize(type, value); break;
+                }
             }
         }
 
@@ -164,12 +206,18 @@ namespace KuruLevelEditor
 
         public void AddToUndoHistory(int[,] g = null)
         {
-            if (g == null) g = Utils.CopyArray(grid);
-            undoHistory.Push(g);
-            redoHistory.Clear();
+            if (inventoryMode == InventoryMode.Custom)
+                customInventory.AddToUndoHistory(type, g);
+            else
+            {
+                if (g == null) g = Utils.CopyArray(grid);
+                undoHistory.Push(g);
+                redoHistory.Clear();
+            }
         }
         public void IncreaseWidth()
         {
+            // TODO: case of custom inventory
             if (type == Levels.MapType.Minimap) return;
             int w = grid.GetLength(1);
             if (w < 0x200)
@@ -181,6 +229,7 @@ namespace KuruLevelEditor
         }
         public void DecreaseWidth()
         {
+            // TODO: case of custom inventory
             if (type == Levels.MapType.Minimap) return;
             int w = grid.GetLength(1);
             if (w > 0x40)
@@ -192,6 +241,7 @@ namespace KuruLevelEditor
         }
         public void IncreaseHeight()
         {
+            // TODO: case of custom inventory
             if (type == Levels.MapType.Minimap) return;
             int h = grid.GetLength(0);
             if (h < 0x200)
@@ -203,6 +253,7 @@ namespace KuruLevelEditor
         }
         public void DecreaseHeight()
         {
+            // TODO: case of custom inventory
             if (type == Levels.MapType.Minimap) return;
             int h = grid.GetLength(0);
             if (h > 0x40)
@@ -304,9 +355,13 @@ namespace KuruLevelEditor
                     break;
                 case Controller.Action.TOGGLE_INVENTORY:
                     if (type != Levels.MapType.Minimap)
-                        inventoryMode = !inventoryMode;
+                        inventoryMode = inventoryMode == InventoryMode.Base ? InventoryMode.No : InventoryMode.Base;
+                    break;
+                case Controller.Action.TOGGLE_CUSTOM_INVENTORY:
+                    inventoryMode = inventoryMode == InventoryMode.Custom ? InventoryMode.No : InventoryMode.Custom;
                     break;
                 case Controller.Action.UNDO:
+                    // TODO: case of custom inventory
                     if (undoHistory.Count > 0)
                     {
                         redoHistory.Push(grid);
@@ -314,6 +369,7 @@ namespace KuruLevelEditor
                     }
                     break;
                 case Controller.Action.REDO:
+                    // TODO: case of custom inventory
                     if (redoHistory.Count > 0)
                     {
                         undoHistory.Push(grid);
@@ -338,6 +394,7 @@ namespace KuruLevelEditor
         Point? initial_mouse_move_map_position = null;
         public void Update(GameTime gt, MouseState mouse, KeyboardState keyboard)
         {
+            bool disableConstruction = inventoryMode == InventoryMode.Base;
             if (initial_mouse_move_pos != null)
             {
                 if (mouse.LeftButton == ButtonState.Released)
@@ -358,7 +415,7 @@ namespace KuruLevelEditor
                             {
                                 Point pt = new Point(x + coord1.X, y + coord1.Y);
                                 if (map_bounds.Contains(pt))
-                                    selectionGrid[y, x] = GetTileCode(Grid[pt.Y, pt.X], inventoryMode);
+                                    selectionGrid[y, x] = GetTileCode(Grid[pt.Y, pt.X], inventoryMode == InventoryMode.Base);
                             }
                         }
                     }
@@ -382,7 +439,7 @@ namespace KuruLevelEditor
                     mouse_move_is_selecting = false;
                 }
             }
-            else if (keyboard.IsKeyDown(Keys.LeftAlt) || inventoryMode)
+            else if (keyboard.IsKeyDown(Keys.LeftAlt) || disableConstruction)
             {
                 if (initial_mouse_move_pos == null && mouse.LeftButton == ButtonState.Pressed)
                 {
@@ -394,14 +451,14 @@ namespace KuruLevelEditor
             }
             else
             {
-                if (!inventoryMode && initial_mouse_move_pos == null && bounds.Contains(mouse.Position))
+                if (!disableConstruction && initial_mouse_move_pos == null && bounds.Contains(mouse.Position))
                 {
                     if (mouse.LeftButton == ButtonState.Pressed || mouse.RightButton == ButtonState.Pressed)
                     {
                         int[,] grid_bkp = null;
                         bool clear = mouse.RightButton == ButtonState.Pressed;
                         Point cpt = ScreenCoordToTileCoord(mouse.Position.X, mouse.Position.Y);
-                        Rectangle map_bounds = new Rectangle(0, 0, grid.GetLength(1), grid.GetLength(0));
+                        Rectangle map_bounds = new Rectangle(0, 0, Grid.GetLength(1), Grid.GetLength(0));
                         if (specialItemMode.HasValue)
                         {
                             if (map_bounds.Contains(cpt))
@@ -428,9 +485,9 @@ namespace KuruLevelEditor
                                 if (map_bounds.Contains(pt))
                                 {
                                     int nv = GetTileCode(selectedItem, !clear);
-                                    if (grid_bkp == null && grid[pt.Y, pt.X] != nv)
-                                        grid_bkp = Utils.CopyArray(grid);
-                                    grid[pt.Y, pt.X] = nv;
+                                    if (grid_bkp == null && Grid[pt.Y, pt.X] != nv)
+                                        grid_bkp = Utils.CopyArray(Grid);
+                                    Grid[pt.Y, pt.X] = nv;
                                 }
                             }
                         }
@@ -448,9 +505,9 @@ namespace KuruLevelEditor
                                 if (map_bounds.Contains(pt))
                                 {
                                     int nv = GetTileCode(selectedItem, false);
-                                    if (grid_bkp == null && grid[pt.Y, pt.X] != nv)
-                                        grid_bkp = Utils.CopyArray(grid);
-                                    grid[pt.Y, pt.X] = nv;
+                                    if (grid_bkp == null && Grid[pt.Y, pt.X] != nv)
+                                        grid_bkp = Utils.CopyArray(Grid);
+                                    Grid[pt.Y, pt.X] = nv;
                                 }
                             }
                         }
@@ -573,6 +630,8 @@ namespace KuruLevelEditor
         }
         public void Draw(SpriteBatch sprite_batch, GameTime gt, MouseState mouse, KeyboardState keyboard)
         {
+            bool disableConstruction = inventoryMode == InventoryMode.Base;
+            bool inventoryOpened = inventoryMode != InventoryMode.No;
             bool showSpecial = type == Levels.MapType.Physical;
             sprite_batch.FillRectangle(bounds, BACKGROUND_COLOR);
             // Compute selected elements sprites
@@ -580,7 +639,7 @@ namespace KuruLevelEditor
             List<DelayedSpriteDrawing> toDraw = new List<DelayedSpriteDrawing>();
             if (!mouse_move_is_selecting)
             {
-                if ((!keyboard.IsKeyDown(Keys.LeftControl) && !keyboard.IsKeyDown(Keys.LeftAlt) && !inventoryMode) || gt.TotalGameTime <= showBrushUntil)
+                if ((!keyboard.IsKeyDown(Keys.LeftControl) && !keyboard.IsKeyDown(Keys.LeftAlt) && !disableConstruction) || gt.TotalGameTime <= showBrushUntil)
                 {
                     Point pt = ScreenCoordToTileCoord(mouse.Position.X, mouse.Position.Y);
                     Rectangle cr = TileCoordToScreenRect(pt.X, pt.Y);
@@ -628,7 +687,7 @@ namespace KuruLevelEditor
                 }
             }
             // Draw map, selected elements and overlays
-            if (!inventoryMode)
+            if (!inventoryOpened)
             {
                 foreach (OverlayGrid underlay in Underlays)
                 {
@@ -636,7 +695,7 @@ namespace KuruLevelEditor
                         DrawGrid(sprite_batch, underlay.grid, underlay.ts, false, false);
                 }
             }
-            DrawGrid(sprite_batch, Grid, sprites, inventoryMode, showSpecial, selectedElementsBounds);
+            DrawGrid(sprite_batch, Grid, sprites, inventoryMode == InventoryMode.Base, showSpecial, selectedElementsBounds);
             if (selectedElementsBounds.HasValue)
             {
                 foreach (DelayedSpriteDrawing d in toDraw)
@@ -647,7 +706,7 @@ namespace KuruLevelEditor
                         DrawTile(sprite_batch, sprites, d.r, d.item.Value, d.overridePalette, showSpecial);
                 }
             }
-            if (!inventoryMode)
+            if (!inventoryOpened)
             {
                 foreach (OverlayGrid overlay in Overlays)
                 {
@@ -664,7 +723,7 @@ namespace KuruLevelEditor
                 for (int y = map_bounds.Y + TileSize; y < map_bounds.Y + map_bounds.Height; y += TileSize)
                     sprite_batch.FillRectangle(new Rectangle(map_bounds.X, y, map_bounds.Width, 1), Color.Gray);
             }
-            if (showSpecial && !inventoryMode)
+            if (showSpecial && !inventoryOpened)
                 sprite_batch.FillRectangle(new Rectangle(map_bounds.X, map_bounds.Y + tile_size * PhysicalMapLogic.NUMBER_RESERVED_ROWS, map_bounds.Width, 1), Color.Orange);
             TilesSet.DrawRectangle(sprite_batch, map_bounds, Color.Red, 2); // Issue with DrawRectangle: https://github.com/rds1983/Myra/issues/211
             // Draw selection rectangle

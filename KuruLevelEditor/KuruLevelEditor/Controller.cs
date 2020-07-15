@@ -23,6 +23,7 @@ namespace KuruLevelEditor
 			FLIP_HORIZONTAL,
 			FLIP_VERTICAL,
 			TOGGLE_INVENTORY,
+			TOGGLE_CUSTOM_INVENTORY,
 			UNDO,
 			REDO,
 			TOGGLE_FULLSCREEN,
@@ -187,12 +188,15 @@ namespace KuruLevelEditor
 				else
 					last_direction_time = TimeSpan.Zero;
 				
-				if (state.IsKeyDown(Keys.Space))
+				if (state.IsKeyDown(Keys.Space) || state.IsKeyDown(Keys.Enter))
 				{
 					if (last_inventory_time.Add(INVENTORY_DELAY) <= total_time)
 					{
 						last_inventory_time = total_time;
-						actions.Add(Action.TOGGLE_INVENTORY);
+						if (state.IsKeyDown(Keys.Space))
+							actions.Add(Action.TOGGLE_INVENTORY);
+						if (state.IsKeyDown(Keys.Enter))
+							actions.Add(Action.TOGGLE_CUSTOM_INVENTORY);
 					}
 				}
 				else

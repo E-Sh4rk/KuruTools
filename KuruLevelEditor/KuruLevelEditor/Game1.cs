@@ -23,6 +23,7 @@ namespace KuruLevelEditor
         private Desktop _lateralMenuDesktop;
         private SpecialItems _specialItemInterface = null;
         private PhysicalMapLogic _physicalMapLogic = null;
+        private CustomInventory _inventory = null;
 
         enum Mode
         {
@@ -61,6 +62,7 @@ namespace KuruLevelEditor
                 Exit();
                 return;
             }
+            _inventory = new CustomInventory();
 
             if (Levels.Init() && Load.LoadSpriteContent(GraphicsDevice))
                 LoadInterface();
@@ -549,6 +551,7 @@ namespace KuruLevelEditor
                     "Flip selection: SHIFT+Wheel or SHIFT+Arrows\n" +
                     "Force palette of selection: SHIFT+Space\n" +
                     "Open/Close inventory: Space\n" +
+                    "Open/Close custom inventory: Enter\n" +
                     "Undo / Redo: CTRL+Z / CTRL+Y"
                     );
                 messageBox.ShowModal(_lateralMenuDesktop);
@@ -699,7 +702,7 @@ namespace KuruLevelEditor
                 selectionGrid = _lastSelectionGrid;
             editor = new EditorGrid(this, MapType(),
                 new Rectangle(LATERAL_PANEL_WIDTH, 0, GraphicsDevice.Viewport.Width - LATERAL_PANEL_WIDTH, GraphicsDevice.Viewport.Height),
-                sset, grid, new Point(-8, -8), overlays.ToArray(), underlays.ToArray(), selectionGrid);
+                sset, grid, new Point(-8, -8), overlays.ToArray(), underlays.ToArray(), selectionGrid, _inventory);
         }
 
         bool reloadAtNextFrame = false;
