@@ -31,7 +31,6 @@ namespace KuruLevelEditor
         }
 
         const int MIN_LENGTH_UNIT = 0x40;
-        const int UNDO_CAPACITY = 100;
         readonly Color BACKGROUND_COLOR = Color.CornflowerBlue;
 
         Game1 game;
@@ -169,7 +168,7 @@ namespace KuruLevelEditor
         }
         public void IncreaseWidth()
         {
-            if (type == Levels.MapType.Minimap) return;
+            if (type == Levels.MapType.Minimap && inventoryMode != InventoryMode.Custom) return;
             if (inventoryMode == InventoryMode.Base) return;
             int w = Grid.GetLength(1);
             if (w < 0x200)
@@ -181,7 +180,7 @@ namespace KuruLevelEditor
         }
         public void DecreaseWidth()
         {
-            if (type == Levels.MapType.Minimap) return;
+            if (type == Levels.MapType.Minimap && inventoryMode != InventoryMode.Custom) return;
             if (inventoryMode == InventoryMode.Base) return;
             int w = Grid.GetLength(1);
             if (w > 0x40)
@@ -193,7 +192,7 @@ namespace KuruLevelEditor
         }
         public void IncreaseHeight()
         {
-            if (type == Levels.MapType.Minimap) return;
+            if (type == Levels.MapType.Minimap && inventoryMode != InventoryMode.Custom) return;
             if (inventoryMode == InventoryMode.Base) return;
             int h = Grid.GetLength(0);
             if (h < 0x200)
@@ -205,7 +204,7 @@ namespace KuruLevelEditor
         }
         public void DecreaseHeight()
         {
-            if (type == Levels.MapType.Minimap) return;
+            if (type == Levels.MapType.Minimap && inventoryMode != InventoryMode.Custom) return;
             if (inventoryMode == InventoryMode.Base) return;
             int h = Grid.GetLength(0);
             if (h > 0x40)

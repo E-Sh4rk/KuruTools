@@ -5,6 +5,7 @@ using Myra;
 using Myra.Graphics2D;
 using Myra.Graphics2D.Brushes;
 using Myra.Graphics2D.UI;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
@@ -86,6 +87,14 @@ namespace KuruLevelEditor
             base.LoadContent();
         }
 
+        protected override void OnExiting(object sender, EventArgs args)
+        {
+            if (_inventories != null)
+                _inventories.Save();
+            base.OnExiting(sender, args);
+        }
+
+
         int[,] _lastSelectionGrid;
         string _lastWorld;
         Levels.MapType _lastMapType;
@@ -96,6 +105,7 @@ namespace KuruLevelEditor
             _lastMapType = MapType();
             editor = null;
             mode = Mode.Menu;
+            _inventories.Save();
         }
 
         void PleaseSelectMapMsg()
@@ -347,6 +357,7 @@ namespace KuruLevelEditor
             buttonSave.Click += (s, a) =>
             {
                 SaveGrid();
+                _inventories.Save();
             };
             lateral.Widgets.Add(buttonSave);
 
@@ -575,6 +586,7 @@ namespace KuruLevelEditor
             buttonSBR.Click += (s, a) =>
             {
                 SaveGrid();
+                _inventories.Save();
                 Task.Factory.StartNew(() => {
                     try
                     {

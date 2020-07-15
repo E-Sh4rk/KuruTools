@@ -6,7 +6,7 @@ using System.Text;
 
 namespace KuruLevelEditor
 {
-    class CustomInventories // TODO: Save system
+    class CustomInventories
     {
         const string DIR = "inventories";
         Dictionary<Levels.MapType, EditableGrid> grids;
@@ -39,6 +39,24 @@ namespace KuruLevelEditor
             if (!File.Exists(pathM))
                 pathM = Path.Combine(defaultDir, "minimap.txt");
             grids[Levels.MapType.Minimap] = EGFromPath(bounds, pathM);
+        }
+
+        void SaveGrid(string path, int[,] grid)
+        {
+            File.WriteAllLines(path, Levels.GetLinesFromGrid(grid, 4, true, 0));
+        }
+        public void Save()
+        {
+            string dir = Path.Combine(Levels.LEVELS_DIR, DIR);
+            Directory.CreateDirectory(dir);
+            string pathP = Path.Combine(dir, "physical.txt");
+            SaveGrid(pathP, grids[Levels.MapType.Physical].Grid);
+            string pathG = Path.Combine(dir, "graphical.txt");
+            SaveGrid(pathG, grids[Levels.MapType.Graphical].Grid);
+            string pathB = Path.Combine(dir, "background.txt");
+            SaveGrid(pathB, grids[Levels.MapType.Background].Grid);
+            string pathM = Path.Combine(dir, "minimap.txt");
+            SaveGrid(pathM, grids[Levels.MapType.Minimap].Grid);
         }
 
         public EditableGrid GetInventory(Levels.MapType type)
