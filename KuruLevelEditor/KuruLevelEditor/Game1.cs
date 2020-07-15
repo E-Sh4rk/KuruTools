@@ -23,7 +23,9 @@ namespace KuruLevelEditor
         private Desktop _lateralMenuDesktop;
         private SpecialItems _specialItemInterface = null;
         private PhysicalMapLogic _physicalMapLogic = null;
-        private CustomInventory _inventory = null;
+        private CustomInventories _inventories = null;
+        private Rectangle _gridEditorBounds;
+        private Rectangle _ssetBounds;
 
         enum Mode
         {
@@ -62,7 +64,9 @@ namespace KuruLevelEditor
                 Exit();
                 return;
             }
-            _inventory = new CustomInventory();
+            _gridEditorBounds = new Rectangle(LATERAL_PANEL_WIDTH, 0, GraphicsDevice.Viewport.Width - LATERAL_PANEL_WIDTH, GraphicsDevice.Viewport.Height);
+            _ssetBounds = new Rectangle(0, PALETTE_SELECTOR_Y, LATERAL_PANEL_WIDTH, GraphicsDevice.Viewport.Height - PALETTE_SELECTOR_Y);
+            _inventories = new CustomInventories(_gridEditorBounds);
 
             if (Levels.Init() && Load.LoadSpriteContent(GraphicsDevice))
                 LoadInterface();
@@ -79,6 +83,7 @@ namespace KuruLevelEditor
                     catch { Exit(); }
                 });
             }
+            base.LoadContent();
         }
 
         int[,] _lastSelectionGrid;
@@ -656,14 +661,12 @@ namespace KuruLevelEditor
             {
                 grid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, Levels.MapType.Minimap)), 64, 64,
                     Levels.TilesOffset(world, Levels.MapType.Minimap));
-                sset = new TilesSet(Load.MinimapColors, false,
-                    new Rectangle(0, PALETTE_SELECTOR_Y, LATERAL_PANEL_WIDTH, GraphicsDevice.Viewport.Height - PALETTE_SELECTOR_Y), 64);
+                sset = new TilesSet(Load.MinimapColors, false, _ssetBounds, 64);
             }
             else
             {
                 grid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, mapType)), Levels.TilesOffset(world, mapType));
-                sset = new TilesSet(Load.Tiles[new Load.WorldAndType(world, mapType)],
-                    true, new Rectangle(0, PALETTE_SELECTOR_Y, LATERAL_PANEL_WIDTH, GraphicsDevice.Viewport.Height - PALETTE_SELECTOR_Y), 64);
+                sset = new TilesSet(Load.Tiles[new Load.WorldAndType(world, mapType)], true, _ssetBounds, 64);
 
                 int[,] ogrid;
                 TilesSet osset;
@@ -700,9 +703,8 @@ namespace KuruLevelEditor
             if (_lastMapType == mapType /*&& (_lastWorld == world || mapType == Levels.MapType.Physical || mapType == Levels.MapType.Minimap)*/)
                 // Sometimes, inter-world copy paste can be relevant even for grounds and backgrounds
                 selectionGrid = _lastSelectionGrid;
-            editor = new EditorGrid(this, MapType(),
-                new Rectangle(LATERAL_PANEL_WIDTH, 0, GraphicsDevice.Viewport.Width - LATERAL_PANEL_WIDTH, GraphicsDevice.Viewport.Height),
-                sset, grid, new Point(-8, -8), overlays.ToArray(), underlays.ToArray(), selectionGrid, _inventory);
+            editor = new EditorGrid(this, MapType(), _gridEditorBounds,
+                sset, grid, new Point(-8, -8), overlays.ToArray(), underlays.ToArray(), selectionGrid, _inventories.GetInventory(MapType()));
         }
 
         bool reloadAtNextFrame = false;

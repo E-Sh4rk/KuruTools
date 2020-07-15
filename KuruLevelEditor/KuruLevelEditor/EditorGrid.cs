@@ -36,20 +36,16 @@ namespace KuruLevelEditor
 
         Game1 game;
 
-        int tile_size = 8;
         Rectangle bounds;
         TilesSet sprites;
-        int[,] grid;
-        Point position;
+        EditableGrid map;
         int brush_size = 1;
         Levels.MapType type;
-        int[,] selectionGrid = null;
+        int[,] selectionGrid;
         InventoryMode inventoryMode = InventoryMode.No;
-        int[,] inventory;
-        Point inventoryPosition = new Point(-8, -8);
-        int inventoryTileSize = 16;
+        EditableGrid inventory;
         TimeSpan showBrushUntil = TimeSpan.Zero;
-        CustomInventory customInventory;
+        EditableGrid customInventory;
 
         Color? specialItemMode = null;
         Point? specialItemLocation = null;
@@ -61,13 +57,12 @@ namespace KuruLevelEditor
         public OverlayGrid[] Underlays { get; private set; }
         public bool GridEnabled { get; set; }
         public EditorGrid(Game1 game, Levels.MapType type, Rectangle bounds, TilesSet sprites, int[,] grid,
-            Point position, OverlayGrid[] overlays, OverlayGrid[] underlays, int[,] selectionGrid, CustomInventory customInventory)
+            Point position, OverlayGrid[] overlays, OverlayGrid[] underlays, int[,] selectionGrid, EditableGrid customInventory)
         {
             this.game = game;
             this.bounds = bounds;
             this.sprites = sprites;
-            this.grid = grid;
-            this.position = position;
+            map = new EditableGrid(bounds, grid, position, 8);
             this.type = type;
             this.selectionGrid = selectionGrid;
             this.customInventory = customInventory;
@@ -76,87 +71,51 @@ namespace KuruLevelEditor
             if (type != Levels.MapType.Minimap)
             {
                 Point nbTiles = sprites.NumberTiles;
-                inventory = new int[nbTiles.Y, nbTiles.X];
+                int[,] inventoryGrid = new int[nbTiles.Y, nbTiles.X];
                 int i = 0;
                 for (int y = 0; y < nbTiles.Y; y++)
                 {
                     for (int x = 0; x < nbTiles.X; x++)
                     {
-                        inventory[y, x] = i;
+                        inventoryGrid[y, x] = i;
                         i++;
                     }
                 }
+                inventory = new EditableGrid(bounds, inventoryGrid, new Point(-8, -8), 16);
             }
+            else
+                inventory = null;
             Overlays = overlays;
             Underlays = underlays;
         }
 
-        int[,] Grid
-        {
-            get {
-                switch (inventoryMode)
-                {
-                    case InventoryMode.No: return grid;
-                    case InventoryMode.Base: return inventory;
-                    case InventoryMode.Custom: return customInventory.Grid(type);
-                }
-                return null;
-            }
-            set
-            {
-                switch (inventoryMode)
-                {
-                    case InventoryMode.No: grid = value; break;
-                    case InventoryMode.Base: break;
-                    case InventoryMode.Custom: customInventory.SetGrid(type, value); break;
-                }
-            }
-        }
-        Point Position
-        {
-            get {
-                switch (inventoryMode)
-                {
-                    case InventoryMode.No: return position;
-                    case InventoryMode.Base: return inventoryPosition;
-                    case InventoryMode.Custom: return customInventory.Position(type);
-                }
-                return Point.Zero;
-            }
-            set
-            {
-                switch (inventoryMode)
-                {
-                    case InventoryMode.No: position = value; break;
-                    case InventoryMode.Base: inventoryPosition = value; break;
-                    case InventoryMode.Custom: customInventory.SetPosition(type, value); break;
-                }
-            }
-        }
-        int TileSize
+        EditableGrid CurrentEditableGrid
         {
             get
             {
                 switch (inventoryMode)
                 {
-                    case InventoryMode.No: return tile_size;
-                    case InventoryMode.Base: return inventoryTileSize;
-                    case InventoryMode.Custom: return customInventory.TileSize(type);
+                    case InventoryMode.No: return map;
+                    case InventoryMode.Base: return inventory;
+                    case InventoryMode.Custom: return customInventory;
                 }
-                return 0;
+                return null;
             }
-            set
-            {
-                Rectangle view = new Rectangle(Position, new Point(bounds.Width, bounds.Height));
-                Point center = view.Center;
-                Position = new Point(center.X * value / TileSize - bounds.Width / 2, center.Y * value / TileSize - bounds.Height / 2);
-                switch (inventoryMode)
-                {
-                    case InventoryMode.No: tile_size = value; break;
-                    case InventoryMode.Base: inventoryTileSize = value; break;
-                    case InventoryMode.Custom: customInventory.SetTileSize(type, value); break;
-                }
-            }
+        }
+        int[,] Grid
+        {
+            get { return CurrentEditableGrid.Grid; }
+            set { CurrentEditableGrid.Grid = value; }
+        }
+        Point Position
+        {
+            get { return CurrentEditableGrid.Position; }
+            set { CurrentEditableGrid.Position = value; }
+        }
+        int TileSize
+        {
+            get { return CurrentEditableGrid.TileSize; }
+            set { CurrentEditableGrid.TileSize = value;  }
         }
 
         public void SpecialItemMode(Color c, Point? initialLocation)
@@ -197,7 +156,7 @@ namespace KuruLevelEditor
         }
         public int[,] MapGrid
         {
-            get { return grid; }
+            get { return map.Grid; }
         }
         public int[,] SelectionGrid
         {
@@ -206,61 +165,55 @@ namespace KuruLevelEditor
 
         public void AddToUndoHistory(int[,] g = null)
         {
-            if (inventoryMode == InventoryMode.Custom)
-                customInventory.AddToUndoHistory(type, g);
-            else
-            {
-                if (g == null) g = Utils.CopyArray(grid);
-                undoHistory.Push(g);
-                redoHistory.Clear();
-            }
+            if (inventoryMode == InventoryMode.Base) return;
+            CurrentEditableGrid.AddToUndoHistory(g);
         }
         public void IncreaseWidth()
         {
-            // TODO: case of custom inventory
             if (type == Levels.MapType.Minimap) return;
-            int w = grid.GetLength(1);
+            if (inventoryMode == InventoryMode.Base) return;
+            int w = Grid.GetLength(1);
             if (w < 0x200)
             {
                 AddToUndoHistory();
                 w += MIN_LENGTH_UNIT;
-                grid = Utils.ResizeArray(grid, grid.GetLength(0), w);
+                Grid = Utils.ResizeArray(Grid, Grid.GetLength(0), w);
             }
         }
         public void DecreaseWidth()
         {
-            // TODO: case of custom inventory
             if (type == Levels.MapType.Minimap) return;
-            int w = grid.GetLength(1);
+            if (inventoryMode == InventoryMode.Base) return;
+            int w = Grid.GetLength(1);
             if (w > 0x40)
             {
                 AddToUndoHistory();
                 w -= MIN_LENGTH_UNIT;
-                grid = Utils.ResizeArray(grid, grid.GetLength(0), w);
+                Grid = Utils.ResizeArray(Grid, Grid.GetLength(0), w);
             }
         }
         public void IncreaseHeight()
         {
-            // TODO: case of custom inventory
             if (type == Levels.MapType.Minimap) return;
-            int h = grid.GetLength(0);
+            if (inventoryMode == InventoryMode.Base) return;
+            int h = Grid.GetLength(0);
             if (h < 0x200)
             {
                 AddToUndoHistory();
                 h += MIN_LENGTH_UNIT;
-                grid = Utils.ResizeArray(grid, h, grid.GetLength(1));
+                Grid = Utils.ResizeArray(Grid, h, Grid.GetLength(1));
             }
         }
         public void DecreaseHeight()
         {
-            // TODO: case of custom inventory
             if (type == Levels.MapType.Minimap) return;
-            int h = grid.GetLength(0);
+            if (inventoryMode == InventoryMode.Base) return;
+            int h = Grid.GetLength(0);
             if (h > 0x40)
             {
                 AddToUndoHistory();
                 h -= MIN_LENGTH_UNIT;
-                grid = Utils.ResizeArray(grid, h, grid.GetLength(1));
+                Grid = Utils.ResizeArray(Grid, h, Grid.GetLength(1));
             }
         }
 
@@ -361,20 +314,12 @@ namespace KuruLevelEditor
                     inventoryMode = inventoryMode == InventoryMode.Custom ? InventoryMode.No : InventoryMode.Custom;
                     break;
                 case Controller.Action.UNDO:
-                    // TODO: case of custom inventory
-                    if (undoHistory.Count > 0)
-                    {
-                        redoHistory.Push(grid);
-                        grid = undoHistory.Pop();
-                    }
+                    if (inventoryMode != InventoryMode.Base)
+                        CurrentEditableGrid.Undo();
                     break;
                 case Controller.Action.REDO:
-                    // TODO: case of custom inventory
-                    if (redoHistory.Count > 0)
-                    {
-                        undoHistory.Push(grid);
-                        grid = redoHistory.Pop();
-                    }
+                    if (inventoryMode != InventoryMode.Base)
+                        CurrentEditableGrid.Redo();
                     break;
                 case Controller.Action.FORCE_PALETTE:
                     if (selectionGrid != null)
@@ -724,7 +669,7 @@ namespace KuruLevelEditor
                     sprite_batch.FillRectangle(new Rectangle(map_bounds.X, y, map_bounds.Width, 1), Color.Gray);
             }
             if (showSpecial && !inventoryOpened)
-                sprite_batch.FillRectangle(new Rectangle(map_bounds.X, map_bounds.Y + tile_size * PhysicalMapLogic.NUMBER_RESERVED_ROWS, map_bounds.Width, 1), Color.Orange);
+                sprite_batch.FillRectangle(new Rectangle(map_bounds.X, map_bounds.Y + TileSize * PhysicalMapLogic.NUMBER_RESERVED_ROWS, map_bounds.Width, 1), Color.Orange);
             TilesSet.DrawRectangle(sprite_batch, map_bounds, Color.Red, 2); // Issue with DrawRectangle: https://github.com/rds1983/Myra/issues/211
             // Draw selection rectangle
             if (mouse_move_is_selecting)
