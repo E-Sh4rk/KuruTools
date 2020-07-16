@@ -13,29 +13,19 @@ namespace KuruRomExtractor
         public const int BASE_ADDRESS = 0x2C894;
         const int ROM_MEMORY_DOMAIN = 0x08000000;
 
-        [FieldOffset(0)]
+        [FieldOffset(0)] // 0x00
         public int level_data_offset;
+        [FieldOffset(44)] // 0x2C
+        public int object_data_offset;
 
         public int LevelDataOffset
         {
             get { return level_data_offset - ROM_MEMORY_DOMAIN; }
         }
-
-    }
-    [StructLayout(LayoutKind.Explicit, Size = 0x4C)]
-    struct ParadiseObjectEntry
-    {
-        public const int BASE_ADDRESS = 0x2C8C0;
-        const int ROM_MEMORY_DOMAIN = 0x08000000;
-
-        [FieldOffset(0)]
-        public int object_data_offset;
-
         public int ObjectDataOffset
         {
             get { return object_data_offset - ROM_MEMORY_DOMAIN; }
         }
-
     }
     public class ParadiseLevels
     {
@@ -50,7 +40,6 @@ namespace KuruRomExtractor
 
         FileStream rom;
         ParadiseLevelEntry[] level_entries;
-        ParadiseObjectEntry[] object_entries;
 
         public struct LevelInfo
         {
@@ -80,11 +69,6 @@ namespace KuruRomExtractor
             rom.Seek(ParadiseLevelEntry.BASE_ADDRESS, SeekOrigin.Begin);
             for (int l = 0; l < level_entries.Length; l++)
                 level_entries[l] = Utils.ByteToType<ParadiseLevelEntry>(reader);
-
-            object_entries = new ParadiseObjectEntry[NUMBER_LEVELS];
-            rom.Seek(ParadiseObjectEntry.BASE_ADDRESS, SeekOrigin.Begin);
-            for (int l = 0; l < object_entries.Length; l++)
-                object_entries[l] = Utils.ByteToType<ParadiseObjectEntry>(reader);
         }
 
         public LevelInfo GetLevelInfo(int level)
@@ -97,7 +81,7 @@ namespace KuruRomExtractor
             res.DataUncompressedSize = reader.ReadInt32();
             res.DataBaseAddress = (int)rom.Position;
 
-            res.ObjectsBaseAddress = object_entries[level].ObjectDataOffset;
+            res.ObjectsBaseAddress = level_entries[level].ObjectDataOffset;
             res.ObjectsSize = 0;
             rom.Seek(res.ObjectsBaseAddress, SeekOrigin.Begin);
             byte[] endDelim = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
