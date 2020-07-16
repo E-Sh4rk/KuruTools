@@ -65,6 +65,16 @@ namespace KuruRomExtractor
                             Map mo = new Map(raw.RawObjects, Map.Type.OBJECTS);
                             File.WriteAllText(filename_objects, mo.ToString());
                         }
+                        if (g == null)
+                        {
+                            Map mg = new Map(raw.RawGraphical, Map.Type.GRAPHICAL);
+                            File.WriteAllText(filename_graphical, mg.ToString());
+                        }
+                        if (b == null)
+                        {
+                            Map mb = new Map(raw.RawBackground, Map.Type.BACKGROUND);
+                            File.WriteAllText(filename_background, mb.ToString());
+                        }
                         Console.WriteLine("Missing components for " + level.ToString() + ". Missing data has been exported.");
                     }
                 }
