@@ -10,7 +10,7 @@ namespace KuruRomExtractor
     {
         public enum Type
         {
-            PHYSICAL, GRAPHICAL, BACKGROUND
+            PHYSICAL, GRAPHICAL, BACKGROUND, OBJECTS
         }
         ushort width;
         ushort height;
@@ -20,8 +20,16 @@ namespace KuruRomExtractor
         public Map(byte[] raw, Type type)
         {
             BinaryReader br = new BinaryReader(new MemoryStream(raw));
-            width = br.ReadUInt16();
-            height = br.ReadUInt16();
+            if (type == Type.OBJECTS)
+            {
+                width = 6;
+                height = (ushort)(raw.Length / (6*2));
+            }
+            else
+            {
+                width = br.ReadUInt16();
+                height = br.ReadUInt16();
+            }
             data = new ushort[height, width];
             for (int y = 0; y < height; y++)
             {
@@ -42,13 +50,29 @@ namespace KuruRomExtractor
 
         public static Map Parse(string[] lines, Type type)
         {
-            string[] headers = lines[0].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-            ushort xl = Convert.ToUInt16(headers[0], 16);
-            ushort yl = Convert.ToUInt16(headers[1], 16);
+            ushort xl;
+            ushort yl;
+            int lineStart;
+            if (type == Type.OBJECTS)
+            {
+                xl = 6;
+                yl = (ushort)lines.Length;
+                while (string.IsNullOrWhiteSpace(lines[yl - 1]))
+                    yl--;
+                lineStart = 0;
+            }
+            else
+            {
+                string[] headers = lines[0].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                xl = Convert.ToUInt16(headers[0], 16);
+                yl = Convert.ToUInt16(headers[1], 16);
+                lineStart = 1;
+            }
+
             ushort[,] map = new ushort[yl, xl];
             for (ushort i = 0; i < yl; i++)
             {
-                string[] line = lines[i + 1].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                string[] line = lines[i + lineStart].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                 for (ushort j = 0; j < xl; j++)
                     map[i, j] = Convert.ToUInt16(line[j], 16);
             }
@@ -57,10 +81,13 @@ namespace KuruRomExtractor
 
         public byte[] ToByteData()
         {
-            byte[] res = new byte[4 + width * height * 2];
+            byte[] res = new byte[(type == Type.OBJECTS ? 0 : 4) + width * height * 2];
             BinaryWriter writer = new BinaryWriter(new MemoryStream(res));
-            writer.Write(width);
-            writer.Write(height);
+            if (type != Type.OBJECTS)
+            {
+                writer.Write(width);
+                writer.Write(height);
+            }
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
@@ -73,7 +100,8 @@ namespace KuruRomExtractor
         public string ToString()
         {
             StringBuilder res = new StringBuilder();
-            res.Append(width.ToString("X") + " " + height.ToString("X") + "\n");
+            if (type != Type.OBJECTS)
+                res.Append(width.ToString("X") + " " + height.ToString("X") + "\n");
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
