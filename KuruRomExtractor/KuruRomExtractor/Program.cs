@@ -29,6 +29,7 @@ namespace KuruRomExtractor
                 Directory.CreateDirectory(workspace);
                 foreach (int level in ParadiseLevels.AllLevels())
                 {
+                    if (level >= 42) continue; // TODO: For levels > 42, the background data is invalid...
                     string filename = Path.Combine(workspace, level.ToString("D2") + ".physical.txt");
                     string filename_objects = Path.Combine(workspace, level.ToString("D2") + ".objects.txt");
                     string filename_graphical = Path.Combine(workspace, level.ToString("D2") + ".graphical.txt");
@@ -65,7 +66,7 @@ namespace KuruRomExtractor
                             Map mo = new Map(raw.RawObjects, Map.Type.OBJECTS);
                             File.WriteAllText(filename_objects, mo.ToString());
                         }
-                        if (g == null)
+                        if (g == null && raw.RawGraphical.Length > 0)
                         {
                             Map mg = new Map(raw.RawGraphical, Map.Type.GRAPHICAL);
                             File.WriteAllText(filename_graphical, mg.ToString());

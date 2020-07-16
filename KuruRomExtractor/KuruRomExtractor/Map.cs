@@ -34,7 +34,11 @@ namespace KuruRomExtractor
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
-                    data[y, x] = br.ReadUInt16();
+                {
+                    // In Paradise, the raw data length is sometimes smaller than the dimensions (ex: lvl 15)
+                    if (br.BaseStream.Position < raw.Length) // TODO: Investigate it
+                        data[y, x] = br.ReadUInt16();
+                }
             }
             br.Close();
             this.type = type;

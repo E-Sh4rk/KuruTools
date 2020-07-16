@@ -25,9 +25,9 @@ namespace KuruRomExtractor
         [FieldOffset(16)]
         public int level_data_offset;
         [FieldOffset(20)]
-        public int addr05; // Sometimes zero
+        public int graphical_data_offset; // Sometimes zero
         [FieldOffset(24)]
-        public int addr06; // Might be compressed... Size of 512?
+        public int background_data_offset;
         [FieldOffset(28)]
         public int addr07; // Sometimes zero
         [FieldOffset(32)]
@@ -60,6 +60,14 @@ namespace KuruRomExtractor
         public int ObjectDataOffset
         {
             get { return object_data_offset - ROM_MEMORY_DOMAIN; }
+        }
+        public int GraphicalDataOffset
+        {
+            get { return graphical_data_offset != 0 ? graphical_data_offset - ROM_MEMORY_DOMAIN : 0; }
+        }
+        public int BackgroundDataOffset
+        {
+            get { return background_data_offset - ROM_MEMORY_DOMAIN; }
         }
     }
     public class ParadiseLevels
@@ -138,12 +146,20 @@ namespace KuruRomExtractor
             while (!reader.ReadBytes(endDelim.Length).SequenceEqual(endDelim))
                 res.ObjectsSize += endDelim.Length;
 
-            base_addr = level_entries[level].level_data_offset - 0x08000000; // TODO: TMP
-            rom.Seek(base_addr, SeekOrigin.Begin);
-            res.GraphicalUncompressedSize = reader.ReadInt32();
-            res.GraphicalBaseAddress = (int)rom.Position;
+            base_addr = level_entries[level].GraphicalDataOffset;
+            if (base_addr == 0)
+            {
+                res.GraphicalUncompressedSize = 0;
+                res.GraphicalBaseAddress = 0;
+            }
+            else
+            {
+                rom.Seek(base_addr, SeekOrigin.Begin);
+                res.GraphicalUncompressedSize = reader.ReadInt32();
+                res.GraphicalBaseAddress = (int)rom.Position;
+            }
 
-            base_addr = level_entries[level].level_data_offset - 0x08000000; // TODO: TMP
+            base_addr = level_entries[level].BackgroundDataOffset;
             rom.Seek(base_addr, SeekOrigin.Begin);
             res.BackgroundUncompressedSize = reader.ReadInt32();
             res.BackgroundBaseAddress = (int)rom.Position;
