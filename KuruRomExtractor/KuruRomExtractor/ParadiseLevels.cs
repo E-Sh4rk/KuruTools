@@ -39,7 +39,7 @@ namespace KuruRomExtractor
         [FieldOffset(44)]
         public int minimap_offset;
         [FieldOffset(48)]
-        public int addr12; // Seems to be some flags (at least, it is not an address)
+        public int flags;
         [FieldOffset(52)]
         public int addr13; // Lot of zeros...
         [FieldOffset(56)]
@@ -95,20 +95,19 @@ namespace KuruRomExtractor
             public int DataUncompressedSize;
             public int ObjectsBaseAddress;
             public int ObjectsSize;
-            // TODO: Data below in progress...
             public int GraphicalBaseAddress;
             public int GraphicalUncompressedSize;
             public int BackgroundBaseAddress;
             public int BackgroundUncompressedSize;
             public int MinimapBaseAddress;
             public int MinimapUncompressedSize;
+            public int Flags;
         }
         public struct RawMapData
         {
             public byte[] CompressedData;
             public byte[] RawData;
             public byte[] RawObjects;
-            // TODO: Data below in progress...
             public byte[] CompressedGraphical;
             public byte[] RawGraphical;
             public byte[] CompressedBackground;
@@ -155,6 +154,12 @@ namespace KuruRomExtractor
                 }
                 Console.ReadLine();
             }*/
+            /*for (int l = 0; l < level_entries.Length; l++)
+            {
+                ParadiseLevelEntry e = level_entries[l];
+                Console.WriteLine(l.ToString("D2") + ": " + Convert.ToString(e.addr12, 2).PadLeft(24, '0'));
+            }
+            Console.ReadLine();*/
         }
 
         public LevelInfo GetLevelInfo(int level)
@@ -195,8 +200,14 @@ namespace KuruRomExtractor
             res.MinimapBaseAddress = level_entries[level].MinimapOffset;
             res.MinimapUncompressedSize = MINIMAP_SIZE;
 
+            res.Flags = level_entries[level].flags;
+
             return res;
         }
+
+        const int BACKGROUND_CHALLENGE_MASK = 0x2000;
+        const ushort BACKGROUND_CHALLENGE_WIDTH = 0x10;
+        const ushort BACKGROUND_CHALLENGE_HEIGHT = 0x10;
 
         public RawMapData ExtractLevelData(int level)
         {
@@ -227,6 +238,16 @@ namespace KuruRomExtractor
             length = (int)(rom.Position - startPos);
             rom.Seek(startPos, SeekOrigin.Begin);
             res.CompressedBackground = reader.ReadBytes(length);
+            if ((info.Flags & BACKGROUND_CHALLENGE_MASK) != 0)
+            {
+                byte[] newRaw = new byte[res.RawBackground.Length + 4];
+                BinaryWriter bw = new BinaryWriter(new MemoryStream(newRaw));
+                bw.Write(BACKGROUND_CHALLENGE_WIDTH);
+                bw.Write(BACKGROUND_CHALLENGE_HEIGHT);
+                bw.Write(res.RawBackground);
+                bw.Close();
+                res.RawBackground = newRaw;
+            }
 
             rom.Seek(info.MinimapBaseAddress, SeekOrigin.Begin);
             startPos = rom.Position;
