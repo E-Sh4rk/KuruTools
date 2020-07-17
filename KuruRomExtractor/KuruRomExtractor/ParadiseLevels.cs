@@ -15,13 +15,13 @@ namespace KuruRomExtractor
         const int ROM_MEMORY_DOMAIN = 0x08000000;
 
         [FieldOffset(0)]
-        public int addr00; // Not compressed data
+        public int addr00;
         [FieldOffset(4)]
-        public int addr01; // Not compressed data
+        public int addr01; // Sometimes zero
         [FieldOffset(8)]
-        public int addr02; // Sometimes zero
+        public int addr02; // Sometimes zero (in particular for first levels)
         [FieldOffset(12)]
-        public int addr03; // First 2 bytes do not seem to indicate the size... (too big)
+        public int addr03;
         [FieldOffset(16)]
         public int level_data_offset;
         [FieldOffset(20)]
@@ -29,29 +29,29 @@ namespace KuruRomExtractor
         [FieldOffset(24)]
         public int background_data_offset;
         [FieldOffset(28)]
-        public int addr07; // Sometimes zero
+        public int addr07; // Sometimes zero (in particular for first levels)
         [FieldOffset(32)]
-        public int addr08; // Not compressed data
+        public int addr08;
         [FieldOffset(36)]
-        public int addr09; // Sometimes zero
+        public int addr09; // Sometimes zero (in particular for first levels)
         [FieldOffset(40)]
-        public int addr10; // Not compressed data
+        public int addr10;
         [FieldOffset(44)]
-        public int addr11; // Not compressed data
+        public int minimap_offset;
         [FieldOffset(48)]
-        public int addr12; // Seems to be an offset (not an absolute address)
+        public int addr12; // Seems to be some flags (at least, it is not an address)
         [FieldOffset(52)]
-        public int addr13; // Not compressed data
+        public int addr13; // Lot of zeros...
         [FieldOffset(56)]
-        public int addr14; // Sometimes zero
+        public int addr14; // Sometimes zero (in particular for first levels)
         [FieldOffset(60)]
         public int object_data_offset;
         [FieldOffset(64)]
-        public int addr16; // Not compressed data
+        public int addr16; // Sometimes zero
         [FieldOffset(68)]
-        public int addr17; // Sometimes zero
+        public int addr17; // Sometimes zero (in particular for first levels)
         [FieldOffset(72)]
-        public int addr18; // Often zero
+        public int addr18; // Often zero (in particular for first levels)
 
         public int LevelDataOffset
         {
@@ -69,10 +69,15 @@ namespace KuruRomExtractor
         {
             get { return background_data_offset - ROM_MEMORY_DOMAIN; }
         }
+        public int MinimapOffset
+        {
+            get { return minimap_offset - ROM_MEMORY_DOMAIN; }
+        }
     }
     public class ParadiseLevels
     {
         public const int NUMBER_LEVELS = 75;
+        public const int MINIMAP_SIZE = 64 * 64 / 2;
         public static int[] AllLevels()
         {
             List<int> res = new List<int>();
@@ -95,8 +100,8 @@ namespace KuruRomExtractor
             public int GraphicalUncompressedSize;
             public int BackgroundBaseAddress;
             public int BackgroundUncompressedSize;
-            //public int MinimapBaseAddress;
-            //public int MinimapSize;
+            public int MinimapBaseAddress;
+            public int MinimapUncompressedSize;
         }
         public struct RawMapData
         {
@@ -108,7 +113,8 @@ namespace KuruRomExtractor
             public byte[] RawGraphical;
             public byte[] CompressedBackground;
             public byte[] RawBackground;
-            //public byte[] RawMinimap;
+            public byte[] CompressedMinimap;
+            public byte[] RawMinimap;
         }
 
         public ParadiseLevels(string romPath)
@@ -127,6 +133,28 @@ namespace KuruRomExtractor
             {
                 level_entries[l] = Utils.ByteToType<ParadiseLevelEntry>(reader);
             }
+            // For debugging purpose
+            /*for (int l = 0; l < level_entries.Length; l++)
+            {
+                ParadiseLevelEntry e = level_entries[l];
+                int[] toTest = new int[] { e.addr00, e.addr01, e.addr02, e.addr03, e.addr07, e.addr08, e.addr09, e.addr10,
+                    e.addr11, e.addr12, e.addr13, e.addr14, e.addr16, e.addr17, e.addr18 };
+                int k = 0;
+                foreach (int addr in toTest)
+                {
+                    if (addr >= 0x08000000)
+                    {
+                        try
+                        {
+                            rom.Seek(addr - 0x08000000, SeekOrigin.Begin);
+                            Console.WriteLine(l.ToString() + "." + k.ToString() + ":" + reader.ReadInt16());
+                        }
+                        catch { }
+                    }
+                    k++;
+                }
+                Console.ReadLine();
+            }*/
         }
 
         public LevelInfo GetLevelInfo(int level)
@@ -164,6 +192,9 @@ namespace KuruRomExtractor
             res.BackgroundUncompressedSize = reader.ReadInt32();
             res.BackgroundBaseAddress = (int)rom.Position;
 
+            res.MinimapBaseAddress = level_entries[level].MinimapOffset;
+            res.MinimapUncompressedSize = MINIMAP_SIZE;
+
             return res;
         }
 
@@ -178,7 +209,7 @@ namespace KuruRomExtractor
             res.RawData = LzCompression.Decompress(rom, info.DataUncompressedSize);
             int length = (int)(rom.Position - startPos);
             rom.Seek(startPos, SeekOrigin.Begin);
-            res.CompressedData = (new BinaryReader(rom)).ReadBytes(length);
+            res.CompressedData = reader.ReadBytes(length);
 
             rom.Seek(info.ObjectsBaseAddress, SeekOrigin.Begin);
             res.RawObjects = reader.ReadBytes(info.ObjectsSize);
@@ -188,14 +219,21 @@ namespace KuruRomExtractor
             res.RawGraphical = LzCompression.Decompress(rom, info.GraphicalUncompressedSize);
             length = (int)(rom.Position - startPos);
             rom.Seek(startPos, SeekOrigin.Begin);
-            res.CompressedGraphical = (new BinaryReader(rom)).ReadBytes(length);
+            res.CompressedGraphical = reader.ReadBytes(length);
 
             rom.Seek(info.BackgroundBaseAddress, SeekOrigin.Begin);
             startPos = rom.Position;
             res.RawBackground = LzCompression.Decompress(rom, info.BackgroundUncompressedSize);
             length = (int)(rom.Position - startPos);
             rom.Seek(startPos, SeekOrigin.Begin);
-            res.CompressedBackground = (new BinaryReader(rom)).ReadBytes(length);
+            res.CompressedBackground = reader.ReadBytes(length);
+
+            rom.Seek(info.MinimapBaseAddress, SeekOrigin.Begin);
+            startPos = rom.Position;
+            res.RawMinimap = LzCompression.Decompress(rom, info.MinimapUncompressedSize);
+            length = (int)(rom.Position - startPos);
+            rom.Seek(startPos, SeekOrigin.Begin);
+            res.CompressedMinimap = reader.ReadBytes(length);
 
             return res;
         }

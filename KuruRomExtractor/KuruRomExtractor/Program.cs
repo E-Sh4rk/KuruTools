@@ -76,6 +76,11 @@ namespace KuruRomExtractor
                             Map mb = new Map(raw.RawBackground, Map.Type.BACKGROUND);
                             File.WriteAllText(filename_background, mb.ToString());
                         }
+                        if (m == null)
+                        {
+                            MiniMap mm = new MiniMap(raw.RawMinimap);
+                            File.WriteAllText(filename_minimap, mm.ToString());
+                        }
                         Console.WriteLine("Missing components for " + level.ToString() + ". Missing data has been exported.");
                     }
                 }
