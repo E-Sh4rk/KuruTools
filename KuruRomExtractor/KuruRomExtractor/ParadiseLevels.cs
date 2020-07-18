@@ -56,22 +56,27 @@ namespace KuruRomExtractor
         public int LevelDataOffset
         {
             get { return level_data_offset - ROM_MEMORY_DOMAIN; }
+            set { level_data_offset = value + ROM_MEMORY_DOMAIN; }
         }
         public int ObjectDataOffset
         {
             get { return object_data_offset - ROM_MEMORY_DOMAIN; }
+            set { object_data_offset = value + ROM_MEMORY_DOMAIN; }
         }
         public int GraphicalDataOffset
         {
             get { return graphical_data_offset != 0 ? graphical_data_offset - ROM_MEMORY_DOMAIN : 0; }
+            set { graphical_data_offset = value == 0 ? 0 : value + ROM_MEMORY_DOMAIN; }
         }
         public int BackgroundDataOffset
         {
             get { return background_data_offset - ROM_MEMORY_DOMAIN; }
+            set { background_data_offset = value + ROM_MEMORY_DOMAIN; }
         }
         public int MinimapOffset
         {
             get { return minimap_offset - ROM_MEMORY_DOMAIN; }
+            set { minimap_offset = value + ROM_MEMORY_DOMAIN; }
         }
     }
     public class ParadiseLevels
@@ -257,6 +262,112 @@ namespace KuruRomExtractor
             res.CompressedMinimap = reader.ReadBytes(length);
 
             return res;
+        }
+
+        int floorToMultiple(int v, int multiple)
+        {
+            return v - (v % multiple);
+        }
+        int ceilToMultiple(int v, int multiple)
+        {
+            if (v % multiple == 0) return v;
+            return floorToMultiple(v, multiple) + multiple;
+        }
+
+        int WriteDataWithCompression(int level, byte[] original_raw, byte[] original_compressed, byte[] new_raw, int baseAddr, int endAddr)
+        {
+            rom.Seek(baseAddr, SeekOrigin.Begin);
+            if (new_raw == null && (endAddr < 0 || baseAddr + original_compressed.Length <= endAddr))
+            {
+                rom.Write(original_compressed);
+                return original_raw.Length;
+            }
+            else if (new_raw == null)
+                new_raw = original_raw;
+            int uncompressed_length_written = LzCompression.Compress(rom, new_raw, endAddr);
+            if (uncompressed_length_written < new_raw.Length)
+                Console.WriteLine(string.Format("Warning: The new level {0} has been truncated.", level.ToString()));
+            Debug.Assert(uncompressed_length_written <= new_raw.Length);
+            return floorToMultiple(uncompressed_length_written, 4);
+            //return new_raw.Length;
+        }
+        void WriteSizeAndDataWithCompression(int level, byte[] original_raw, byte[] original_compressed, byte[] new_raw, int baseAddr, int endAddr)
+        {
+            int size = WriteDataWithCompression(level, original_raw, original_compressed,new_raw, baseAddr + sizeof(int), endAddr);
+            long position_bkp = rom.Position;
+            rom.Seek(baseAddr, SeekOrigin.Begin);
+            (new BinaryWriter(rom)).Write(size);
+            rom.Seek(position_bkp, SeekOrigin.Begin);
+        }
+        byte[] StripFirstBytes(byte[] data, int nb)
+        {
+            byte[] res = new byte[data.Length - nb];
+            Array.Copy(data, nb, res, 0, res.Length);
+            return res;
+        }
+        public bool AlterLevelData(int level, byte[] new_data, byte[] new_objects, byte[] new_graphical, byte[] new_background, byte[] new_minimap)
+        {
+            RawMapData original = ExtractLevelData(level);
+            if (new_data != null && original.RawData.SequenceEqual(new_data))
+                new_data = null;
+            if (new_objects != null && original.RawObjects.SequenceEqual(new_objects))
+                new_objects = null;
+            if (new_graphical != null && original.RawGraphical.SequenceEqual(new_graphical))
+                new_graphical = null;
+            if (new_background != null && original.RawBackground.SequenceEqual(new_background))
+                new_background = null;
+            if (new_minimap != null && original.RawMinimap.SequenceEqual(new_minimap))
+                new_minimap = null;
+
+            if (new_data == null && new_objects == null && new_graphical == null && new_background == null && new_minimap == null)
+                return false;
+
+            // Write compressed data
+            LevelInfo info = GetLevelInfo(level);
+
+            int pos = ceilToMultiple((int)rom.Length, 4);
+            level_entries[level].LevelDataOffset = pos;
+            WriteSizeAndDataWithCompression(level, original.RawData, original.CompressedData, new_data, pos, -1);
+
+            if ((new_graphical == null && original.RawGraphical.Length == 0) ||
+                (new_graphical != null && new_graphical.Length == 0))
+            {
+                level_entries[level].GraphicalDataOffset = 0;
+            }
+            else
+            {
+                pos = ceilToMultiple((int)rom.Position, 4);
+                level_entries[level].GraphicalDataOffset = pos;
+                WriteSizeAndDataWithCompression(level, original.RawGraphical, original.CompressedGraphical, new_graphical, pos, -1);
+            }
+
+            pos = ceilToMultiple((int)rom.Position, 4);
+            if ((info.Flags & BACKGROUND_CHALLENGE_MASK) != 0)
+            {
+                original.RawBackground = StripFirstBytes(original.RawBackground, 4);
+                if (new_background != null)
+                    new_background = StripFirstBytes(new_background, 4);
+            }
+            level_entries[level].BackgroundDataOffset = pos;
+            WriteSizeAndDataWithCompression(level, original.RawBackground, original.CompressedBackground, new_background, pos, -1);
+
+            pos = ceilToMultiple((int)rom.Position, 4);
+            level_entries[level].MinimapOffset = pos;
+            WriteDataWithCompression(level, original.RawMinimap, original.CompressedMinimap, new_minimap, pos, -1);
+
+            pos = ceilToMultiple((int)rom.Position, 4);
+            level_entries[level].ObjectDataOffset = pos;
+            byte[] objects = new_objects == null ? original.RawObjects : new_objects;
+            rom.Seek(pos, SeekOrigin.Begin);
+            rom.Write(objects, 0, objects.Length);
+
+            // Update LevelEntry structure
+            rom.Seek(ParadiseLevelEntry.BASE_ADDRESS, SeekOrigin.Begin);
+            BinaryWriter writer = new BinaryWriter(rom);
+            foreach (ParadiseLevelEntry entry in level_entries)
+                Utils.TypeToByte(writer, entry);
+
+            return true;
         }
 
         public void Dispose()

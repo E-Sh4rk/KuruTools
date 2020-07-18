@@ -19,6 +19,8 @@ namespace KuruRomExtractor
         static void Main(bool paradise = false, string input = "input.gba", string output = "output.gba", string workspace = "levels",
             bool relocate = true, string extractTiles = null)
         {
+            if (paradise && !relocate)
+                Console.WriteLine("Warning: Kururin Paradise mode only supports relocation.");
             if (paradise)
             {
                 Console.WriteLine("=== Kururin Paradise ROM Extractor ===");
@@ -82,6 +84,11 @@ namespace KuruRomExtractor
                         }
                         Console.WriteLine("Missing components for " + level.ToString() + ". Missing data has been exported.");
                     }
+
+                    // Alter map in the ROM
+                    if (levels.AlterLevelData(level, p, o, g, b, m))
+                        Console.WriteLine("Changes detected in " + level.ToString() + ". The ROM has been updated.");
+
                 }
 
                 Console.WriteLine("All tasks terminated.");
