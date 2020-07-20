@@ -28,6 +28,25 @@ namespace KuruRomExtractor
                 File.Copy(input, output, true);
                 ParadiseLevels levels = new ParadiseLevels(output);
 
+                if (!string.IsNullOrEmpty(extractTiles))
+                {
+                    Directory.CreateDirectory(extractTiles);
+                    foreach (int level in ParadiseLevels.AllLevels())
+                    {
+                        byte[][] data = levels.ExtractTilesData(level);
+                        for (int i = 0; i < data.Length; i++)
+                        {
+                            byte[] d = data[i];
+                            if (d != null)
+                            {
+                                string type = (new string[] { "graphical", "background", "background2", "physical" })[i];
+                                string filename_png = string.Format("{0:D2}.{1}.png", level, type);
+                                Tiles.PreviewOfTilesData(d, null).Save(Path.Combine(extractTiles, filename_png));
+                            }
+                        }
+                    }
+                }
+
                 Directory.CreateDirectory(workspace);
                 foreach (int level in ParadiseLevels.AllLevels())
                 {

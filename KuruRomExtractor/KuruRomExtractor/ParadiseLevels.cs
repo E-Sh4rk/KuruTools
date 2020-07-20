@@ -12,16 +12,16 @@ namespace KuruRomExtractor
     struct ParadiseLevelEntry
     {
         public const int BASE_ADDRESS = 0x2C884;
-        const int ROM_MEMORY_DOMAIN = 0x08000000;
+        public const int ROM_MEMORY_DOMAIN = 0x08000000;
 
         [FieldOffset(0)]
-        public int addr00;
+        public int addr00; // Graphical tiles
         [FieldOffset(4)]
-        public int addr01; // Sometimes zero
+        public int addr01; // Background tiles, sometimes zero
         [FieldOffset(8)]
-        public int addr02; // Sometimes zero (in particular for first levels)
+        public int addr02; // Background tiles 2, Sometimes zero (in particular for first levels)
         [FieldOffset(12)]
-        public int addr03;
+        public int addr03; // Physical tiles
         [FieldOffset(16)]
         public int level_data_offset;
         [FieldOffset(20)]
@@ -142,7 +142,7 @@ namespace KuruRomExtractor
             {
                 ParadiseLevelEntry e = level_entries[l];
                 int[] toTest = new int[] { e.addr00, e.addr01, e.addr02, e.addr03, e.addr07, e.addr08, e.addr09, e.addr10,
-                    e.addr11, e.addr12, e.addr13, e.addr14, e.addr16, e.addr17, e.addr18 };
+                    e.addr13, e.addr14, e.addr16, e.addr17, e.addr18 };
                 int k = 0;
                 foreach (int addr in toTest)
                 {
@@ -151,7 +151,7 @@ namespace KuruRomExtractor
                         try
                         {
                             rom.Seek(addr - 0x08000000, SeekOrigin.Begin);
-                            Console.WriteLine(l.ToString() + "." + k.ToString() + ":" + reader.ReadInt16());
+                            Console.WriteLine(l.ToString() + "." + k.ToString() + ":" + reader.ReadInt32());
                         }
                         catch { }
                     }
@@ -368,6 +368,25 @@ namespace KuruRomExtractor
                 Utils.TypeToByte(writer, entry);
 
             return true;
+        }
+
+        byte[] DecompressWorldData(int addr, int uncompressed_size)
+        {
+            if (addr == 0)
+                return null;
+            rom.Seek(addr - ParadiseLevelEntry.ROM_MEMORY_DOMAIN, SeekOrigin.Begin);
+            return LzCompression.Decompress(rom, uncompressed_size);
+        }
+
+        public byte[][] ExtractTilesData(int level)
+        {
+            byte[][] res = new byte[4][];
+            ParadiseLevelEntry ple = level_entries[level];
+            res[0] = DecompressWorldData(ple.addr00, 0x4000);
+            res[1] = DecompressWorldData(ple.addr01, 0x4000);
+            res[2] = DecompressWorldData(ple.addr02, 0x4000);
+            res[3] = DecompressWorldData(ple.addr03, 0x2000);
+            return res;
         }
 
         public void Dispose()

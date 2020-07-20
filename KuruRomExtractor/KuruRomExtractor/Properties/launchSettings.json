@@ -2,7 +2,7 @@
   "profiles": {
     "KuruRomExtractor": {
       "commandName": "Project",
-      "commandLineArgs": "--paradise"
+      "commandLineArgs": "--paradise --extract-tiles tiles"
     }
   }
 }

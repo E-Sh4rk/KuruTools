@@ -302,7 +302,6 @@ namespace KuruRomExtractor
             byte[][] res = new byte[8][];
             int w = (int)world;
             WorldInfo wi = world_infos[w];
-            //rom.Seek(0, SeekOrigin.Begin);
             res[0] = DecompressWorldData(w, wi.addr1_offset, wi.addr1_uncompressed_size);
             res[1] = DecompressWorldData(w, wi.addr2_offset, wi.addr2_uncompressed_size);
             res[2] = DecompressWorldData(w, wi.addr3_offset, wi.addr3_uncompressed_size);
