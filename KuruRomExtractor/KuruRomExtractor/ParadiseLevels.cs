@@ -31,7 +31,7 @@ namespace KuruRomExtractor
         [FieldOffset(28)]
         public int addr07; // Sometimes zero (in particular for first levels)
         [FieldOffset(32)]
-        public int addr08;
+        public int addr08; // Palette for background tiles
         [FieldOffset(36)]
         public int addr09; // Sometimes zero (in particular for first levels)
         [FieldOffset(40)]
@@ -380,12 +380,14 @@ namespace KuruRomExtractor
 
         public byte[][] ExtractTilesData(int level)
         {
-            byte[][] res = new byte[4][];
+            byte[][] res = new byte[6][];
             ParadiseLevelEntry ple = level_entries[level];
             res[0] = DecompressWorldData(ple.addr00, 0x4000);
             res[1] = DecompressWorldData(ple.addr01, 0x4000);
             res[2] = DecompressWorldData(ple.addr02, 0x4000);
             res[3] = DecompressWorldData(ple.addr03, 0x2000);
+            res[4] = DecompressWorldData(ple.addr08, 512);
+            //res[5] = DecompressWorldData(ple.addr10, 32);
             return res;
         }
 

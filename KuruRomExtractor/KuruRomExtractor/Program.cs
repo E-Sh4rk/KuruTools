@@ -33,15 +33,26 @@ namespace KuruRomExtractor
                     Directory.CreateDirectory(extractTiles);
                     foreach (int level in ParadiseLevels.AllLevels())
                     {
+                        if (level > 6) break; // TODO: First 6 levels only for now
                         byte[][] data = levels.ExtractTilesData(level);
+                        if (data[5] != null)
+                            Array.Copy(data[5], 0, data[4], 0, Levels.COLORSET_SIZE);
+                        Palette palette = new Palette(data[4]);
                         for (int i = 0; i < data.Length; i++)
                         {
-                            byte[] d = data[i];
-                            if (d != null)
+                            if (i < 4)
                             {
-                                string type = (new string[] { "graphical", "background", "background2", "physical" })[i];
-                                string filename_png = string.Format("{0:D2}.{1}.png", level, type);
-                                Tiles.PreviewOfTilesData(d, null).Save(Path.Combine(extractTiles, filename_png));
+                                byte[] d = data[i];
+                                if (d != null)
+                                {
+                                    string type = (new string[] { "graphical", "background", "background2", "physical" })[i];
+                                    for (int j = 0; j < palette.Colors.Length; j++)
+                                    {
+                                        string filename_png = string.Format("{0:D2}.{1}.{2:D2}.png", level, type, j);
+                                        Color firstColor = i == 1 ? palette.Colors[0][0] : Color.Transparent;
+                                        Tiles.PreviewOfTilesData(d, palette.Colors[j], firstColor).Save(Path.Combine(extractTiles, filename_png));
+                                    }
+                                }
                             }
                         }
                     }
