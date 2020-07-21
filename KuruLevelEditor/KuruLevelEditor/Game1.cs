@@ -34,6 +34,7 @@ namespace KuruLevelEditor
             Menu,
             Physical,
             Graphical,
+            Graphical2,
             Background,
             Minimap
         }
@@ -119,9 +120,15 @@ namespace KuruLevelEditor
                 return Mode.Physical;
             else if (index == 1)
                 return Mode.Graphical;
-            else if (index == 2)
+            else if (index == 2 && !Settings.Paradise)
                 return Mode.Background;
+            else if (index == 2)
+                return Mode.Graphical2;
+            else if (index == 3 && !Settings.Paradise)
+                return Mode.Minimap;
             else if (index == 3)
+                return Mode.Background;
+            else if (index == 4)
                 return Mode.Minimap;
             return Mode.Menu;
         }
@@ -157,6 +164,8 @@ namespace KuruLevelEditor
             };
             comboType.Items.Add(new ListItem("Walls", Color.White));
             comboType.Items.Add(new ListItem("Ground", Color.White));
+            if (Settings.Paradise)
+                comboType.Items.Add(new ListItem("Ground 2", Color.White));
             comboType.Items.Add(new ListItem("Background", Color.White));
             comboType.Items.Add(new ListItem("MiniMap", Color.White));
             grid.Widgets.Add(comboType);
@@ -653,11 +662,13 @@ namespace KuruLevelEditor
                 return Levels.MapType.Physical;
             if (mode == Mode.Graphical)
                 return Levels.MapType.Graphical;
+            if (mode == Mode.Graphical2)
+                return Levels.MapType.Graphical2;
             if (mode == Mode.Background)
                 return Levels.MapType.Background;
             if (mode == Mode.Minimap)
                 return Levels.MapType.Minimap;
-            throw new System.Exception();
+            throw new Exception();
         }
 
         EditorGrid editor;
@@ -684,30 +695,57 @@ namespace KuruLevelEditor
                 TilesSet osset;
                 if (mode != Mode.Background)
                 {
-                    ogrid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, Levels.MapType.Background)),
-                        Levels.TilesOffset(world, Levels.MapType.Background));
-                    osset = new TilesSet(Load.Tiles[new Load.WorldAndType(world, Levels.MapType.Background)],
-                        true, Rectangle.Empty, 0);
-                    underlays.Add(new EditorGrid.OverlayGrid(osset, ogrid, false));
+                    try
+                    {
+                        ogrid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, Levels.MapType.Background)),
+                            Levels.TilesOffset(world, Levels.MapType.Background));
+                        osset = new TilesSet(Load.Tiles[new Load.WorldAndType(world, Levels.MapType.Background)],
+                            true, Rectangle.Empty, 0);
+                        underlays.Add(new EditorGrid.OverlayGrid(osset, ogrid, false));
+                    }
+                    catch { }
+                }
+                if (mode != Mode.Graphical2)
+                {
+                    try
+                    {
+                        ogrid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, Levels.MapType.Graphical2)),
+                            Levels.TilesOffset(world, Levels.MapType.Graphical2));
+                        osset = new TilesSet(Load.Tiles[new Load.WorldAndType(world, Levels.MapType.Graphical2)],
+                            true, Rectangle.Empty, 0);
+                        if (mode == Mode.Background)
+                            overlays.Add(new EditorGrid.OverlayGrid(osset, ogrid, false));
+                        else
+                            underlays.Add(new EditorGrid.OverlayGrid(osset, ogrid, false));
+                    }
+                    catch { }
                 }
                 if (mode != Mode.Graphical)
                 {
-                    ogrid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, Levels.MapType.Graphical)),
-                        Levels.TilesOffset(world, Levels.MapType.Graphical));
-                    osset = new TilesSet(Load.Tiles[new Load.WorldAndType(world, Levels.MapType.Graphical)],
-                        true, Rectangle.Empty, 0);
-                    if (mode == Mode.Physical)
-                        underlays.Add(new EditorGrid.OverlayGrid(osset, ogrid, false));
-                    else
-                        overlays.Add(new EditorGrid.OverlayGrid(osset, ogrid, false));
+                    try
+                    {
+                        ogrid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, Levels.MapType.Graphical)),
+                            Levels.TilesOffset(world, Levels.MapType.Graphical));
+                        osset = new TilesSet(Load.Tiles[new Load.WorldAndType(world, Levels.MapType.Graphical)],
+                            true, Rectangle.Empty, 0);
+                        if (mode == Mode.Physical)
+                            underlays.Add(new EditorGrid.OverlayGrid(osset, ogrid, false));
+                        else
+                            overlays.Add(new EditorGrid.OverlayGrid(osset, ogrid, false));
+                    }
+                    catch { }
                 }
                 if (mode != Mode.Physical)
                 {
-                    ogrid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, Levels.MapType.Physical)),
-                        Levels.TilesOffset(world, Levels.MapType.Physical));
-                    osset = new TilesSet(Load.Tiles[new Load.WorldAndType(world, Levels.MapType.Physical)],
-                        true, Rectangle.Empty, 0);
-                    overlays.Add(new EditorGrid.OverlayGrid(osset, ogrid, true));
+                    try
+                    {
+                        ogrid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, Levels.MapType.Physical)),
+                            Levels.TilesOffset(world, Levels.MapType.Physical));
+                        osset = new TilesSet(Load.Tiles[new Load.WorldAndType(world, Levels.MapType.Physical)],
+                            true, Rectangle.Empty, 0);
+                        overlays.Add(new EditorGrid.OverlayGrid(osset, ogrid, true));
+                    }
+                    catch { }
                 }
             }
 

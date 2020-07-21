@@ -13,12 +13,12 @@ namespace KuruLevelEditor
 
         public enum MapType
         {
-            Physical = 0, Graphical, Background, Minimap
+            Physical = 0, Graphical, Graphical2, Background, Minimap
         }
-        static readonly string[] MAP_TYPE_STR = new string[] { "physical", "graphical", "background", "minimap" };
+        static readonly string[] MAP_TYPE_STR = new string[] { "physical", "graphical", "graphical2", "background", "minimap" };
 
-        public static string LEVELS_DIR = Path.GetFullPath("levels");
-        public static string TILES_DIR = Path.GetFullPath("tiles");
+        public static string LEVELS_DIR = Settings.Paradise ? Path.GetFullPath("paradise_levels") : Path.GetFullPath("levels");
+        public static string TILES_DIR = Settings.Paradise ? Path.GetFullPath("paradise_tiles") : Path.GetFullPath("tiles");
 
         public static string[] AllLevels { get; private set; }
         public static string[] AllWorlds { get; private set; }
@@ -62,6 +62,8 @@ namespace KuruLevelEditor
         }
         public static string GetWorldOfLevel(string level)
         {
+            if (Settings.Paradise)
+                return level;
             return level.Substring(0, level.LastIndexOf('_'));
         }
 

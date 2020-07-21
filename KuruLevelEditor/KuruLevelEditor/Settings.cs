@@ -13,6 +13,12 @@ namespace KuruLevelEditor
         public static string Input;
         public static string Output;
         public static string EmulatorCommand;
+
+        public static bool Paradise
+        {
+            get { return true; }
+        }
+
         public static bool LoadSettings()
         {
             try

@@ -64,12 +64,14 @@ namespace KuruRomExtractor
                     string filename = Path.Combine(workspace, level.ToString("D2") + ".physical.txt");
                     string filename_objects = Path.Combine(workspace, level.ToString("D2") + ".objects.txt");
                     string filename_graphical = Path.Combine(workspace, level.ToString("D2") + ".graphical.txt");
+                    string filename_graphical2 = Path.Combine(workspace, level.ToString("D2") + ".graphical2.txt");
                     string filename_background = Path.Combine(workspace, level.ToString("D2") + ".background.txt");
                     string filename_minimap = Path.Combine(workspace, level.ToString("D2") + ".minimap.txt");
 
                     byte[] p = null;
                     byte[] o = null;
                     byte[] g = null;
+                    byte[] g2 = null;
                     byte[] b = null;
                     byte[] m = null;
                     if (File.Exists(filename))
@@ -78,13 +80,15 @@ namespace KuruRomExtractor
                         o = Map.Parse(File.ReadAllLines(filename_objects), Map.Type.OBJECTS).ToByteData();
                     if (File.Exists(filename_graphical))
                         g = Map.Parse(File.ReadAllLines(filename_graphical), Map.Type.GRAPHICAL).ToByteData();
+                    if (File.Exists(filename_graphical2))
+                        g2 = Map.Parse(File.ReadAllLines(filename_graphical2), Map.Type.GRAPHICAL).ToByteData();
                     if (File.Exists(filename_background))
                         b = Map.Parse(File.ReadAllLines(filename_background), Map.Type.BACKGROUND).ToByteData();
                     if (File.Exists(filename_minimap))
                         m = MiniMap.Parse(File.ReadAllLines(filename_minimap)).ToByteData();
 
                     // Export map if not already present
-                    if (p == null || o == null || g == null || b == null || m == null)
+                    if (p == null || o == null || g == null || g2 == null || b == null || m == null)
                     {
                         ParadiseLevels.RawMapData raw = levels.ExtractLevelData(level);
                         if (p == null)
@@ -102,7 +106,12 @@ namespace KuruRomExtractor
                             Map mg = new Map(raw.RawGraphical, Map.Type.GRAPHICAL);
                             File.WriteAllText(filename_graphical, mg.ToString());
                         }
-                        if (b == null)
+                        if (g2 == null)
+                        {
+                            Map mg2 = new Map(raw.RawGraphical2, Map.Type.GRAPHICAL);
+                            File.WriteAllText(filename_graphical2, mg2.ToString());
+                        }
+                        if (b == null && raw.RawBackground.Length > 0)
                         {
                             Map mb = new Map(raw.RawBackground, Map.Type.BACKGROUND);
                             File.WriteAllText(filename_background, mb.ToString());
@@ -116,7 +125,7 @@ namespace KuruRomExtractor
                     }
 
                     // Alter map in the ROM
-                    if (levels.AlterLevelData(level, p, o, g, b, m))
+                    if (levels.AlterLevelData(level, p, o, g, g2, b, m))
                         Console.WriteLine("Changes detected in " + level.ToString() + ". The ROM has been updated.");
 
                 }

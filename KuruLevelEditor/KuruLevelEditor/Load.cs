@@ -83,17 +83,24 @@ namespace KuruLevelEditor
 				Tiles = new Dictionary<WorldAndType, Texture2D[]>();
 				foreach (string world in Levels.AllWorlds)
 				{
-					foreach (Levels.MapType type in new Levels.MapType[] { Levels.MapType.Background, Levels.MapType.Graphical, Levels.MapType.Physical })
+					foreach (Levels.MapType type in new Levels.MapType[] { Levels.MapType.Background, Levels.MapType.Graphical2, Levels.MapType.Graphical, Levels.MapType.Physical })
 					{
 						WorldAndType lat = new WorldAndType(world, type);
 						Texture2D[] ts = new Texture2D[16];
 						for (int i = 0; i < ts.Length; i++)
 						{
 							string path = Levels.GetTilePath(world, type, i);
-							FileStream fileStream = new FileStream(path, FileMode.Open);
-							Texture2D tile = Texture2D.FromStream(graphics, fileStream);
-							fileStream.Close();
-							ts[i] = tile;
+							if (!File.Exists(path) && Settings.Paradise)
+                            {
+								ts[i] = null;
+                            }
+							else
+                            {
+								FileStream fileStream = new FileStream(path, FileMode.Open);
+								Texture2D tile = Texture2D.FromStream(graphics, fileStream);
+								fileStream.Close();
+								ts[i] = tile;
+							}
 						}
 						Tiles.Add(lat, ts);
 					}

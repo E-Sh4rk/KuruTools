@@ -27,9 +27,9 @@ namespace KuruRomExtractor
         [FieldOffset(20)]
         public int graphical_data_offset; // Sometimes zero
         [FieldOffset(24)]
-        public int background_data_offset;
+        public int graphical2_data_offset;
         [FieldOffset(28)]
-        public int addr07; // Sometimes zero (in particular for first levels)
+        public int background_data_offset; // Sometimes zero (in particular for first levels)
         [FieldOffset(32)]
         public int addr08; // Palette for background tiles
         [FieldOffset(36)]
@@ -51,7 +51,7 @@ namespace KuruRomExtractor
         [FieldOffset(68)]
         public int addr17; // Sometimes zero (in particular for first levels)
         [FieldOffset(72)]
-        public int addr18; // Often zero (in particular for first levels)
+        public int addr18; // Often zero, except 28, 36, 37
 
         public int LevelDataOffset
         {
@@ -70,8 +70,13 @@ namespace KuruRomExtractor
         }
         public int BackgroundDataOffset
         {
-            get { return background_data_offset - ROM_MEMORY_DOMAIN; }
-            set { background_data_offset = value + ROM_MEMORY_DOMAIN; }
+            get { return background_data_offset > 0 ? background_data_offset - ROM_MEMORY_DOMAIN : 0; }
+            set { background_data_offset = value <= 0 ? 0 : value + ROM_MEMORY_DOMAIN; }
+        }
+        public int Graphical2DataOffset
+        {
+            get { return graphical2_data_offset - ROM_MEMORY_DOMAIN; }
+            set { graphical2_data_offset = value + ROM_MEMORY_DOMAIN; }
         }
         public int MinimapOffset
         {
@@ -109,6 +114,8 @@ namespace KuruRomExtractor
             public int ObjectsSize;
             public int GraphicalBaseAddress;
             public int GraphicalUncompressedSize;
+            public int Graphical2BaseAddress;
+            public int Graphical2UncompressedSize;
             public int BackgroundBaseAddress;
             public int BackgroundUncompressedSize;
             public int MinimapBaseAddress;
@@ -122,6 +129,8 @@ namespace KuruRomExtractor
             public byte[] RawObjects;
             public byte[] CompressedGraphical;
             public byte[] RawGraphical;
+            public byte[] CompressedGraphical2;
+            public byte[] RawGraphical2;
             public byte[] CompressedBackground;
             public byte[] RawBackground;
             public byte[] CompressedMinimap;
@@ -145,10 +154,10 @@ namespace KuruRomExtractor
                 level_entries[l] = Utils.ByteToType<ParadiseLevelEntry>(reader);
             }
             // For debugging purpose
-            /*for (int l = 0; l < level_entries.Length; l++)
+            for (int l = 0; l < level_entries.Length; l++)
             {
                 ParadiseLevelEntry e = level_entries[l];
-                int[] toTest = new int[] { e.addr07, e.addr09 };
+                int[] toTest = new int[] { e.addr18 };
                 int k = 0;
                 foreach (int addr in toTest)
                 {
@@ -164,11 +173,11 @@ namespace KuruRomExtractor
                     k++;
                 }
                 Console.ReadLine();
-            }*/
+            }
             /*for (int l = 0; l < level_entries.Length; l++)
             {
                 ParadiseLevelEntry e = level_entries[l];
-                Console.WriteLine(l.ToString("D2") + ": " + Convert.ToString(e.addr12, 2).PadLeft(24, '0'));
+                Console.WriteLine(l.ToString("D2") + ": " + Convert.ToString(e.flags, 2).PadLeft(24, '0'));
             }
             Console.ReadLine();*/
         }
@@ -203,10 +212,23 @@ namespace KuruRomExtractor
                 res.GraphicalBaseAddress = (int)rom.Position;
             }
 
-            base_addr = level_entries[level].BackgroundDataOffset;
+            base_addr = level_entries[level].Graphical2DataOffset;
             rom.Seek(base_addr, SeekOrigin.Begin);
-            res.BackgroundUncompressedSize = reader.ReadInt32();
-            res.BackgroundBaseAddress = (int)rom.Position;
+            res.Graphical2UncompressedSize = reader.ReadInt32();
+            res.Graphical2BaseAddress = (int)rom.Position;
+
+            base_addr = level_entries[level].BackgroundDataOffset;
+            if (base_addr == 0)
+            {
+                res.BackgroundUncompressedSize = 0;
+                res.BackgroundBaseAddress = 0;
+            }
+            else
+            {
+                rom.Seek(base_addr, SeekOrigin.Begin);
+                res.BackgroundUncompressedSize = reader.ReadInt32();
+                res.BackgroundBaseAddress = (int)rom.Position;
+            }
 
             res.MinimapBaseAddress = level_entries[level].MinimapOffset;
             res.MinimapUncompressedSize = MINIMAP_SIZE;
@@ -216,9 +238,9 @@ namespace KuruRomExtractor
             return res;
         }
 
-        const int BACKGROUND_CHALLENGE_MASK = 0x2000;
-        const ushort BACKGROUND_CHALLENGE_WIDTH = 0x10;
-        const ushort BACKGROUND_CHALLENGE_HEIGHT = 0x10;
+        const int GR2_CHALLENGE_MASK = 0x2000;
+        const ushort GR2_CHALLENGE_WIDTH = 0x10;
+        const ushort GR2_CHALLENGE_HEIGHT = 0x10;
 
         public RawMapData ExtractLevelData(int level)
         {
@@ -243,22 +265,29 @@ namespace KuruRomExtractor
             rom.Seek(startPos, SeekOrigin.Begin);
             res.CompressedGraphical = reader.ReadBytes(length);
 
+            rom.Seek(info.Graphical2BaseAddress, SeekOrigin.Begin);
+            startPos = rom.Position;
+            res.RawGraphical2 = LzCompression.Decompress(rom, info.Graphical2UncompressedSize);
+            length = (int)(rom.Position - startPos);
+            rom.Seek(startPos, SeekOrigin.Begin);
+            res.CompressedGraphical2 = reader.ReadBytes(length);
+            if ((info.Flags & GR2_CHALLENGE_MASK) != 0)
+            {
+                byte[] newRaw = new byte[res.RawGraphical2.Length + 4];
+                BinaryWriter bw = new BinaryWriter(new MemoryStream(newRaw));
+                bw.Write(GR2_CHALLENGE_WIDTH);
+                bw.Write(GR2_CHALLENGE_HEIGHT);
+                bw.Write(res.RawGraphical2);
+                bw.Close();
+                res.RawGraphical2 = newRaw;
+            }
+
             rom.Seek(info.BackgroundBaseAddress, SeekOrigin.Begin);
             startPos = rom.Position;
             res.RawBackground = LzCompression.Decompress(rom, info.BackgroundUncompressedSize);
             length = (int)(rom.Position - startPos);
             rom.Seek(startPos, SeekOrigin.Begin);
             res.CompressedBackground = reader.ReadBytes(length);
-            if ((info.Flags & BACKGROUND_CHALLENGE_MASK) != 0)
-            {
-                byte[] newRaw = new byte[res.RawBackground.Length + 4];
-                BinaryWriter bw = new BinaryWriter(new MemoryStream(newRaw));
-                bw.Write(BACKGROUND_CHALLENGE_WIDTH);
-                bw.Write(BACKGROUND_CHALLENGE_HEIGHT);
-                bw.Write(res.RawBackground);
-                bw.Close();
-                res.RawBackground = newRaw;
-            }
 
             rom.Seek(info.MinimapBaseAddress, SeekOrigin.Begin);
             startPos = rom.Position;
@@ -311,7 +340,7 @@ namespace KuruRomExtractor
             Array.Copy(data, nb, res, 0, res.Length);
             return res;
         }
-        public bool AlterLevelData(int level, byte[] new_data, byte[] new_objects, byte[] new_graphical, byte[] new_background, byte[] new_minimap)
+        public bool AlterLevelData(int level, byte[] new_data, byte[] new_objects, byte[] new_graphical, byte[] new_graphical2, byte[] new_background, byte[] new_minimap)
         {
             RawMapData original = ExtractLevelData(level);
             if (new_data != null && original.RawData.SequenceEqual(new_data))
@@ -320,12 +349,14 @@ namespace KuruRomExtractor
                 new_objects = null;
             if (new_graphical != null && original.RawGraphical.SequenceEqual(new_graphical))
                 new_graphical = null;
+            if (new_graphical2 != null && original.RawGraphical2.SequenceEqual(new_graphical2))
+                new_graphical2 = null;
             if (new_background != null && original.RawBackground.SequenceEqual(new_background))
                 new_background = null;
             if (new_minimap != null && original.RawMinimap.SequenceEqual(new_minimap))
                 new_minimap = null;
 
-            if (new_data == null && new_objects == null && new_graphical == null && new_background == null && new_minimap == null)
+            if (new_data == null && new_objects == null && new_graphical == null && new_graphical2 == null  && new_background == null && new_minimap == null)
                 return false;
 
             // Write compressed data
@@ -348,14 +379,26 @@ namespace KuruRomExtractor
             }
 
             pos = ceilToMultiple((int)rom.Position, 4);
-            if ((info.Flags & BACKGROUND_CHALLENGE_MASK) != 0)
+            if ((info.Flags & GR2_CHALLENGE_MASK) != 0)
             {
-                original.RawBackground = StripFirstBytes(original.RawBackground, 4);
-                if (new_background != null)
-                    new_background = StripFirstBytes(new_background, 4);
+                original.RawGraphical2 = StripFirstBytes(original.RawGraphical2, 4);
+                if (new_graphical2 != null)
+                    new_graphical2 = StripFirstBytes(new_graphical2, 4);
             }
-            level_entries[level].BackgroundDataOffset = pos;
-            WriteSizeAndDataWithCompression(level, original.RawBackground, original.CompressedBackground, new_background, pos, -1);
+            level_entries[level].Graphical2DataOffset = pos;
+            WriteSizeAndDataWithCompression(level, original.RawGraphical2, original.CompressedGraphical2, new_graphical2, pos, -1);
+
+            if ((new_background == null && original.RawBackground.Length == 0) ||
+                (new_background != null && new_background.Length == 0))
+            {
+                level_entries[level].BackgroundDataOffset = 0;
+            }
+            else
+            {
+                pos = ceilToMultiple((int)rom.Position, 4);
+                level_entries[level].BackgroundDataOffset = pos;
+                WriteSizeAndDataWithCompression(level, original.RawBackground, original.CompressedBackground, new_background, pos, -1);
+            }
 
             pos = ceilToMultiple((int)rom.Position, 4);
             level_entries[level].MinimapOffset = pos;

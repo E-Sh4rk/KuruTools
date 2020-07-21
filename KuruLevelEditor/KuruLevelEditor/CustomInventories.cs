@@ -31,6 +31,10 @@ namespace KuruLevelEditor
             if (!File.Exists(pathG))
                 pathG = Path.Combine(defaultDir, "graphical.txt");
             grids[Levels.MapType.Graphical] = EGFromPath(bounds, pathG);
+            string pathG2 = Path.Combine(dir, "graphical2.txt");
+            if (!File.Exists(pathG2))
+                pathG2 = Path.Combine(defaultDir, "graphical2.txt");
+            grids[Levels.MapType.Graphical2] = EGFromPath(bounds, pathG2);
             string pathB = Path.Combine(dir, "background.txt");
             if (!File.Exists(pathB))
                 pathB = Path.Combine(defaultDir, "background.txt");
@@ -53,6 +57,8 @@ namespace KuruLevelEditor
             SaveGrid(pathP, grids[Levels.MapType.Physical].Grid);
             string pathG = Path.Combine(dir, "graphical.txt");
             SaveGrid(pathG, grids[Levels.MapType.Graphical].Grid);
+            string pathG2 = Path.Combine(dir, "graphical2.txt");
+            SaveGrid(pathG2, grids[Levels.MapType.Graphical2].Grid);
             string pathB = Path.Combine(dir, "background.txt");
             SaveGrid(pathB, grids[Levels.MapType.Background].Grid);
             string pathM = Path.Combine(dir, "minimap.txt");
