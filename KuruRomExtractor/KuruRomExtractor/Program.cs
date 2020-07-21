@@ -33,10 +33,9 @@ namespace KuruRomExtractor
                     Directory.CreateDirectory(extractTiles);
                     foreach (int level in ParadiseLevels.AllLevels())
                     {
-                        if (level > 6) break; // TODO: First 6 levels only for now
+                        if (level > 6) continue; // TODO: First 6 levels only for now
                         byte[][] data = levels.ExtractTilesData(level);
-                        if (data[5] != null)
-                            Array.Copy(data[5], 0, data[4], 0, Levels.COLORSET_SIZE);
+                        Array.Copy(data[5], 0, data[4], 0, Levels.COLORSET_SIZE);
                         Palette palette = new Palette(data[4]);
                         for (int i = 0; i < data.Length; i++)
                         {

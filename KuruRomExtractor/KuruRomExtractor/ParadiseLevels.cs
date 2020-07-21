@@ -35,7 +35,7 @@ namespace KuruRomExtractor
         [FieldOffset(36)]
         public int addr09; // Sometimes zero (in particular for first levels)
         [FieldOffset(40)]
-        public int addr10;
+        public int addr10; // Other versions of the first color set (32 first bytes)
         [FieldOffset(44)]
         public int minimap_offset;
         [FieldOffset(48)]
@@ -141,8 +141,7 @@ namespace KuruRomExtractor
             /*for (int l = 0; l < level_entries.Length; l++)
             {
                 ParadiseLevelEntry e = level_entries[l];
-                int[] toTest = new int[] { e.addr00, e.addr01, e.addr02, e.addr03, e.addr07, e.addr08, e.addr09, e.addr10,
-                    e.addr13, e.addr14, e.addr16, e.addr17, e.addr18 };
+                int[] toTest = new int[] { e.addr07, e.addr09 };
                 int k = 0;
                 foreach (int addr in toTest)
                 {
@@ -377,6 +376,13 @@ namespace KuruRomExtractor
             rom.Seek(addr - ParadiseLevelEntry.ROM_MEMORY_DOMAIN, SeekOrigin.Begin);
             return LzCompression.Decompress(rom, uncompressed_size);
         }
+        byte[] ReadWorldData(int addr, int size)
+        {
+            if (addr == 0)
+                return null;
+            rom.Seek(addr - ParadiseLevelEntry.ROM_MEMORY_DOMAIN, SeekOrigin.Begin);
+            return (new BinaryReader(rom)).ReadBytes(size);
+        }
 
         public byte[][] ExtractTilesData(int level)
         {
@@ -387,7 +393,7 @@ namespace KuruRomExtractor
             res[2] = DecompressWorldData(ple.addr02, 0x4000);
             res[3] = DecompressWorldData(ple.addr03, 0x2000);
             res[4] = DecompressWorldData(ple.addr08, 512);
-            //res[5] = DecompressWorldData(ple.addr10, 32);
+            res[5] = ReadWorldData(ple.addr10, 32);
             return res;
         }
 
