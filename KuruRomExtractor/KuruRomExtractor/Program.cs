@@ -31,11 +31,12 @@ namespace KuruRomExtractor
                 if (!string.IsNullOrEmpty(extractTiles))
                 {
                     Directory.CreateDirectory(extractTiles);
+                    byte[] commonPaletteData = levels.ExtractCommonPaletteData();
                     foreach (int level in ParadiseLevels.AllLevels())
                     {
-                        if (level > 6) continue; // TODO: First 6 levels only for now
                         byte[][] data = levels.ExtractTilesData(level);
                         Array.Copy(data[5], 0, data[4], 0, Levels.COLORSET_SIZE);
+                        Array.Copy(commonPaletteData, 0, data[4], data[4].Length - commonPaletteData.Length, commonPaletteData.Length);
                         Palette palette = new Palette(data[4]);
                         for (int i = 0; i < data.Length; i++)
                         {

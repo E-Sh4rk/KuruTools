@@ -91,6 +91,13 @@ namespace KuruRomExtractor
             return res.ToArray();
         }
 
+        const int COMMON_PALETTE_11 = 0x1C5BF0;
+        const int COMMON_PALETTE_12 = 0x1C5CF0;
+        const int COMMON_PALETTE_13 = 0x1C5DF0;
+        const int COMMON_PALETTE_14 = 0x19BF64;
+        const int COMMON_PALETTE_15 = 0x19BF84;
+        public const int COLORSET_SIZE = 0x20;
+
         FileStream rom;
         ParadiseLevelEntry[] level_entries;
 
@@ -393,7 +400,26 @@ namespace KuruRomExtractor
             res[2] = DecompressWorldData(ple.addr02, 0x4000);
             res[3] = DecompressWorldData(ple.addr03, 0x2000);
             res[4] = DecompressWorldData(ple.addr08, 512);
-            res[5] = ReadWorldData(ple.addr10, 32);
+            res[5] = ReadWorldData(ple.addr10, COLORSET_SIZE);
+            return res;
+        }
+
+        public byte[] ExtractCommonPaletteData()
+        {
+            byte[] res = new byte[5 * COLORSET_SIZE];
+            BinaryWriter writer = new BinaryWriter(new MemoryStream(res));
+            BinaryReader reader = new BinaryReader(rom);
+            rom.Seek(COMMON_PALETTE_11, SeekOrigin.Begin);
+            writer.Write(reader.ReadBytes(COLORSET_SIZE));
+            rom.Seek(COMMON_PALETTE_12, SeekOrigin.Begin);
+            writer.Write(reader.ReadBytes(COLORSET_SIZE));
+            rom.Seek(COMMON_PALETTE_13, SeekOrigin.Begin);
+            writer.Write(reader.ReadBytes(COLORSET_SIZE));
+            rom.Seek(COMMON_PALETTE_14, SeekOrigin.Begin);
+            writer.Write(reader.ReadBytes(COLORSET_SIZE));
+            rom.Seek(COMMON_PALETTE_15, SeekOrigin.Begin);
+            writer.Write(reader.ReadBytes(COLORSET_SIZE));
+            writer.Close();
             return res;
         }
 
