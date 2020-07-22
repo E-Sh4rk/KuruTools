@@ -45,7 +45,7 @@ namespace KuruRomExtractor
                                 byte[] d = data[i];
                                 if (d != null)
                                 {
-                                    string type = (new string[] { "graphical", "background", "background2", "physical" })[i];
+                                    string type = (new string[] { "graphical", "graphical2", "background", "physical" })[i];
                                     for (int j = 0; j < palette.Colors.Length; j++)
                                     {
                                         string filename_png = string.Format("{0:D2}.{1}.{2:D2}.png", level, type, j);

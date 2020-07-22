@@ -15,11 +15,11 @@ namespace KuruRomExtractor
         public const int ROM_MEMORY_DOMAIN = 0x08000000;
 
         [FieldOffset(0)]
-        public int addr00; // Graphical tiles
+        public int addr00; // Graphical/Background tiles 1
         [FieldOffset(4)]
-        public int addr01; // Background tiles, sometimes zero
+        public int addr01; // Graphical/Background tiles 2, sometimes zero
         [FieldOffset(8)]
-        public int addr02; // Background tiles 2, Sometimes zero (in particular for first levels)
+        public int addr02; // Sprite tiles? Sometimes zero (in particular for first levels)
         [FieldOffset(12)]
         public int addr03; // Physical tiles
         [FieldOffset(16)]
@@ -154,7 +154,7 @@ namespace KuruRomExtractor
                 level_entries[l] = Utils.ByteToType<ParadiseLevelEntry>(reader);
             }
             // For debugging purpose
-            for (int l = 0; l < level_entries.Length; l++)
+            /*for (int l = 0; l < level_entries.Length; l++)
             {
                 ParadiseLevelEntry e = level_entries[l];
                 int[] toTest = new int[] { e.addr18 };
@@ -173,7 +173,7 @@ namespace KuruRomExtractor
                     k++;
                 }
                 Console.ReadLine();
-            }
+            }*/
             /*for (int l = 0; l < level_entries.Length; l++)
             {
                 ParadiseLevelEntry e = level_entries[l];
@@ -440,7 +440,8 @@ namespace KuruRomExtractor
             ParadiseLevelEntry ple = level_entries[level];
             res[0] = DecompressWorldData(ple.addr00, 0x4000);
             res[1] = DecompressWorldData(ple.addr01, 0x4000);
-            res[2] = DecompressWorldData(ple.addr02, 0x4000);
+            res[2] = DecompressWorldData(ple.addr01, 0x4000); // TODO
+            //res[2] = DecompressWorldData(ple.addr02, 0x4000);
             res[3] = DecompressWorldData(ple.addr03, 0x2000);
             res[4] = DecompressWorldData(ple.addr08, 512);
             res[5] = ReadWorldData(ple.addr10, COLORSET_SIZE);
