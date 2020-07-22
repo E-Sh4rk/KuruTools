@@ -49,7 +49,7 @@ namespace KuruRomExtractor
                                     for (int j = 0; j < palette.Colors.Length; j++)
                                     {
                                         string filename_png = string.Format("{0:D2}.{1}.{2:D2}.png", level, type, j);
-                                        Color firstColor = i == 1 ? palette.Colors[0][0] : Color.Transparent;
+                                        Color firstColor = i == 2 ? palette.Colors[0][0] : Color.Transparent;
                                         Tiles.PreviewOfTilesData(d, palette.Colors[j], firstColor).Save(Path.Combine(extractTiles, filename_png));
                                     }
                                 }

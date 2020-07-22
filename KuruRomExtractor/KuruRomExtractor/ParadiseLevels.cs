@@ -9,7 +9,7 @@ using System.Diagnostics;
 namespace KuruRomExtractor
 {
     [StructLayout(LayoutKind.Explicit, Size = 0x4C)]
-    struct ParadiseLevelEntry
+    struct ParadiseLevelEntry // TODO: Some sprites missing in level 6... Because graphical map seems to have OOB ID. Should the graphical tiles be concatenated with the sprite tiles?
     {
         public const int BASE_ADDRESS = 0x2C884;
         public const int ROM_MEMORY_DOMAIN = 0x08000000;
@@ -436,11 +436,12 @@ namespace KuruRomExtractor
 
         public byte[][] ExtractTilesData(int level)
         {
+            LevelInfo info = GetLevelInfo(level);
             byte[][] res = new byte[6][];
             ParadiseLevelEntry ple = level_entries[level];
-            res[0] = DecompressWorldData(ple.addr00, 0x4000);
-            res[1] = DecompressWorldData(ple.addr01, 0x4000);
-            res[2] = DecompressWorldData(ple.addr01, 0x4000); // TODO
+            res[0] = DecompressWorldData(info.BackgroundBaseAddress == 0 ? ple.addr00 : ple.addr01, 0x4000);
+            res[1] = DecompressWorldData(info.BackgroundBaseAddress == 0 ? ple.addr01 : ple.addr00, 0x4000);
+            res[2] = DecompressWorldData(ple.addr01, 0x4000); // TODO: Not the right correspondance... see level 10
             //res[2] = DecompressWorldData(ple.addr02, 0x4000);
             res[3] = DecompressWorldData(ple.addr03, 0x2000);
             res[4] = DecompressWorldData(ple.addr08, 512);
