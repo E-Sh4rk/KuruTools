@@ -98,38 +98,46 @@ namespace KuruRomExtractor
                     // Export map if not already present
                     if (p == null || o == null || g == null || g2 == null || b == null || m == null)
                     {
+                        bool exported = false;
                         ParadiseLevels.RawMapData raw = levels.ExtractLevelData(level);
                         if (p == null)
                         {
                             Map mp = new Map(raw.RawData, Map.Type.PHYSICAL);
                             File.WriteAllText(filename, mp.ToString());
+                            exported = true;
                         }
                         if (o == null)
                         {
                             Map mo = new Map(raw.RawObjects, Map.Type.OBJECTS);
                             File.WriteAllText(filename_objects, mo.ToString());
+                            exported = true;
                         }
                         if (g == null && raw.RawGraphical.Length > 0)
                         {
                             Map mg = new Map(raw.RawGraphical, Map.Type.GRAPHICAL);
                             File.WriteAllText(filename_graphical, mg.ToString());
+                            exported = true;
                         }
                         if (g2 == null)
                         {
                             Map mg2 = new Map(raw.RawGraphical2, Map.Type.GRAPHICAL);
                             File.WriteAllText(filename_graphical2, mg2.ToString());
+                            exported = true;
                         }
                         if (b == null && raw.RawBackground.Length > 0)
                         {
                             Map mb = new Map(raw.RawBackground, Map.Type.BACKGROUND);
                             File.WriteAllText(filename_background, mb.ToString());
+                            exported = true;
                         }
                         if (m == null)
                         {
                             MiniMap mm = new MiniMap(raw.RawMinimap);
                             File.WriteAllText(filename_minimap, mm.ToString());
+                            exported = true;
                         }
-                        Console.WriteLine("Missing components for " + level.ToString() + ". Missing data has been exported.");
+                        if (exported)
+                            Console.WriteLine("Missing components for " + level.ToString() + ". Missing data has been exported.");
                     }
 
                     // Alter map in the ROM

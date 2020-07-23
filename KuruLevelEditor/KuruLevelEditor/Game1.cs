@@ -209,7 +209,8 @@ namespace KuruLevelEditor
                 {
                     mode = IndexToSelectedMode(comboType.SelectedIndex);
                     map = comboMap.SelectedItem.Text;
-                    LoadGrid();
+                    if (!LoadGrid())
+                        mode = Mode.Menu;
                 }
             };
 
@@ -673,22 +674,25 @@ namespace KuruLevelEditor
 
         EditorGrid editor;
         TilesSet sset;
-        void LoadGrid()
+        bool LoadGrid()
         {
             int[,] grid;
             List<EditorGrid.OverlayGrid> underlays = new List<EditorGrid.OverlayGrid>();
             List<EditorGrid.OverlayGrid> overlays = new List<EditorGrid.OverlayGrid>();
             string world = Levels.GetWorldOfLevel(map);
             Levels.MapType mapType = MapType();
+            string levelPath = Levels.GetLevelPath(map, mapType);
+            if (!File.Exists(levelPath) && Settings.Paradise)
+                return false;
             if (mode == Mode.Minimap)
             {
-                grid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, Levels.MapType.Minimap)), 64, 64,
+                grid = Levels.GetGridFromLines(File.ReadAllLines(levelPath), 64, 64,
                     Levels.TilesOffset(world, Levels.MapType.Minimap));
                 sset = new TilesSet(Load.MinimapColors, false, _ssetBounds, 64);
             }
             else
             {
-                grid = Levels.GetGridFromLines(File.ReadAllLines(Levels.GetLevelPath(map, mapType)), Levels.TilesOffset(world, mapType));
+                grid = Levels.GetGridFromLines(File.ReadAllLines(levelPath), Levels.TilesOffset(world, mapType));
                 sset = new TilesSet(Load.Tiles[new Load.WorldAndType(world, mapType)], true, _ssetBounds, 64);
 
                 int[,] ogrid;
@@ -755,6 +759,7 @@ namespace KuruLevelEditor
                 selectionGrid = _lastSelectionGrid;
             editor = new EditorGrid(this, MapType(), _gridEditorBounds,
                 sset, grid, new Point(-8, -8), overlays.ToArray(), underlays.ToArray(), selectionGrid, _inventories.GetInventory(MapType()));
+            return true;
         }
 
         bool reloadAtNextFrame = false;
