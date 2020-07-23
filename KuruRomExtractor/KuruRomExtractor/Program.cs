@@ -38,6 +38,14 @@ namespace KuruRomExtractor
                         Array.Copy(data[5], 0, data[4], 0, Levels.COLORSET_SIZE);
                         Array.Copy(commonPaletteData, 0, data[4], data[4].Length - commonPaletteData.Length, commonPaletteData.Length);
                         Palette palette = new Palette(data[4]);
+                        int lastLayer = 2;
+                        ParadiseLevels.LevelInfo info = levels.GetLevelInfo(level);
+                        if (info.BackgroundBaseAddress == 0)
+                        {
+                            lastLayer--;
+                            if (info.Graphical2BaseAddress == 0)
+                                lastLayer--;
+                        }
                         for (int i = 0; i < data.Length; i++)
                         {
                             if (i < 4)
@@ -49,7 +57,7 @@ namespace KuruRomExtractor
                                     for (int j = 0; j < palette.Colors.Length; j++)
                                     {
                                         string filename_png = string.Format("{0:D2}.{1}.{2:D2}.png", level, type, j);
-                                        Color firstColor = i == 2 ? palette.Colors[0][0] : Color.Transparent;
+                                        Color firstColor = i >= lastLayer && i <= 2 ? palette.Colors[0][0] : Color.Transparent;
                                         Tiles.PreviewOfTilesData(d, palette.Colors[j], firstColor).Save(Path.Combine(extractTiles, filename_png));
                                     }
                                 }
