@@ -33,7 +33,7 @@ namespace KuruRomExtractor
         [FieldOffset(32)]
         public int addr08; // Palette for background tiles
         [FieldOffset(36)]
-        public int addr09; // Sometimes zero (in particular for first levels)
+        public int addr09; // Palette for practice mode? Sometimes zero (in particular for first levels)
         [FieldOffset(40)]
         public int addr10; // Other versions of the first color set (32 first bytes)
         [FieldOffset(44)]
@@ -157,7 +157,7 @@ namespace KuruRomExtractor
             /*for (int l = 0; l < level_entries.Length; l++)
             {
                 ParadiseLevelEntry e = level_entries[l];
-                int[] toTest = new int[] { e.addr18 };
+                int[] toTest = new int[] { e.addr13 };
                 int k = 0;
                 foreach (int addr in toTest)
                 {
@@ -166,7 +166,7 @@ namespace KuruRomExtractor
                         try
                         {
                             rom.Seek(addr - 0x08000000, SeekOrigin.Begin);
-                            Console.WriteLine(l.ToString() + "." + k.ToString() + ":" + reader.ReadInt32());
+                            Console.WriteLine(l.ToString() + "." + k.ToString() + ":" + "\t" + (addr - 0x08000000).ToString("X6") + "\t" + reader.ReadInt32());
                         }
                         catch { }
                     }
@@ -174,6 +174,30 @@ namespace KuruRomExtractor
                 }
                 Console.ReadLine();
             }*/
+            /*List<int> addrs = new List<int>();
+            Dictionary<int, string> infos = new Dictionary<int, string>();
+            for (int l = 0; l < level_entries.Length; l++)
+            {
+                ParadiseLevelEntry e = level_entries[l];
+                int[] toTest = new int[] { e.addr00, e.addr01, e.addr02, e.addr03, e.level_data_offset, e.graphical_data_offset, e.graphical2_data_offset, e.background_data_offset,
+                    e.addr08, e.addr09, e.addr10, e.minimap_offset, e.flags, e.addr13, e.addr14, e.object_data_offset, e.addr16, e.addr17, e.addr18 };
+                int k = 0;
+                foreach (int addr in toTest)
+                {
+                    if (addr >= 0x08000000)
+                    {
+                        addrs.Add(addr - 0x08000000);
+                        infos[addr - 0x08000000] = k.ToString();
+                    }
+                    k++;
+                }
+            }
+            addrs.Sort();
+            foreach (int addr in addrs.Distinct())
+            {
+                Console.WriteLine(addr.ToString("X6") + "\t" + infos[addr]);
+            }
+            Console.ReadLine();*/
             /*for (int l = 0; l < level_entries.Length; l++)
             {
                 ParadiseLevelEntry e = level_entries[l];
@@ -461,6 +485,7 @@ namespace KuruRomExtractor
             res[3] = DecompressWorldData(ple.addr03, 0x2000);
             res[4] = DecompressWorldData(ple.addr08, 512);
             res[5] = ReadWorldData(ple.addr10, COLORSET_SIZE);
+
             return res;
         }
 
