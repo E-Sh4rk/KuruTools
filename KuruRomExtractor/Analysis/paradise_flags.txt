@@ -24,5 +24,10 @@ ABCDEFGHIJKLMNOPQRSTUVWX
 41: 0000 1110 0001 0011 0101 0101
 42: 0000 1100 0010 1011 0101 0101 (x33)
     ABCD EFGH IJKL MNOP QRST UVWX
+    0    1    2    3    4    5
 
-K: indicate that the background map has not the same format (fixed size)?
+IJ: indicate the tiles to use for the background map (0-3)
+KL: indicate the tiles to use for the graphical2 map (0-3)
+
+MN: indicate the tiles to use for the graphical map (0-3)
+OP: indicate the tiles to use for the physical map (0-3)

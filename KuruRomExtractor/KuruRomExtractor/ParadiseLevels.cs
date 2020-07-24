@@ -15,13 +15,13 @@ namespace KuruRomExtractor
         public const int ROM_MEMORY_DOMAIN = 0x08000000;
 
         [FieldOffset(0)]
-        public int addr00; // Graphical/Background tiles 1
+        public int addr00; // Tileset 1
         [FieldOffset(4)]
-        public int addr01; // Graphical/Background tiles 2, sometimes zero
+        public int addr01; // Tileset 2
         [FieldOffset(8)]
-        public int addr02; // Sprite tiles? Sometimes zero (in particular for first levels)
+        public int addr02; // Tileset 3
         [FieldOffset(12)]
-        public int addr03; // Physical tiles
+        public int addr03; // Tileset 4
         [FieldOffset(16)]
         public int level_data_offset;
         [FieldOffset(20)]
@@ -31,7 +31,7 @@ namespace KuruRomExtractor
         [FieldOffset(28)]
         public int background_data_offset; // Sometimes zero (in particular for first levels)
         [FieldOffset(32)]
-        public int addr08; // Palette for background tiles
+        public int addr08; // Palette for tiles
         [FieldOffset(36)]
         public int addr09; // Palette for practice mode? Sometimes zero (in particular for first levels)
         [FieldOffset(40)]
@@ -87,6 +87,7 @@ namespace KuruRomExtractor
     public class ParadiseLevels
     {
         public const int NUMBER_LEVELS = 75;
+        public const int FIRST_CHALLENGE = 42;
         public const int MINIMAP_SIZE = 64 * 64 / 2;
         public static int[] AllLevels()
         {
@@ -262,7 +263,6 @@ namespace KuruRomExtractor
             return res;
         }
 
-        const int GR2_CHALLENGE_MASK = 0x2000;
         const ushort GR2_CHALLENGE_WIDTH = 0x10;
         const ushort GR2_CHALLENGE_HEIGHT = 0x10;
 
@@ -295,7 +295,7 @@ namespace KuruRomExtractor
             length = (int)(rom.Position - startPos);
             rom.Seek(startPos, SeekOrigin.Begin);
             res.CompressedGraphical2 = reader.ReadBytes(length);
-            if ((info.Flags & GR2_CHALLENGE_MASK) != 0)
+            if (level >= FIRST_CHALLENGE)
             {
                 byte[] newRaw = new byte[res.RawGraphical2.Length + 4];
                 BinaryWriter bw = new BinaryWriter(new MemoryStream(newRaw));
@@ -403,7 +403,7 @@ namespace KuruRomExtractor
             }
 
             pos = ceilToMultiple((int)rom.Position, 4);
-            if ((info.Flags & GR2_CHALLENGE_MASK) != 0)
+            if (level >= FIRST_CHALLENGE)
             {
                 original.RawGraphical2 = StripFirstBytes(original.RawGraphical2, 4);
                 if (new_graphical2 != null)
@@ -443,6 +443,15 @@ namespace KuruRomExtractor
             return true;
         }
 
+        const int PHYSICAL_TILES_FLAGS_POS = 8;
+        const int GRAPHICAL_TILES_FLAGS_POS = 10;
+        const int GRAPHICAL2_TILES_FLAGS_POS = 12;
+        const int BACKGROUND_TILES_FLAGS_POS = 14;
+
+        int GetTilesetNbFromFlag(int flag, int pos)
+        {
+            return (flag >> pos) & 0x3;
+        }
         byte[] DecompressWorldData(int addr, int uncompressed_size)
         {
             if (addr == 0)
@@ -460,29 +469,45 @@ namespace KuruRomExtractor
 
         public byte[][] ExtractTilesData(int level)
         {
-            //LevelInfo info = GetLevelInfo(level);
-            byte[][] res = new byte[6][];
+            // Extract tilesets
             ParadiseLevelEntry ple = level_entries[level];
-            res[0] = DecompressWorldData(ple.addr00, 0x4000);
-            res[1] = DecompressWorldData(ple.addr01, 0x4000);
-            res[2] = DecompressWorldData(ple.addr02, 0x4000);
+            byte[] ts0 = DecompressWorldData(ple.addr00, 0x4000);
+            byte[] ts1 = DecompressWorldData(ple.addr01, 0x4000);
+            byte[] ts2 = DecompressWorldData(ple.addr02, 0x4000);
+            byte[] ts3 = DecompressWorldData(ple.addr03, 0x2000);
 
             byte[] ext0 = new byte[0x8000];
-            if (res[0] != null)
-                Array.Copy(res[0], ext0, 0x4000);
-            if (res[1] != null)
-                Array.Copy(res[1], 0, ext0, 0x4000, 0x4000);
+            if (ts0 != null)
+                Array.Copy(ts0, ext0, 0x4000);
+            if (ts1 != null)
+                Array.Copy(ts1, 0, ext0, 0x4000, 0x4000);
 
             byte[] ext1 = new byte[0x8000];
-            if (res[1] != null)
-                Array.Copy(res[1], ext1, 0x4000);
-            if (res[2] != null)
-                Array.Copy(res[2], 0, ext1, 0x4000, 0x4000);
+            if (ts1 != null)
+                Array.Copy(ts1, ext1, 0x4000);
+            if (ts2 != null)
+                Array.Copy(ts2, 0, ext1, 0x4000, 0x4000);
 
-            res[0] = ext0;
-            res[1] = ext1;
+            byte[] ext2 = new byte[0x6000];
+            if (ts2 != null)
+                Array.Copy(ts2, ext2, 0x4000);
+            if (ts3 != null)
+                Array.Copy(ts3, 0, ext2, 0x4000, 0x2000);
 
-            res[3] = DecompressWorldData(ple.addr03, 0x2000);
+            byte[][] tilesets = new byte[][] { ext0, ext1, ext2, ts3 };
+
+            // Permutations according to the flags...
+            LevelInfo info = GetLevelInfo(level);
+            int physical = GetTilesetNbFromFlag(info.Flags, PHYSICAL_TILES_FLAGS_POS);
+            int graphical = GetTilesetNbFromFlag(info.Flags, GRAPHICAL_TILES_FLAGS_POS);
+            int graphical2 = GetTilesetNbFromFlag(info.Flags, GRAPHICAL2_TILES_FLAGS_POS);
+            int background = GetTilesetNbFromFlag(info.Flags, BACKGROUND_TILES_FLAGS_POS);
+
+            byte[][] res = new byte[6][];
+            res[0] = tilesets[graphical];
+            res[1] = tilesets[graphical2];
+            res[2] = tilesets[background];
+            res[3] = tilesets[physical];
             res[4] = DecompressWorldData(ple.addr08, 512);
             res[5] = ReadWorldData(ple.addr10, COLORSET_SIZE);
 
