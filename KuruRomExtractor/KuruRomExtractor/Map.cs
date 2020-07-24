@@ -20,17 +20,17 @@ namespace KuruRomExtractor
         {
             BinaryReader br = new BinaryReader(new MemoryStream(raw));
             int width, height;
+            int tileSize = compact ? 1 : 2;
             if (type == Type.OBJECTS)
             {
                 width = 6;
-                height = (ushort)(raw.Length / (6*2));
+                height = (ushort)(raw.Length / (6 * tileSize));
             }
             else
             {
                 width = br.ReadUInt16();
                 height = br.ReadUInt16();
             }
-            int tileSize = compact ? 1 : 2;
             data = new ushort[height, width];
             for (int y = 0; y < data.GetLength(0); y++)
             {
