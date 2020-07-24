@@ -77,11 +77,15 @@ namespace KuruLevelEditor
             int[,] res = new int[h, w];
             for (int y = 0; y < h; y++)
             {
-                string[] elts = lines[y].Split(' ', StringSplitOptions.RemoveEmptyEntries);
-                for (int x = 0; x < w; x++)
+                try
                 {
-                    res[y, x] = Convert.ToInt32(elts[x], 16) - tilesOffset;
+                    string[] elts = lines[y].Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    for (int x = 0; x < w; x++)
+                    {
+                        res[y, x] = Convert.ToInt32(elts[x], 16) - tilesOffset;
+                    }
                 }
+                catch { return GetGridFromLines(lines, w, y, tilesOffset); /* For paradise level 15 */ }
             }
             return res;
         }
