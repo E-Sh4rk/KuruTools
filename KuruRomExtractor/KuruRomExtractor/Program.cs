@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 
@@ -54,11 +55,22 @@ namespace KuruRomExtractor
                                 if (d != null)
                                 {
                                     string type = (new string[] { "graphical", "graphical2", "background", "physical" })[i];
+                                    Color firstColor = i >= lastLayer && i <= 2 ? palette.Colors[0][0] : Color.Transparent;
+                                    Bitmap bmp8bpp = null;
+                                    if (i == 1 && levels.AreGraphical2Tiles8bpp(level))
+                                    {
+                                        List<Color> fullPalette = new List<Color>();
+                                        foreach (Color[] colors in palette.Colors)
+                                            fullPalette.AddRange(colors);
+                                        bmp8bpp = Tiles.PreviewOf8bppTilesData(d, fullPalette.ToArray(), firstColor);
+                                    }
                                     for (int j = 0; j < palette.Colors.Length; j++)
                                     {
                                         string filename_png = string.Format("{0:D2}.{1}.{2:D2}.png", level, type, j);
-                                        Color firstColor = i >= lastLayer && i <= 2 ? palette.Colors[0][0] : Color.Transparent;
-                                        Tiles.PreviewOfTilesData(d, palette.Colors[j], firstColor).Save(Path.Combine(extractTiles, filename_png));
+                                        if (bmp8bpp == null)
+                                            Tiles.PreviewOfTilesData(d, palette.Colors[j], firstColor).Save(Path.Combine(extractTiles, filename_png));
+                                        else
+                                            bmp8bpp.Save(Path.Combine(extractTiles, filename_png));
                                     }
                                 }
                             }
@@ -189,10 +201,10 @@ namespace KuruRomExtractor
                                 if (i < 4)
                                 {
                                     string type = (new string[] { "graphical", "background", "physical", "sprites" })[i];
+                                    Color firstColor = i == 1 ? palette.Colors[0][0] : Color.Transparent;
                                     for (int j = 0; j < palette.Colors.Length; j++)
                                     {
                                         string filename_png = string.Format("{0}.{1}.{2:D2}.png", Levels.LevelIdentifier.WorldShortName(w), type, j);
-                                        Color firstColor = i == 1 ? palette.Colors[0][0] : Color.Transparent;
                                         Tiles.PreviewOfTilesData(d, palette.Colors[j], firstColor).Save(Path.Combine(extractTiles, filename_png));
                                     }
                                 }

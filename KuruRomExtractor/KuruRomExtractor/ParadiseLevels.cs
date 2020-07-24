@@ -9,7 +9,7 @@ using System.Diagnostics;
 namespace KuruRomExtractor
 {
     [StructLayout(LayoutKind.Explicit, Size = 0x4C)]
-    struct ParadiseLevelEntry // TODO: Support 8bpp tiles (like in level 15 graphical 2)
+    struct ParadiseLevelEntry // TODO: Fix level 15 graphical 2 rendering
     {
         public const int BASE_ADDRESS = 0x2C884;
         public const int ROM_MEMORY_DOMAIN = 0x08000000;
@@ -384,8 +384,6 @@ namespace KuruRomExtractor
                 return false;
 
             // Write compressed data
-            LevelInfo info = GetLevelInfo(level);
-
             int pos = ceilToMultiple((int)rom.Length, 4);
             level_entries[level].LevelDataOffset = pos;
             WriteSizeAndDataWithCompression(level, original.RawData, original.CompressedData, new_data, pos, -1);
@@ -447,6 +445,16 @@ namespace KuruRomExtractor
         const int GRAPHICAL_TILES_FLAGS_POS = 10;
         const int GRAPHICAL2_TILES_FLAGS_POS = 12;
         const int BACKGROUND_TILES_FLAGS_POS = 14;
+
+        const int SPECIAL_MODE_8BPP_FLAGS = 0b001011;
+        const int SPECIAL_MODE_8BPP_MASK = 0b111111;
+        const int SPECIAL_MODE_8BPP_FLAGS_POS = PHYSICAL_TILES_FLAGS_POS;
+
+        public bool AreGraphical2Tiles8bpp(int level)
+        {
+            LevelInfo info = GetLevelInfo(level);
+            return ((info.Flags >> SPECIAL_MODE_8BPP_FLAGS_POS) & SPECIAL_MODE_8BPP_MASK) == SPECIAL_MODE_8BPP_FLAGS;
+        }
 
         int GetTilesetNbFromFlag(int flag, int pos)
         {

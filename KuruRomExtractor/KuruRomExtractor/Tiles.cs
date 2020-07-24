@@ -17,9 +17,7 @@ namespace KuruRomExtractor
         const int WIDTH = 256;
         public static Bitmap PreviewOfTilesData(byte[] data, Color[] palette = null, Color? treatFirstColorAs = null)
         {
-            int length = data.Length * 2;
-            int height = length / WIDTH;
-
+            int height = data.Length * 2 / WIDTH;
             var b = new Bitmap(WIDTH, height, PixelFormat.Format4bppIndexed);
 
             ColorPalette ncp = b.Palette;
@@ -63,7 +61,53 @@ namespace KuruRomExtractor
             Marshal.Copy(rgbValues, 0, ptr, bytes);
             b.UnlockBits(bmpData);
             return b;
+        }
+        public static Bitmap PreviewOf8bppTilesData(byte[] data, Color[] palette = null, Color? treatFirstColorAs = null)
+        {
+            int height = data.Length / WIDTH;
+            var b = new Bitmap(WIDTH, height, PixelFormat.Format8bppIndexed);
 
+            ColorPalette ncp = b.Palette;
+            if (palette == null)
+            {
+                for (int i = 0; i < 256; i++)
+                    ncp.Entries[i] = Color.FromArgb(255, i, i, i);
+            }
+            else
+            {
+                for (int i = 0; i < 256; i++)
+                    ncp.Entries[i] = palette[i];
+            }
+            if (treatFirstColorAs != null)
+                ncp.Entries[0] = treatFirstColorAs.Value;
+            b.Palette = ncp;
+
+            var BoundsRect = new Rectangle(0, 0, WIDTH, height);
+            BitmapData bmpData = b.LockBits(BoundsRect,
+                                            ImageLockMode.WriteOnly,
+                                            b.PixelFormat);
+
+            IntPtr ptr = bmpData.Scan0;
+
+            int bytes = bmpData.Stride * b.Height;
+            var rgbValues = new byte[bytes];
+
+            int nb_tiles_per_row = WIDTH / 8;
+            for (int i = 0; i < data.Length / 64; i++)
+            {
+                int x = (i % nb_tiles_per_row) * 8;
+                int y = (i / nb_tiles_per_row) * 8;
+                for (int j = 0; j < 64; j++)
+                {
+                    int x2 = x + (j % 8);
+                    int y2 = y + (j / 8);
+                    rgbValues[y2 * WIDTH + x2] = data[i * 64 + j];
+                }
+            }
+
+            Marshal.Copy(rgbValues, 0, ptr, bytes);
+            b.UnlockBits(bmpData);
+            return b;
         }
     }
     class Palette
