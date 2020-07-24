@@ -90,17 +90,10 @@ namespace KuruLevelEditor
 						for (int i = 0; i < ts.Length; i++)
 						{
 							string path = Levels.GetTilePath(world, type, i);
-							if (!File.Exists(path) && Settings.Paradise)
-                            {
-								ts[i] = null;
-                            }
-							else
-                            {
-								FileStream fileStream = new FileStream(path, FileMode.Open);
-								Texture2D tile = Texture2D.FromStream(graphics, fileStream);
-								fileStream.Close();
-								ts[i] = tile;
-							}
+							FileStream fileStream = new FileStream(path, FileMode.Open);
+							Texture2D tile = Texture2D.FromStream(graphics, fileStream);
+							fileStream.Close();
+							ts[i] = tile;
 						}
 						Tiles.Add(lat, ts);
 					}
