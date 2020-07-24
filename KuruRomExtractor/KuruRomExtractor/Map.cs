@@ -6,21 +6,20 @@ using System.Text;
 
 namespace KuruRomExtractor
 {
-    // TODO: Function to normalize the level (remove useless orientation data) and thus improve compression.
     public class Map
     {
         public enum Type
         {
             PHYSICAL, GRAPHICAL, BACKGROUND, OBJECTS
         }
-        ushort width;
-        ushort height;
         ushort[,] data;
         Type type;
+        bool compact;
 
-        public Map(byte[] raw, Type type)
+        public Map(byte[] raw, Type type, bool compact)
         {
             BinaryReader br = new BinaryReader(new MemoryStream(raw));
+            int width, height;
             if (type == Type.OBJECTS)
             {
                 width = 6;
@@ -31,26 +30,28 @@ namespace KuruRomExtractor
                 width = br.ReadUInt16();
                 height = br.ReadUInt16();
             }
-            int remaining = (int)(raw.Length - br.BaseStream.Position);
-            Debug.Assert(remaining % (2 * width) == 0);
-            data = new ushort[remaining / (2*width), width];
+            int tileSize = compact ? 1 : 2;
+            data = new ushort[height, width];
             for (int y = 0; y < data.GetLength(0); y++)
             {
                 for (int x = 0; x < data.GetLength(1); x++)
                 {
-                    data[y, x] = br.ReadUInt16();
+                    if (tileSize == 1)
+                        data[y, x] = br.ReadByte();
+                    else
+                        data[y, x] = br.ReadUInt16();
                 }
             }
             br.Close();
             this.type = type;
+            this.compact = compact;
         }
 
-        Map(ushort width, ushort height, ushort[,] data, Type type)
+        Map(ushort[,] data, Type type, bool compact)
         {
-            this.width = width;
-            this.height = height;
             this.data = data;
             this.type = type;
+            this.compact = compact;
         }
 
         static ushort CountLines(string[] lines)
@@ -60,7 +61,7 @@ namespace KuruRomExtractor
             return res;
         }
 
-        public static Map Parse(string[] lines, Type type)
+        public static Map Parse(string[] lines, Type type, bool compact)
         {
             ushort xl;
             ushort yl;
@@ -79,29 +80,35 @@ namespace KuruRomExtractor
                 lineStart = 1;
             }
 
-            ushort[,] map = new ushort[CountLines(lines) - lineStart, xl];
+            ushort[,] map = new ushort[yl, xl];
             for (ushort i = 0; i < map.GetLength(0); i++)
             {
                 string[] line = lines[i + lineStart].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                 for (ushort j = 0; j < map.GetLength(1); j++)
                     map[i, j] = Convert.ToUInt16(line[j], 16);
             }
-            return new Map(xl, yl, map, type);
+            return new Map(map, type, compact);
         }
 
         public byte[] ToByteData()
         {
-            byte[] res = new byte[(type == Type.OBJECTS ? 0 : 4) + data.GetLength(1) * data.GetLength(0) * 2];
+            int tileSize = compact ? 1 : 2;
+            byte[] res = new byte[(type == Type.OBJECTS ? 0 : 4) + data.GetLength(1) * data.GetLength(0) * tileSize];
             BinaryWriter writer = new BinaryWriter(new MemoryStream(res));
             if (type != Type.OBJECTS)
             {
-                writer.Write(width);
-                writer.Write(height);
+                writer.Write((ushort)data.GetLength(1));
+                writer.Write((ushort)data.GetLength(0));
             }
             for (int y = 0; y < data.GetLength(0); y++)
             {
                 for (int x = 0; x < data.GetLength(1); x++)
-                    writer.Write(data[y, x]);
+                {
+                    if (tileSize == 1)
+                        writer.Write((byte)data[y, x]);
+                    else
+                        writer.Write(data[y, x]);
+                }
             }
             writer.Close();
             return res;
@@ -111,7 +118,7 @@ namespace KuruRomExtractor
         {
             StringBuilder res = new StringBuilder();
             if (type != Type.OBJECTS)
-                res.Append(width.ToString("X") + " " + height.ToString("X") + "\n");
+                res.Append(data.GetLength(1).ToString("X") + " " + data.GetLength(0).ToString("X") + "\n");
             for (int y = 0; y < data.GetLength(0); y++)
             {
                 for (int x = 0; x < data.GetLength(1); x++)

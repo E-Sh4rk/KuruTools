@@ -9,7 +9,7 @@ using System.Diagnostics;
 namespace KuruRomExtractor
 {
     [StructLayout(LayoutKind.Explicit, Size = 0x4C)]
-    struct ParadiseLevelEntry // TODO: Fix level 15 graphical 2 rendering
+    struct ParadiseLevelEntry
     {
         public const int BASE_ADDRESS = 0x2C884;
         public const int ROM_MEMORY_DOMAIN = 0x08000000;

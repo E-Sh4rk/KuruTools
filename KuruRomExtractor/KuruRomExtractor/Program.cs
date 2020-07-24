@@ -87,6 +87,7 @@ namespace KuruRomExtractor
                     string filename_graphical2 = Path.Combine(workspace, level.ToString("D2") + ".graphical2.txt");
                     string filename_background = Path.Combine(workspace, level.ToString("D2") + ".background.txt");
                     string filename_minimap = Path.Combine(workspace, level.ToString("D2") + ".minimap.txt");
+                    bool isGraphical2Compact = levels.AreGraphical2Tiles8bpp(level);
 
                     byte[] p = null;
                     byte[] o = null;
@@ -95,15 +96,15 @@ namespace KuruRomExtractor
                     byte[] b = null;
                     byte[] m = null;
                     if (File.Exists(filename))
-                        p = Map.Parse(File.ReadAllLines(filename), Map.Type.PHYSICAL).ToByteData();
+                        p = Map.Parse(File.ReadAllLines(filename), Map.Type.PHYSICAL, false).ToByteData();
                     if (File.Exists(filename_objects))
-                        o = Map.Parse(File.ReadAllLines(filename_objects), Map.Type.OBJECTS).ToByteData();
+                        o = Map.Parse(File.ReadAllLines(filename_objects), Map.Type.OBJECTS, false).ToByteData();
                     if (File.Exists(filename_graphical))
-                        g = Map.Parse(File.ReadAllLines(filename_graphical), Map.Type.GRAPHICAL).ToByteData();
+                        g = Map.Parse(File.ReadAllLines(filename_graphical), Map.Type.GRAPHICAL, false).ToByteData();
                     if (File.Exists(filename_graphical2))
-                        g2 = Map.Parse(File.ReadAllLines(filename_graphical2), Map.Type.GRAPHICAL).ToByteData();
+                        g2 = Map.Parse(File.ReadAllLines(filename_graphical2), Map.Type.GRAPHICAL, isGraphical2Compact).ToByteData();
                     if (File.Exists(filename_background))
-                        b = Map.Parse(File.ReadAllLines(filename_background), Map.Type.BACKGROUND).ToByteData();
+                        b = Map.Parse(File.ReadAllLines(filename_background), Map.Type.BACKGROUND, false).ToByteData();
                     if (File.Exists(filename_minimap))
                         m = MiniMap.Parse(File.ReadAllLines(filename_minimap)).ToByteData();
 
@@ -114,31 +115,31 @@ namespace KuruRomExtractor
                         ParadiseLevels.RawMapData raw = levels.ExtractLevelData(level);
                         if (p == null)
                         {
-                            Map mp = new Map(raw.RawData, Map.Type.PHYSICAL);
+                            Map mp = new Map(raw.RawData, Map.Type.PHYSICAL, false);
                             File.WriteAllText(filename, mp.ToString());
                             exported = true;
                         }
                         if (o == null)
                         {
-                            Map mo = new Map(raw.RawObjects, Map.Type.OBJECTS);
+                            Map mo = new Map(raw.RawObjects, Map.Type.OBJECTS, false);
                             File.WriteAllText(filename_objects, mo.ToString());
                             exported = true;
                         }
                         if (g == null && raw.RawGraphical.Length > 0)
                         {
-                            Map mg = new Map(raw.RawGraphical, Map.Type.GRAPHICAL);
+                            Map mg = new Map(raw.RawGraphical, Map.Type.GRAPHICAL, false);
                             File.WriteAllText(filename_graphical, mg.ToString());
                             exported = true;
                         }
                         if (g2 == null)
                         {
-                            Map mg2 = new Map(raw.RawGraphical2, Map.Type.GRAPHICAL);
+                            Map mg2 = new Map(raw.RawGraphical2, Map.Type.GRAPHICAL, isGraphical2Compact);
                             File.WriteAllText(filename_graphical2, mg2.ToString());
                             exported = true;
                         }
                         if (b == null && raw.RawBackground.Length > 0)
                         {
-                            Map mb = new Map(raw.RawBackground, Map.Type.BACKGROUND);
+                            Map mb = new Map(raw.RawBackground, Map.Type.BACKGROUND, false);
                             File.WriteAllText(filename_background, mb.ToString());
                             exported = true;
                         }
@@ -226,11 +227,11 @@ namespace KuruRomExtractor
                     byte[] b = null;
                     byte[] m = null;
                     if (File.Exists(filename))
-                        p = Map.Parse(File.ReadAllLines(filename), Map.Type.PHYSICAL).ToByteData();
+                        p = Map.Parse(File.ReadAllLines(filename), Map.Type.PHYSICAL, false).ToByteData();
                     if (File.Exists(filename_graphical))
-                        g = Map.Parse(File.ReadAllLines(filename_graphical), Map.Type.GRAPHICAL).ToByteData();
+                        g = Map.Parse(File.ReadAllLines(filename_graphical), Map.Type.GRAPHICAL, false).ToByteData();
                     if (File.Exists(filename_background))
-                        b = Map.Parse(File.ReadAllLines(filename_background), Map.Type.BACKGROUND).ToByteData();
+                        b = Map.Parse(File.ReadAllLines(filename_background), Map.Type.BACKGROUND, false).ToByteData();
                     if (File.Exists(filename_minimap))
                         m = MiniMap.Parse(File.ReadAllLines(filename_minimap)).ToByteData();
 
@@ -240,17 +241,17 @@ namespace KuruRomExtractor
                         Levels.RawMapData raw = levels.ExtractLevelData(level);
                         if (p == null)
                         {
-                            Map mp = new Map(raw.RawData, Map.Type.PHYSICAL);
+                            Map mp = new Map(raw.RawData, Map.Type.PHYSICAL, false);
                             File.WriteAllText(filename, mp.ToString());
                         }
                         if (g == null)
                         {
-                            Map mg = new Map(raw.RawGraphical, Map.Type.GRAPHICAL);
+                            Map mg = new Map(raw.RawGraphical, Map.Type.GRAPHICAL, false);
                             File.WriteAllText(filename_graphical, mg.ToString());
                         }
                         if (b == null)
                         {
-                            Map mb = new Map(raw.RawBackground, Map.Type.BACKGROUND);
+                            Map mb = new Map(raw.RawBackground, Map.Type.BACKGROUND, false);
                             File.WriteAllText(filename_background, mb.ToString());
                         }
                         if (m == null)
