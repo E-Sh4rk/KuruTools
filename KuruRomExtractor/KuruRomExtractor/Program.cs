@@ -2,35 +2,59 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Text;
 
 namespace KuruRomExtractor
 {
     // TODO: Document public functions
     class Program
     {
+        static string NameOfROM(string path)
+        {
+            StringBuilder res = new StringBuilder();
+            FileStream stream = File.OpenRead(path);
+            stream.Seek(0xA0, SeekOrigin.Begin);
+            int b;
+            while ((b = stream.ReadByte()) > 0) {
+                res.Append((char)b);
+            }
+            stream.Close();
+            return res.ToString();
+        }
         /// <summary>
         /// Extract and edit Kururin ROM map data.
         /// </summary>
-        /// <param name="paradise">Kururin Paradise (alpha)</param>
+        /// <param name="identifyOnly">Only identify the ROM, then exit.</param>
         /// <param name="input">The path to the input ROM</param>
         /// <param name="output">The target path for the altered ROM</param>
         /// <param name="workspace">The path to the directory containing the level data</param>
         /// <param name="relocate">Relocate the new maps at the end of the ROM (prevent overlapping, but increase ROM size)</param>
         /// <param name="extractTiles">Path to the directory where tiles will be extracted</param>
-        static void Main(bool paradise = false, string input = "input.gba", string output = "output.gba", string workspace = "levels",
+        static void Main(bool identifyOnly = false, string input = "input.gba", string output = "output.gba", string workspace = "levels",
             bool relocate = true, string extractTiles = null)
         {
-            if (paradise && !relocate)
-                Console.WriteLine("Warning: Kururin Paradise mode only supports relocation.");
-            if (paradise)
+            string name = NameOfROM(input);
+
+            if (identifyOnly)
             {
-                Console.WriteLine("=== Kururin Paradise ROM Extractor ===");
-                Console.WriteLine("");
+                Console.WriteLine(name);
+                return;
+            }
+
+            Console.WriteLine("=== Kururin ROM Extractor ===");
+            Console.WriteLine("");
+            Console.WriteLine("ROM detected: " + name);
+            Console.WriteLine("");
+
+            if (name == "KURUPARA")
+            {
+                if (!relocate) Console.WriteLine("Warning: Kururin Paradise mode only supports relocation.");
                 File.Copy(input, output, true);
                 ParadiseLevels levels = new ParadiseLevels(output);
 
                 if (!string.IsNullOrEmpty(extractTiles))
                 {
+                    Console.WriteLine("Extracting tiles...");
                     Directory.CreateDirectory(extractTiles);
                     byte[] commonPaletteData = levels.ExtractCommonPaletteData();
                     foreach (int level in ParadiseLevels.AllLevels())
@@ -162,15 +186,14 @@ namespace KuruRomExtractor
                 Console.WriteLine("All tasks terminated.");
                 levels.Dispose();
             }
-            else
+            else if (name == "KURURIN")
             {
-                Console.WriteLine("=== Kuru Kuru Kururin ROM Extractor ===");
-                Console.WriteLine("");
                 File.Copy(input, output, true);
                 Levels levels = new Levels(output);
 
                 if (!string.IsNullOrEmpty(extractTiles))
                 {
+                    Console.WriteLine("Extracting tiles...");
                     Directory.CreateDirectory(extractTiles);
                     byte[] physicalTilesData = levels.ExtractPhysicalTilesData();
                     //File.WriteAllBytes(Path.Combine(extractTiles, "physical_tiles.bin"), physicalTilesData);
@@ -270,6 +293,8 @@ namespace KuruRomExtractor
                 Console.WriteLine("All tasks terminated.");
                 levels.Dispose();
             }
+            else
+                Console.WriteLine("Unsupported ROM. Exiting.");
         }
     }
 }
