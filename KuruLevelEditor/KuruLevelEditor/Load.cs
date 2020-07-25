@@ -85,6 +85,7 @@ namespace KuruLevelEditor
 				{
 					foreach (Levels.MapType type in new Levels.MapType[] { Levels.MapType.Background, Levels.MapType.Graphical2, Levels.MapType.Graphical, Levels.MapType.Physical })
 					{
+						if (type == Levels.MapType.Graphical2 && !Settings.Paradise) continue;
 						WorldAndType lat = new WorldAndType(world, type);
 						Texture2D[] ts = new Texture2D[16];
 						for (int i = 0; i < ts.Length; i++)

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -14,9 +15,14 @@ namespace KuruLevelEditor
         public static string Output;
         public static string EmulatorCommand;
 
+        static bool? _cachedParadise = null;
         public static bool Paradise
         {
-            get { return true; }
+            get
+            {
+                Debug.Assert(_cachedParadise.HasValue);
+                return _cachedParadise.Value;
+            }
         }
 
         public static bool LoadSettings()
@@ -31,6 +37,7 @@ namespace KuruLevelEditor
                 Input = config.GetSection("ROM").GetSection("InputRom").Value;
                 Output = config.GetSection("ROM").GetSection("OutputRom").Value;
                 EmulatorCommand = config.GetSection("Emulator").GetSection("Command").Value;
+                _cachedParadise = GetNameOfROM() == "KURUPARA";
                 return true;
             }
             catch { }
@@ -52,6 +59,13 @@ namespace KuruLevelEditor
             string args = $"\"{escapedROM}\"";
             string cmd = EmulatorCommand.Replace("%ROM%", args);
             return cmd.RunCommand();
+        }
+        public static string GetNameOfROM()
+        {
+            string escapedInput = Path.GetFullPath(Input).Escape();
+            string args = $"--input \"{escapedInput}\" --identify-only";
+            string cmd = ExtractorCommand.Replace("%ARGS%", args);
+            return cmd.RunCommand().Trim(new char[] { ' ', '\r', '\n' });
         }
     }
 }
