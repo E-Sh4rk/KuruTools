@@ -465,11 +465,11 @@ namespace KuruLevelEditor
             };
             buttonOP.Click += (s, a) =>
             {
-                List<EditorGrid.OverlayGrid> overlays = new List<EditorGrid.OverlayGrid>();
+                List<GridEditor.OverlayGrid> overlays = new List<GridEditor.OverlayGrid>();
                 overlays.AddRange(editor.Underlays);
                 overlays.AddRange(editor.Overlays);
                 overlays.Reverse();
-                foreach (EditorGrid.OverlayGrid overlay in overlays)
+                foreach (GridEditor.OverlayGrid overlay in overlays)
                 {
                     if (!overlay.enabled)
                     {
@@ -490,10 +490,10 @@ namespace KuruLevelEditor
             };
             buttonOM.Click += (s, a) =>
             {
-                List<EditorGrid.OverlayGrid> overlays = new List<EditorGrid.OverlayGrid>();
+                List<GridEditor.OverlayGrid> overlays = new List<GridEditor.OverlayGrid>();
                 overlays.AddRange(editor.Underlays);
                 overlays.AddRange(editor.Overlays);
-                foreach (EditorGrid.OverlayGrid overlay in overlays)
+                foreach (GridEditor.OverlayGrid overlay in overlays)
                 {
                     if (overlay.enabled)
                     {
@@ -672,13 +672,13 @@ namespace KuruLevelEditor
             throw new Exception();
         }
 
-        EditorGrid editor;
+        GridEditor editor;
         TilesSet sset;
         bool LoadGrid()
         {
             int[,] grid;
-            List<EditorGrid.OverlayGrid> underlays = new List<EditorGrid.OverlayGrid>();
-            List<EditorGrid.OverlayGrid> overlays = new List<EditorGrid.OverlayGrid>();
+            List<GridEditor.OverlayGrid> underlays = new List<GridEditor.OverlayGrid>();
+            List<GridEditor.OverlayGrid> overlays = new List<GridEditor.OverlayGrid>();
             string world = Levels.GetWorldOfLevel(map);
             Levels.MapType mapType = MapType();
             string levelPath = Levels.GetLevelPath(map, mapType);
@@ -705,7 +705,7 @@ namespace KuruLevelEditor
                             Levels.TilesOffset(world, Levels.MapType.Background));
                         osset = new TilesSet(Load.Tiles[new Load.WorldAndType(world, Levels.MapType.Background)],
                             true, Rectangle.Empty, 0);
-                        underlays.Add(new EditorGrid.OverlayGrid(osset, ogrid, false));
+                        underlays.Add(new GridEditor.OverlayGrid(osset, ogrid, false));
                     }
                     catch { }
                 }
@@ -718,9 +718,9 @@ namespace KuruLevelEditor
                         osset = new TilesSet(Load.Tiles[new Load.WorldAndType(world, Levels.MapType.Graphical2)],
                             true, Rectangle.Empty, 0);
                         if (mode == Mode.Background)
-                            overlays.Add(new EditorGrid.OverlayGrid(osset, ogrid, false));
+                            overlays.Add(new GridEditor.OverlayGrid(osset, ogrid, false));
                         else
-                            underlays.Add(new EditorGrid.OverlayGrid(osset, ogrid, false));
+                            underlays.Add(new GridEditor.OverlayGrid(osset, ogrid, false));
                     }
                     catch { }
                 }
@@ -733,9 +733,9 @@ namespace KuruLevelEditor
                         osset = new TilesSet(Load.Tiles[new Load.WorldAndType(world, Levels.MapType.Graphical)],
                             true, Rectangle.Empty, 0);
                         if (mode == Mode.Physical)
-                            underlays.Add(new EditorGrid.OverlayGrid(osset, ogrid, false));
+                            underlays.Add(new GridEditor.OverlayGrid(osset, ogrid, false));
                         else
-                            overlays.Add(new EditorGrid.OverlayGrid(osset, ogrid, false));
+                            overlays.Add(new GridEditor.OverlayGrid(osset, ogrid, false));
                     }
                     catch { }
                 }
@@ -747,7 +747,7 @@ namespace KuruLevelEditor
                             Levels.TilesOffset(world, Levels.MapType.Physical));
                         osset = new TilesSet(Load.Tiles[new Load.WorldAndType(world, Levels.MapType.Physical)],
                             true, Rectangle.Empty, 0);
-                        overlays.Add(new EditorGrid.OverlayGrid(osset, ogrid, true));
+                        overlays.Add(new GridEditor.OverlayGrid(osset, ogrid, true));
                     }
                     catch { }
                 }
@@ -757,7 +757,7 @@ namespace KuruLevelEditor
             if (_lastMapType == mapType /*&& (_lastWorld == world || mapType == Levels.MapType.Physical || mapType == Levels.MapType.Minimap)*/)
                 // Sometimes, inter-world copy paste can be relevant even for grounds and backgrounds
                 selectionGrid = _lastSelectionGrid;
-            editor = new EditorGrid(this, MapType(), _gridEditorBounds,
+            editor = new GridEditor(this, MapType(), _gridEditorBounds,
                 sset, grid, new Point(-8, -8), overlays.ToArray(), underlays.ToArray(), selectionGrid, _inventories.GetInventory(MapType()));
             return true;
         }

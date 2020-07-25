@@ -11,7 +11,7 @@ using System.Text;
 
 namespace KuruLevelEditor
 {
-    class EditorGrid
+    class GridEditor
     {
         enum InventoryMode
         {
@@ -52,7 +52,7 @@ namespace KuruLevelEditor
         public OverlayGrid[] Overlays { get; private set; }
         public OverlayGrid[] Underlays { get; private set; }
         public bool GridEnabled { get; set; }
-        public EditorGrid(Game1 game, Levels.MapType type, Rectangle bounds, TilesSet sprites, int[,] grid,
+        public GridEditor(Game1 game, Levels.MapType type, Rectangle bounds, TilesSet sprites, int[,] grid,
             Point position, OverlayGrid[] overlays, OverlayGrid[] underlays, int[,] selectionGrid, EditableGrid customInventory)
         {
             this.game = game;
@@ -667,7 +667,7 @@ namespace KuruLevelEditor
                 for (int y = map_bounds.Y + TileSize; y < map_bounds.Y + map_bounds.Height; y += TileSize)
                     sprite_batch.FillRectangle(new Rectangle(map_bounds.X, y, map_bounds.Width, 1), Color.Gray);
             }
-            if (showSpecial && !inventoryOpened)
+            if (showSpecial && !inventoryOpened && !Settings.Paradise)
                 sprite_batch.FillRectangle(new Rectangle(map_bounds.X, map_bounds.Y + TileSize * PhysicalMapLogic.NUMBER_RESERVED_ROWS, map_bounds.Width, 1), Color.Orange);
             TilesSet.DrawRectangle(sprite_batch, map_bounds, Color.Red, 2); // Issue with DrawRectangle: https://github.com/rds1983/Myra/issues/211
             // Draw selection rectangle

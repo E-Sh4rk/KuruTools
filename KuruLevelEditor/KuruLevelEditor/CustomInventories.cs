@@ -24,25 +24,43 @@ namespace KuruLevelEditor
 
             // Load inventories
             string pathP = Path.Combine(dir, "physical.txt");
-            if (!File.Exists(pathP))
-                pathP = Path.Combine(defaultDir, "physical.txt");
-            grids[Levels.MapType.Physical] = EGFromPath(bounds, pathP);
             string pathG = Path.Combine(dir, "graphical.txt");
-            if (!File.Exists(pathG))
-                pathG = Path.Combine(defaultDir, "graphical.txt");
-            grids[Levels.MapType.Graphical] = EGFromPath(bounds, pathG);
             string pathG2 = Path.Combine(dir, "graphical2.txt");
-            if (!File.Exists(pathG2))
-                pathG2 = Path.Combine(defaultDir, "graphical2.txt");
-            grids[Levels.MapType.Graphical2] = EGFromPath(bounds, pathG2);
             string pathB = Path.Combine(dir, "background.txt");
-            if (!File.Exists(pathB))
-                pathB = Path.Combine(defaultDir, "background.txt");
-            grids[Levels.MapType.Background] = EGFromPath(bounds, pathB);
             string pathM = Path.Combine(dir, "minimap.txt");
-            if (!File.Exists(pathM))
-                pathM = Path.Combine(defaultDir, "minimap.txt");
-            grids[Levels.MapType.Minimap] = EGFromPath(bounds, pathM);
+            if (Settings.Paradise)
+            {
+                if (!File.Exists(pathP))
+                    pathP = Path.Combine(defaultDir, "physical_paradise.txt");
+                grids[Levels.MapType.Physical] = EGFromPath(bounds, pathP);
+                if (!File.Exists(pathG))
+                    pathG = Path.Combine(defaultDir, "graphical_paradise.txt");
+                grids[Levels.MapType.Graphical] = EGFromPath(bounds, pathG);
+                if (!File.Exists(pathG2))
+                    pathG2 = Path.Combine(defaultDir, "graphical2_paradise.txt");
+                grids[Levels.MapType.Graphical2] = EGFromPath(bounds, pathG2);
+                if (!File.Exists(pathB))
+                    pathB = Path.Combine(defaultDir, "background_paradise.txt");
+                grids[Levels.MapType.Background] = EGFromPath(bounds, pathB);
+                if (!File.Exists(pathM))
+                    pathM = Path.Combine(defaultDir, "minimap_paradise.txt");
+                grids[Levels.MapType.Minimap] = EGFromPath(bounds, pathM);
+            }
+            else
+            {
+                if (!File.Exists(pathP))
+                    pathP = Path.Combine(defaultDir, "physical.txt");
+                grids[Levels.MapType.Physical] = EGFromPath(bounds, pathP);
+                if (!File.Exists(pathG))
+                    pathG = Path.Combine(defaultDir, "graphical.txt");
+                grids[Levels.MapType.Graphical] = EGFromPath(bounds, pathG);
+                if (!File.Exists(pathB))
+                    pathB = Path.Combine(defaultDir, "background.txt");
+                grids[Levels.MapType.Background] = EGFromPath(bounds, pathB);
+                if (!File.Exists(pathM))
+                    pathM = Path.Combine(defaultDir, "minimap.txt");
+                grids[Levels.MapType.Minimap] = EGFromPath(bounds, pathM);
+            }
         }
 
         void SaveGrid(string path, int[,] grid)
