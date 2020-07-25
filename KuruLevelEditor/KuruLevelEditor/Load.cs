@@ -17,6 +17,7 @@ namespace KuruLevelEditor
 		
 		public static Texture2D SpringHorizontal;
 		public static Texture2D SpringVertical;
+		public static Texture2D SpringDiag;
 		public static Texture2D[] SpecialNumbers { get; private set; }
 		public static Texture2D StartingDiagonal;
 		public static Texture2D EndingDiagonal;
@@ -27,6 +28,11 @@ namespace KuruLevelEditor
 		public static Texture2D Piston;
 		public static Texture2D Roller;
 		public static Texture2D RollerCatcher;
+
+		public static Texture2D Key;
+		public static Texture2D ConveyorH;
+		public static Texture2D ConveyorV;
+		public static Texture2D ConveyorDiag;
 
 		public static SpriteFont Monospace;
 
@@ -57,6 +63,7 @@ namespace KuruLevelEditor
 					MinimapColors[i] = Content.Load<Texture2D>("minimap" + i.ToString("D2"));
 				SpringHorizontal = Content.Load<Texture2D>("spring_horizontal");
 				SpringVertical = Content.Load<Texture2D>("spring_vertical");
+				SpringDiag = Content.Load<Texture2D>("spring_diag");
 				SpecialNumbers = new Texture2D[10];
 				for (int i = 0; i < SpecialNumbers.Length; i++)
 					SpecialNumbers[i] = Content.Load<Texture2D>("special" + i.ToString());
@@ -68,6 +75,10 @@ namespace KuruLevelEditor
 				Piston = Content.Load<Texture2D>("piston");
 				Roller = Content.Load<Texture2D>("roller");
 				RollerCatcher = Content.Load<Texture2D>("roller_catcher");
+				Key = Content.Load<Texture2D>("key");
+				ConveyorV = Content.Load<Texture2D>("conveyor_v");
+				ConveyorH = Content.Load<Texture2D>("conveyor_h");
+				ConveyorDiag = Content.Load<Texture2D>("conveyor_diag");
 				Monospace = Content.Load<SpriteFont>("monospace");
 				return true;
 			}

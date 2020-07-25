@@ -505,31 +505,60 @@ namespace KuruLevelEditor
                     ((tile & 0x800) != 0 ? SpriteEffects.FlipVertically : SpriteEffects.None);
                 if (showSpecial)
                 {
-                    if (tile_id >= PhysicalMapLogic.CONTROL_MIN_ID)
+                    if (Settings.Paradise)
                     {
-                        // Rendering of non-graphic special elements
-                        Color? c = null;
-                        if (PhysicalMapLogic.STARTING_ZONE_IDS.Contains(tile_id))
-                            c = PhysicalMapLogic.StartingZoneColor(tile_id);
-                        else if (PhysicalMapLogic.HEALING_ZONE_IDS.Contains(tile_id))
-                            c = PhysicalMapLogic.HealingZoneColor(tile_id);
-                        else if (PhysicalMapLogic.ENDING_ZONE_IDS.Contains(tile_id))
-                            c = PhysicalMapLogic.EndingZoneColor(tile_id);
-                        else if (PhysicalMapLogic.SPRING_IDS.Contains(tile_id))
-                            sprite_batch.Draw(PhysicalMapLogic.TextureOfSpring(tile_id), dst, null, Color.White, 0, Vector2.Zero, effects, 0F);
-                        else if (PhysicalMapLogic.VISIBLE_CONTROL_TILES.Contains(tile_id))
-                            sprite_batch.Draw(PhysicalMapLogic.UnderlayOfVisibleControlTile(tile_id), dst, null, Color.White, 0, Vector2.Zero, effects, 0F);
-                        else if (PhysicalMapLogic.MOVING_OBJECTS_IDS.Contains(tile_id)) // Flips have no effect on moving objects tiles
-                            sprite_batch.Draw(PhysicalMapLogic.TextureOfMovingObject(tile_id), dst, null, Color.White, 0, Vector2.Zero, SpriteEffects.None, 0F);
-                        else if (PhysicalMapLogic.NUMBER_TILES.Contains(tile)) // Palette and flips matters for numbers
-                            sprite_batch.Draw(PhysicalMapLogic.TextureOfNumber(tile), dst, null, Color.White, 0, Vector2.Zero, SpriteEffects.None, 0F);
-                        else
-                            c = PhysicalMapLogic.UNSUPPORTED_COLOR;
-                        if (c.HasValue)
-                            sprite_batch.FillRectangle(dst, c.Value);
+                        if (tile_id >= PhysicalMapLogic.CONTROL_MIN_ID)
+                        {
+                            // Rendering of non-graphic special elements
+                            Color? c = null;
+                            if (ParadisePhysicalMapLogic.STARTING_ZONE_IDS.Contains(tile_id))
+                                c = ParadisePhysicalMapLogic.StartingZoneColor(tile_id);
+                            else if (ParadisePhysicalMapLogic.HEALING_ZONE_IDS.Contains(tile_id))
+                                c = ParadisePhysicalMapLogic.HealingZoneColor(tile_id);
+                            else if (ParadisePhysicalMapLogic.ENDING_ZONE_IDS.Contains(tile_id))
+                                c = ParadisePhysicalMapLogic.EndingZoneColor(tile_id);
+                            else if (ParadisePhysicalMapLogic.FIXED_OBJECTS_IDS.Contains(tile_id))
+                                sprite_batch.Draw(ParadisePhysicalMapLogic.TextureOfFixedObjects(tile_id), dst, null, Color.White, 0, Vector2.Zero, effects, 0F);
+                            else if (ParadisePhysicalMapLogic.MOVING_OBJECTS_IDS.Contains(tile_id)) // Flips have no effect on moving objects tiles
+                                sprite_batch.Draw(ParadisePhysicalMapLogic.TextureOfMovingObject(tile_id), dst, null, Color.White, 0, Vector2.Zero, SpriteEffects.None, 0F);
+                            else if (ParadisePhysicalMapLogic.NUMBER_TILES.Contains(tile)) // Palette and flips matters for numbers
+                                sprite_batch.Draw(ParadisePhysicalMapLogic.TextureOfNumber(tile), dst, null, Color.White, 0, Vector2.Zero, SpriteEffects.None, 0F);
+                            else
+                                c = ParadisePhysicalMapLogic.UNSUPPORTED_COLOR;
+                            if (c.HasValue)
+                                sprite_batch.FillRectangle(dst, c.Value);
+                        }
+                        if (tile_id <= PhysicalMapLogic.VISIBLE_MAX_ID)
+                            sprites.Draw(sprite_batch, palette, tile_id, dst, effects);
                     }
-                    if (tile_id <= PhysicalMapLogic.VISIBLE_MAX_ID || PhysicalMapLogic.VISIBLE_CONTROL_TILES.Contains(tile_id))
-                        sprites.Draw(sprite_batch, palette, tile_id, dst, effects);
+                    else
+                    {
+                        if (tile_id >= PhysicalMapLogic.CONTROL_MIN_ID)
+                        {
+                            // Rendering of non-graphic special elements
+                            Color? c = null;
+                            if (PhysicalMapLogic.STARTING_ZONE_IDS.Contains(tile_id))
+                                c = PhysicalMapLogic.StartingZoneColor(tile_id);
+                            else if (PhysicalMapLogic.HEALING_ZONE_IDS.Contains(tile_id))
+                                c = PhysicalMapLogic.HealingZoneColor(tile_id);
+                            else if (PhysicalMapLogic.ENDING_ZONE_IDS.Contains(tile_id))
+                                c = PhysicalMapLogic.EndingZoneColor(tile_id);
+                            else if (PhysicalMapLogic.SPRING_IDS.Contains(tile_id))
+                                sprite_batch.Draw(PhysicalMapLogic.TextureOfSpring(tile_id), dst, null, Color.White, 0, Vector2.Zero, effects, 0F);
+                            else if (PhysicalMapLogic.VISIBLE_CONTROL_TILES.Contains(tile_id))
+                                sprite_batch.Draw(PhysicalMapLogic.UnderlayOfVisibleControlTile(tile_id), dst, null, Color.White, 0, Vector2.Zero, effects, 0F);
+                            else if (PhysicalMapLogic.MOVING_OBJECTS_IDS.Contains(tile_id)) // Flips have no effect on moving objects tiles
+                                sprite_batch.Draw(PhysicalMapLogic.TextureOfMovingObject(tile_id), dst, null, Color.White, 0, Vector2.Zero, SpriteEffects.None, 0F);
+                            else if (PhysicalMapLogic.NUMBER_TILES.Contains(tile)) // Palette and flips matters for numbers
+                                sprite_batch.Draw(PhysicalMapLogic.TextureOfNumber(tile), dst, null, Color.White, 0, Vector2.Zero, SpriteEffects.None, 0F);
+                            else
+                                c = PhysicalMapLogic.UNSUPPORTED_COLOR;
+                            if (c.HasValue)
+                                sprite_batch.FillRectangle(dst, c.Value);
+                        }
+                        if (tile_id <= PhysicalMapLogic.VISIBLE_MAX_ID || PhysicalMapLogic.VISIBLE_CONTROL_TILES.Contains(tile_id))
+                            sprites.Draw(sprite_batch, palette, tile_id, dst, effects);
+                    }
                 }
                 else
                     sprites.Draw(sprite_batch, palette, tile_id, dst, effects);
