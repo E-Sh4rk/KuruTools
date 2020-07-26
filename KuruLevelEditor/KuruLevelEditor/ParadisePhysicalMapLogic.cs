@@ -109,6 +109,7 @@ namespace KuruLevelEditor
         {
             Array = 0,
             Offset = 1,
+            // TODO: 2 = Roller Catcher ?
             Roller = 3,
             Piston = 4,
             Shooter = 5,

@@ -188,7 +188,7 @@ namespace KuruLevelEditor
             // Roller
             TextBox roller1 = new TextBox()
             {
-                GridRow = 4,
+                GridRow = 5,
                 GridColumn = 6,
                 HintText = "Direction",
                 Width = 100
@@ -196,7 +196,7 @@ namespace KuruLevelEditor
             grid.Widgets.Add(roller1);
             TextBox roller2 = new TextBox()
             {
-                GridRow = 4,
+                GridRow = 5,
                 GridColumn = 7,
                 HintText = "Speed",
                 Width = 100
@@ -204,7 +204,7 @@ namespace KuruLevelEditor
             grid.Widgets.Add(roller2);
             TextBox roller3 = new TextBox()
             {
-                GridRow = 4,
+                GridRow = 5,
                 GridColumn = 8,
                 HintText = "StartTime",
                 Width = 100
@@ -212,7 +212,7 @@ namespace KuruLevelEditor
             grid.Widgets.Add(roller3);
             TextBox roller4 = new TextBox()
             {
-                GridRow = 4,
+                GridRow = 5,
                 GridColumn = 9,
                 HintText = "Period",
                 Width = 100
@@ -221,7 +221,7 @@ namespace KuruLevelEditor
             var rollerAdd = new TextButton
             {
                 GridColumn = 11,
-                GridRow = 4,
+                GridRow = 5,
                 Text = "Add roller",
                 Width = 100,
             };
@@ -233,7 +233,7 @@ namespace KuruLevelEditor
             // Piston
             TextBox piston1 = new TextBox()
             {
-                GridRow = 5,
+                GridRow = 6,
                 GridColumn = 6,
                 HintText = "Direction",
                 Width = 100
@@ -241,7 +241,7 @@ namespace KuruLevelEditor
             grid.Widgets.Add(piston1);
             TextBox piston2 = new TextBox()
             {
-                GridRow = 5,
+                GridRow = 6,
                 GridColumn = 7,
                 HintText = "MovePeriod",
                 Width = 100
@@ -249,7 +249,7 @@ namespace KuruLevelEditor
             grid.Widgets.Add(piston2);
             TextBox piston3 = new TextBox()
             {
-                GridRow = 5,
+                GridRow = 6,
                 GridColumn = 8,
                 HintText = "StrokeLength",
                 Width = 100
@@ -257,7 +257,7 @@ namespace KuruLevelEditor
             grid.Widgets.Add(piston3);
             TextBox piston4 = new TextBox()
             {
-                GridRow = 5,
+                GridRow = 6,
                 GridColumn = 9,
                 HintText = "StartTime",
                 Width = 100
@@ -265,7 +265,7 @@ namespace KuruLevelEditor
             grid.Widgets.Add(piston4);
             TextBox piston5 = new TextBox()
             {
-                GridRow = 5,
+                GridRow = 6,
                 GridColumn = 10,
                 HintText = "WaitPeriod",
                 Width = 100
@@ -274,7 +274,7 @@ namespace KuruLevelEditor
             var pistonAdd = new TextButton
             {
                 GridColumn = 11,
-                GridRow = 5,
+                GridRow = 6,
                 Text = "Add piston",
                 Width = 100,
             };
@@ -286,7 +286,7 @@ namespace KuruLevelEditor
             // Shooter
             TextBox shooter1 = new TextBox()
             {
-                GridRow = 6,
+                GridRow = 7,
                 GridColumn = 6,
                 HintText = "Direction",
                 Width = 100
@@ -294,7 +294,7 @@ namespace KuruLevelEditor
             grid.Widgets.Add(shooter1);
             TextBox shooter2 = new TextBox()
             {
-                GridRow = 6,
+                GridRow = 7,
                 GridColumn = 7,
                 HintText = "Speed",
                 Width = 100
@@ -302,7 +302,7 @@ namespace KuruLevelEditor
             grid.Widgets.Add(shooter2);
             TextBox shooter3 = new TextBox()
             {
-                GridRow = 6,
+                GridRow = 7,
                 GridColumn = 8,
                 HintText = "StartTime",
                 Width = 100
@@ -310,7 +310,7 @@ namespace KuruLevelEditor
             grid.Widgets.Add(shooter3);
             TextBox shooter4 = new TextBox()
             {
-                GridRow = 6,
+                GridRow = 7,
                 GridColumn = 9,
                 HintText = "Period",
                 Width = 100
@@ -319,7 +319,7 @@ namespace KuruLevelEditor
             var shooterAdd = new TextButton
             {
                 GridColumn = 11,
-                GridRow = 6,
+                GridRow = 7,
                 Text = "Add shooter",
                 Width = 100,
             };
@@ -331,7 +331,7 @@ namespace KuruLevelEditor
             // RollerRing
             TextBox rr1 = new TextBox()
             {
-                GridRow = 7,
+                GridRow = 9,
                 GridColumn = 6,
                 HintText = "NumBalls",
                 Width = 100
@@ -339,7 +339,7 @@ namespace KuruLevelEditor
             grid.Widgets.Add(rr1);
             TextBox rr2 = new TextBox()
             {
-                GridRow = 7,
+                GridRow = 9,
                 GridColumn = 7,
                 HintText = "Radius",
                 Width = 100
@@ -347,7 +347,7 @@ namespace KuruLevelEditor
             grid.Widgets.Add(rr2);
             TextBox rr3 = new TextBox()
             {
-                GridRow = 7,
+                GridRow = 9,
                 GridColumn = 8,
                 HintText = "MovePeriod",
                 Width = 100
@@ -355,7 +355,7 @@ namespace KuruLevelEditor
             grid.Widgets.Add(rr3);
             TextBox rr4 = new TextBox()
             {
-                GridRow = 7,
+                GridRow = 9,
                 GridColumn = 9,
                 HintText = "StartAngle",
                 Width = 100
@@ -364,7 +364,7 @@ namespace KuruLevelEditor
             var rrAdd = new TextButton
             {
                 GridColumn = 11,
-                GridRow = 7,
+                GridRow = 9,
                 Text = "Roller ring",
                 Width = 100,
             };
@@ -374,8 +374,44 @@ namespace KuruLevelEditor
             };
             grid.Widgets.Add(rrAdd);
             // Cog
+            var cogAdd = new TextButton
+            {
+                GridColumn = 11,
+                GridRow = 10,
+                Text = "Add cog",
+                Width = 100,
+            };
+            cogAdd.Click += (s, a) =>
+            {
+                addToMovingObjectsBox(id.Text, ParadisePhysicalMapLogic.ObjectsStr[7], rr1.Text, rr2.Text, rr3.Text, rr4.Text);
+            };
+            grid.Widgets.Add(cogAdd);
             // ArcOfFire
+            var afAdd = new TextButton
+            {
+                GridColumn = 11,
+                GridRow = 11,
+                Text = "Arc of Fire",
+                Width = 100,
+            };
+            afAdd.Click += (s, a) =>
+            {
+                addToMovingObjectsBox(id.Text, ParadisePhysicalMapLogic.ObjectsStr[8], rr1.Text, rr2.Text, rr3.Text, rr4.Text);
+            };
+            grid.Widgets.Add(afAdd);
             // RingOfFire
+            var rfAdd = new TextButton
+            {
+                GridColumn = 11,
+                GridRow = 12,
+                Text = "Ring of Fire",
+                Width = 100,
+            };
+            rfAdd.Click += (s, a) =>
+            {
+                addToMovingObjectsBox(id.Text, ParadisePhysicalMapLogic.ObjectsStr[9], rr1.Text, rr2.Text, rr3.Text, rr4.Text);
+            };
+            grid.Widgets.Add(rfAdd);
             // ClockHand
             // Pendulum
             // Ghost
