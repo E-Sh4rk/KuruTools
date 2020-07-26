@@ -243,7 +243,7 @@ namespace KuruLevelEditor
             {
                 GridRow = 5,
                 GridColumn = 7,
-                HintText = "Speed",
+                HintText = "MovePeriod",
                 Width = 100
             };
             grid.Widgets.Add(piston2);
@@ -267,7 +267,7 @@ namespace KuruLevelEditor
             {
                 GridRow = 5,
                 GridColumn = 10,
-                HintText = "Period",
+                HintText = "WaitPeriod",
                 Width = 100
             };
             grid.Widgets.Add(piston5);
@@ -329,6 +329,50 @@ namespace KuruLevelEditor
             };
             grid.Widgets.Add(shooterAdd);
             // RollerRing
+            TextBox rr1 = new TextBox()
+            {
+                GridRow = 7,
+                GridColumn = 6,
+                HintText = "NumBalls",
+                Width = 100
+            };
+            grid.Widgets.Add(rr1);
+            TextBox rr2 = new TextBox()
+            {
+                GridRow = 7,
+                GridColumn = 7,
+                HintText = "Radius",
+                Width = 100
+            };
+            grid.Widgets.Add(rr2);
+            TextBox rr3 = new TextBox()
+            {
+                GridRow = 7,
+                GridColumn = 8,
+                HintText = "MovePeriod",
+                Width = 100
+            };
+            grid.Widgets.Add(rr3);
+            TextBox rr4 = new TextBox()
+            {
+                GridRow = 7,
+                GridColumn = 9,
+                HintText = "StartAngle",
+                Width = 100
+            };
+            grid.Widgets.Add(rr4);
+            var rrAdd = new TextButton
+            {
+                GridColumn = 11,
+                GridRow = 7,
+                Text = "Roller ring",
+                Width = 100,
+            };
+            rrAdd.Click += (s, a) =>
+            {
+                addToMovingObjectsBox(id.Text, ParadisePhysicalMapLogic.ObjectsStr[6], rr1.Text, rr2.Text, rr3.Text, rr4.Text);
+            };
+            grid.Widgets.Add(rrAdd);
             // Cog
             // ArcOfFire
             // RingOfFire
