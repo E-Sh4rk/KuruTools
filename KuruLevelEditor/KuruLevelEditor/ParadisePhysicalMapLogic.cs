@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace KuruLevelEditor
 {
@@ -103,5 +104,115 @@ namespace KuruLevelEditor
 
         public const int VISIBLE_MAX_ID = 0xDF;
         public const int CONTROL_MIN_ID = 0xE0;
+
+        enum PARADISE_OBJECTS
+        {
+            Array = 0,
+            Offset = 1,
+            Roller = 3,
+            Piston = 4,
+            Shooter = 5,
+            RollerRing = 6,
+            Cog = 7,
+            ArcOfFire = 8,
+            RingOfFire = 9,
+            ClockHand = 10,
+            Pendulum = 11,
+            Ghost = 12,
+            Sword = 13,
+            MovingWall = 14,
+            Gate = 15
+        }
+        static string[] ObjectsStr = new string[]
+        {
+            "Array", "Offset", null, "Roller", "Piston", "Shooter", "RollerRing", "Cog", "ArcOfFire", "RingOfFire",
+            "ClockHand", "Pendulum", "Ghost", "Sword", "MovingWall", "Gate"
+        };
+        static string StrOfObject(PARADISE_OBJECTS obj)
+        {
+            return ObjectsStr[(int)obj];
+        }
+        static PARADISE_OBJECTS? ObjectOfStr(string str)
+        {
+            int i = 0;
+            foreach (string elt in ObjectsStr)
+            {
+                if (elt != null && elt.Equals(str, StringComparison.OrdinalIgnoreCase))
+                    return (PARADISE_OBJECTS)i;
+                i++;
+            }
+            return null;
+        }
+
+        List<int[]> objects;
+        public ParadisePhysicalMapLogic(string[] lines)
+        {
+            objects = new List<int[]>();
+            foreach (string line in lines)
+            {
+                try
+                {
+                    string[] elts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    int[] l = new int[6];
+                    for (int x = 0; x < 6; x++)
+                        l[x] = Convert.ToInt32(elts[x], 16);
+                    objects.Add(l);
+                }
+                catch { }
+            }
+        }
+
+        public string GetPrettyText()
+        {
+            StringBuilder res = new StringBuilder();
+            int i = 0;
+            foreach (int[] obj in objects)
+            {
+                res.Append(i.ToString().PadLeft(3, ' ') + " ");
+                res.Append(StrOfObject((PARADISE_OBJECTS)obj[0]).PadLeft(10, ' ') + " ");
+                res.Append(obj[1].ToString().PadLeft(5, ' ') + " ");
+                res.Append(obj[2].ToString().PadLeft(5, ' ') + " ");
+                res.Append(obj[3].ToString().PadLeft(5, ' ') + " ");
+                res.Append(obj[4].ToString().PadLeft(5, ' ') + " ");
+                res.Append(obj[5].ToString().PadLeft(5, ' '));
+                res.Append(Environment.NewLine);
+                i++;
+            }
+            return res.ToString();
+        }
+
+        public void FromPrettyText(string text)
+        {
+            List<int[]> res = new List<int[]>();
+            string[] lines = text.Replace("\r", "").Split("\n", StringSplitOptions.RemoveEmptyEntries);
+            foreach (string line in lines)
+            {
+                try
+                {
+                    string[] elts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    int id = Convert.ToInt32(elts[0]);
+                    while (res.Count <= id)
+                        res.Add(new int[6]);
+                    res[id] = new int[6]; // TODO
+                }
+                catch { }
+            }
+            objects = res;
+        }
+
+        public string[] GetLines()
+        {
+            string[] res = new string[objects.Count];
+            int i = 0;
+            foreach (int[] obj in objects)
+            {
+                StringBuilder b = new StringBuilder();
+                for (int x = 0; x < 6; x++)
+                    b.Append(obj[x].ToString("X").PadLeft(4, ' ') + " ");
+                res[i] = b.ToString();
+                i++;
+            }
+            return res;
+        }
     }
 }
