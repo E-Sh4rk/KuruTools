@@ -386,24 +386,11 @@ namespace KuruLevelEditor
                 addToMovingObjectsBox(id.Text, ParadisePhysicalMapLogic.ObjectsStr[7], rr1.Text, rr2.Text, rr3.Text, rr4.Text);
             };
             grid.Widgets.Add(cogAdd);
-            // ArcOfFire
-            var afAdd = new TextButton
-            {
-                GridColumn = 11,
-                GridRow = 11,
-                Text = "Arc of Fire",
-                Width = 100,
-            };
-            afAdd.Click += (s, a) =>
-            {
-                addToMovingObjectsBox(id.Text, ParadisePhysicalMapLogic.ObjectsStr[8], rr1.Text, rr2.Text, rr3.Text, rr4.Text);
-            };
-            grid.Widgets.Add(afAdd);
             // RingOfFire
             var rfAdd = new TextButton
             {
                 GridColumn = 11,
-                GridRow = 12,
+                GridRow = 11,
                 Text = "Ring of Fire",
                 Width = 100,
             };
@@ -412,13 +399,67 @@ namespace KuruLevelEditor
                 addToMovingObjectsBox(id.Text, ParadisePhysicalMapLogic.ObjectsStr[9], rr1.Text, rr2.Text, rr3.Text, rr4.Text);
             };
             grid.Widgets.Add(rfAdd);
+            // ArcOfFire
+            // TODO: Add parameters...
+            var afAdd = new TextButton
+            {
+                GridColumn = 11,
+                GridRow = 12,
+                Text = "Arc of Fire",
+                Width = 100,
+            };
+            afAdd.Click += (s, a) =>
+            {
+                addToMovingObjectsBox(id.Text, ParadisePhysicalMapLogic.ObjectsStr[8], rr1.Text, rr2.Text, rr3.Text, rr4.Text);
+            };
+            grid.Widgets.Add(afAdd);
             // ClockHand
+            TextBox ch1 = new TextBox()
+            {
+                GridRow = 14,
+                GridColumn = 6,
+                HintText = "MovePeriod",
+                Width = 100
+            };
+            grid.Widgets.Add(ch1);
+            TextBox ch2 = new TextBox()
+            {
+                GridRow = 14,
+                GridColumn = 7,
+                HintText = "BaseAngle",
+                Width = 100
+            };
+            grid.Widgets.Add(ch2);
+            var chAdd = new TextButton
+            {
+                GridColumn = 11,
+                GridRow = 14,
+                Text = "Clock Hand",
+                Width = 100,
+            };
+            chAdd.Click += (s, a) =>
+            {
+                addToMovingObjectsBox(id.Text, ParadisePhysicalMapLogic.ObjectsStr[10], ch1.Text, ch2.Text);
+            };
+            grid.Widgets.Add(chAdd);
+            // Sword
+            var swAdd = new TextButton
+            {
+                GridColumn = 11,
+                GridRow = 15,
+                Text = "Add Sword",
+                Width = 100,
+            };
+            swAdd.Click += (s, a) =>
+            {
+                addToMovingObjectsBox(id.Text, ParadisePhysicalMapLogic.ObjectsStr[13], ch1.Text, ch2.Text);
+            };
+            grid.Widgets.Add(swAdd);
             // Pendulum
             // Ghost
-            // Sword
+            
             // MovingWall
             // Gate
-
             movingObjects.Text = _logic.GetPrettyText();
 
             // --- SUBMIT ---
