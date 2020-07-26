@@ -158,7 +158,7 @@ namespace KuruRomExtractor
             /*for (int l = 0; l < level_entries.Length; l++)
             {
                 ParadiseLevelEntry e = level_entries[l];
-                int[] toTest = new int[] { e.addr13 };
+                int[] toTest = new int[] { e.addr13, e.addr14, e.addr16, e.addr17 };
                 int k = 0;
                 foreach (int addr in toTest)
                 {

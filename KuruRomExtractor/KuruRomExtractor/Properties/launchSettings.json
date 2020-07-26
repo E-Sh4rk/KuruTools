@@ -2,7 +2,7 @@
   "profiles": {
     "KuruRomExtractor": {
       "commandName": "Project",
-      "commandLineArgs": "--workspace paradise_levels --extract-tiles paradise_tiles"
+      "commandLineArgs": "--workspace paradise_levels --output \"Kururin Paradise (Japan).gba\""
     }
   }
 }
