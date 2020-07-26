@@ -56,6 +56,12 @@ namespace KuruLevelEditor
         {
             return Path.Combine(LEVELS_DIR, name + "." + MAP_TYPE_STR[(int)type] + ".txt");
         }
+        public static string GetObjectsPath(string name)
+        {
+            if (!Settings.Paradise)
+                return null;
+            return Path.Combine(LEVELS_DIR, name + ".objects.txt");
+        }
         public static string GetTilePath(string world, MapType type, int nb)
         {
             return Path.Combine(TILES_DIR, world + "." + MAP_TYPE_STR[(int)type] + "." + nb.ToString("D2") + ".png");

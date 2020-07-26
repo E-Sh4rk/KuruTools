@@ -24,6 +24,7 @@ namespace KuruLevelEditor
         private Desktop _lateralMenuDesktop;
         private SpecialItems _specialItemInterface = null;
         private PhysicalMapLogic _physicalMapLogic = null;
+        private ParadisePhysicalMapLogic _paraPhysicalMapLogic = null;
         private CustomInventories _inventories = null;
         private Rectangle _gridEditorBounds;
         private Rectangle _ssetBounds;
@@ -106,6 +107,7 @@ namespace KuruLevelEditor
             _lastMapType = MapType();
             editor = null;
             mode = Mode.Menu;
+            _paraPhysicalMapLogic = null;
             _inventories.Save();
         }
 
@@ -653,6 +655,12 @@ namespace KuruLevelEditor
             string[] lines = Levels.GetLinesFromGrid(editor.MapGrid, mode != Mode.Minimap ? 4 : 1, mode != Mode.Minimap,
                 Levels.TilesOffset(Levels.GetWorldOfLevel(map), MapType()));
             File.WriteAllLines(Levels.GetLevelPath(map, MapType()), lines);
+            if (Settings.Paradise && mode == Mode.Physical)
+            {
+                string objectsPath = Levels.GetObjectsPath(map);
+                string[] objects = _paraPhysicalMapLogic.GetLines();
+                File.WriteAllLines(objectsPath, objects);
+            }
         }
 
         Levels.MapType MapType(Mode? mode = null)
@@ -694,6 +702,13 @@ namespace KuruLevelEditor
             {
                 grid = Levels.GetGridFromLines(File.ReadAllLines(levelPath), Levels.TilesOffset(world, mapType));
                 sset = new TilesSet(Load.Tiles[new Load.WorldAndType(world, mapType)], true, _ssetBounds, 64);
+
+                if (Settings.Paradise && mode == Mode.Physical)
+                {
+                    string objectsPath = Levels.GetObjectsPath(map);
+                    string[] objects = File.Exists(objectsPath) ? File.ReadAllLines(objectsPath) : new string[0];
+                    _paraPhysicalMapLogic = new ParadisePhysicalMapLogic(objects);
+                }
 
                 int[,] ogrid;
                 TilesSet osset;

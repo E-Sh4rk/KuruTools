@@ -65,11 +65,12 @@ namespace KuruRomExtractor
         }
         public int GraphicalDataOffset
         {
-            get { return graphical_data_offset != 0 ? graphical_data_offset - ROM_MEMORY_DOMAIN : 0; }
-            set { graphical_data_offset = value == 0 ? 0 : value + ROM_MEMORY_DOMAIN; }
+            get { return graphical_data_offset > 0 ? graphical_data_offset - ROM_MEMORY_DOMAIN : 0; }
+            set { graphical_data_offset = value <= 0 ? 0 : value + ROM_MEMORY_DOMAIN; }
         }
         public int BackgroundDataOffset
         {
+            // background_data_offset can be -1 on some levels...
             get { return background_data_offset > 0 ? background_data_offset - ROM_MEMORY_DOMAIN : 0; }
             set { background_data_offset = value <= 0 ? 0 : value + ROM_MEMORY_DOMAIN; }
         }
@@ -207,6 +208,7 @@ namespace KuruRomExtractor
             Console.ReadLine();*/
         }
 
+        static byte[] objectsEndDelimiter = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         public LevelInfo GetLevelInfo(int level)
         {
             LevelInfo res;
@@ -220,9 +222,8 @@ namespace KuruRomExtractor
             res.ObjectsBaseAddress = level_entries[level].ObjectDataOffset;
             res.ObjectsSize = 0;
             rom.Seek(res.ObjectsBaseAddress, SeekOrigin.Begin);
-            byte[] endDelim = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-            while (!reader.ReadBytes(endDelim.Length).SequenceEqual(endDelim))
-                res.ObjectsSize += endDelim.Length;
+            while (!reader.ReadBytes(objectsEndDelimiter.Length).SequenceEqual(objectsEndDelimiter))
+                res.ObjectsSize += objectsEndDelimiter.Length;
 
             base_addr = level_entries[level].GraphicalDataOffset;
             if (base_addr == 0)
@@ -360,6 +361,7 @@ namespace KuruRomExtractor
         }
         byte[] StripFirstBytes(byte[] data, int nb)
         {
+            nb = Math.Min(nb, data.Length);
             byte[] res = new byte[data.Length - nb];
             Array.Copy(data, nb, res, 0, res.Length);
             return res;
@@ -431,6 +433,7 @@ namespace KuruRomExtractor
             byte[] objects = new_objects == null ? original.RawObjects : new_objects;
             rom.Seek(pos, SeekOrigin.Begin);
             rom.Write(objects, 0, objects.Length);
+            rom.Write(objectsEndDelimiter, 0, objectsEndDelimiter.Length);
 
             // Update LevelEntry structure
             rom.Seek(ParadiseLevelEntry.BASE_ADDRESS, SeekOrigin.Begin);
