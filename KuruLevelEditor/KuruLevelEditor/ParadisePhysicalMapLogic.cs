@@ -191,9 +191,18 @@ namespace KuruLevelEditor
                 {
                     string[] elts = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
                     int id = Convert.ToInt32(elts[0]);
+                    if (id >= 1000) continue;
                     while (res.Count <= id)
-                        res.Add(new int[6]);
-                    res[id] = new int[6]; // TODO
+                        res.Add(new int[] { 0, 0, 0, 0, 0, 1});
+                    int[] cur = new int[] {
+                        (int)ObjectOfStr(elts[1]),
+                        Convert.ToInt32(elts[2]),
+                        Convert.ToInt32(elts[3]),
+                        Convert.ToInt32(elts[4]),
+                        Convert.ToInt32(elts[5]),
+                        Convert.ToInt32(elts[6])
+                    };
+                    res[id] = cur;
                 }
                 catch { }
             }
