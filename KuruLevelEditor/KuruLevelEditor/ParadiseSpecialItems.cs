@@ -283,10 +283,63 @@ namespace KuruLevelEditor
                 addToMovingObjectsBox(id.Text, ParadisePhysicalMapLogic.ObjectsStr[4], piston1.Text, piston2.Text, piston3.Text, piston4.Text, piston5.Text);
             };
             grid.Widgets.Add(pistonAdd);
+            // MovingWall
+            TextBox mw1 = new TextBox()
+            {
+                GridRow = 7,
+                GridColumn = 6,
+                HintText = "W+16H+256SL",
+                Width = 100
+            };
+            grid.Widgets.Add(mw1);
+            TextBox mw2 = new TextBox()
+            {
+                GridRow = 7,
+                GridColumn = 7,
+                HintText = "MovePeriod",
+                Width = 100
+            };
+            grid.Widgets.Add(mw2);
+            TextBox mw3 = new TextBox()
+            {
+                GridRow = 7,
+                GridColumn = 8,
+                HintText = "Dir + 4ST",
+                Width = 100
+            };
+            grid.Widgets.Add(mw3);
+            TextBox mw4 = new TextBox()
+            {
+                GridRow = 7,
+                GridColumn = 9,
+                HintText = "WaitPeriod1",
+                Width = 100
+            };
+            grid.Widgets.Add(mw4);
+            TextBox mw5 = new TextBox()
+            {
+                GridRow = 7,
+                GridColumn = 10,
+                HintText = "WaitPeriod2",
+                Width = 100
+            };
+            grid.Widgets.Add(mw5);
+            var mwAdd = new TextButton
+            {
+                GridColumn = 11,
+                GridRow = 7,
+                Text = "Moving Wall",
+                Width = 100,
+            };
+            mwAdd.Click += (s, a) =>
+            {
+                addToMovingObjectsBox(id.Text, ParadisePhysicalMapLogic.ObjectsStr[14], mw1.Text, mw2.Text, mw3.Text, mw4.Text, mw5.Text);
+            };
+            grid.Widgets.Add(mwAdd);
             // Shooter
             TextBox shooter1 = new TextBox()
             {
-                GridRow = 7,
+                GridRow = 8,
                 GridColumn = 6,
                 HintText = "Direction",
                 Width = 100
@@ -294,7 +347,7 @@ namespace KuruLevelEditor
             grid.Widgets.Add(shooter1);
             TextBox shooter2 = new TextBox()
             {
-                GridRow = 7,
+                GridRow = 8,
                 GridColumn = 7,
                 HintText = "Speed",
                 Width = 100
@@ -302,7 +355,7 @@ namespace KuruLevelEditor
             grid.Widgets.Add(shooter2);
             TextBox shooter3 = new TextBox()
             {
-                GridRow = 7,
+                GridRow = 8,
                 GridColumn = 8,
                 HintText = "StartTime",
                 Width = 100
@@ -310,7 +363,7 @@ namespace KuruLevelEditor
             grid.Widgets.Add(shooter3);
             TextBox shooter4 = new TextBox()
             {
-                GridRow = 7,
+                GridRow = 8,
                 GridColumn = 9,
                 HintText = "Period",
                 Width = 100
@@ -319,7 +372,7 @@ namespace KuruLevelEditor
             var shooterAdd = new TextButton
             {
                 GridColumn = 11,
-                GridRow = 7,
+                GridRow = 8,
                 Text = "Add shooter",
                 Width = 100,
             };
@@ -331,7 +384,7 @@ namespace KuruLevelEditor
             // RollerRing
             TextBox rr1 = new TextBox()
             {
-                GridRow = 9,
+                GridRow = 10,
                 GridColumn = 6,
                 HintText = "NumBalls",
                 Width = 100
@@ -339,7 +392,7 @@ namespace KuruLevelEditor
             grid.Widgets.Add(rr1);
             TextBox rr2 = new TextBox()
             {
-                GridRow = 9,
+                GridRow = 10,
                 GridColumn = 7,
                 HintText = "Radius",
                 Width = 100
@@ -347,7 +400,7 @@ namespace KuruLevelEditor
             grid.Widgets.Add(rr2);
             TextBox rr3 = new TextBox()
             {
-                GridRow = 9,
+                GridRow = 10,
                 GridColumn = 8,
                 HintText = "MovePeriod",
                 Width = 100
@@ -355,7 +408,7 @@ namespace KuruLevelEditor
             grid.Widgets.Add(rr3);
             TextBox rr4 = new TextBox()
             {
-                GridRow = 9,
+                GridRow = 10,
                 GridColumn = 9,
                 HintText = "StartAngle",
                 Width = 100
@@ -364,7 +417,7 @@ namespace KuruLevelEditor
             var rrAdd = new TextButton
             {
                 GridColumn = 11,
-                GridRow = 9,
+                GridRow = 10,
                 Text = "Roller ring",
                 Width = 100,
             };
@@ -377,7 +430,7 @@ namespace KuruLevelEditor
             var cogAdd = new TextButton
             {
                 GridColumn = 11,
-                GridRow = 10,
+                GridRow = 11,
                 Text = "Add cog",
                 Width = 100,
             };
@@ -390,7 +443,7 @@ namespace KuruLevelEditor
             var rfAdd = new TextButton
             {
                 GridColumn = 11,
-                GridRow = 11,
+                GridRow = 12,
                 Text = "Ring of Fire",
                 Width = 100,
             };
@@ -404,7 +457,7 @@ namespace KuruLevelEditor
             var afAdd = new TextButton
             {
                 GridColumn = 11,
-                GridRow = 12,
+                GridRow = 13,
                 Text = "Arc of Fire",
                 Width = 100,
             };
@@ -416,7 +469,7 @@ namespace KuruLevelEditor
             // ClockHand
             TextBox ch1 = new TextBox()
             {
-                GridRow = 14,
+                GridRow = 15,
                 GridColumn = 6,
                 HintText = "MovePeriod",
                 Width = 100
@@ -424,7 +477,7 @@ namespace KuruLevelEditor
             grid.Widgets.Add(ch1);
             TextBox ch2 = new TextBox()
             {
-                GridRow = 14,
+                GridRow = 15,
                 GridColumn = 7,
                 HintText = "BaseAngle",
                 Width = 100
@@ -433,7 +486,7 @@ namespace KuruLevelEditor
             var chAdd = new TextButton
             {
                 GridColumn = 11,
-                GridRow = 14,
+                GridRow = 15,
                 Text = "Clock Hand",
                 Width = 100,
             };
@@ -446,7 +499,7 @@ namespace KuruLevelEditor
             var swAdd = new TextButton
             {
                 GridColumn = 11,
-                GridRow = 15,
+                GridRow = 16,
                 Text = "Add Sword",
                 Width = 100,
             };
@@ -456,10 +509,105 @@ namespace KuruLevelEditor
             };
             grid.Widgets.Add(swAdd);
             // Pendulum
+            TextBox pend1 = new TextBox()
+            {
+                GridRow = 18,
+                GridColumn = 6,
+                HintText = "MovePeriod",
+                Width = 100
+            };
+            grid.Widgets.Add(pend1);
+            TextBox pend2 = new TextBox()
+            {
+                GridRow = 18,
+                GridColumn = 7,
+                HintText = "BaseAngle",
+                Width = 100
+            };
+            grid.Widgets.Add(pend2);
+            TextBox pend3 = new TextBox()
+            {
+                GridRow = 18,
+                GridColumn = 8,
+                HintText = "AngleRange",
+                Width = 100
+            };
+            grid.Widgets.Add(pend3);
+            TextBox pend4 = new TextBox()
+            {
+                GridRow = 18,
+                GridColumn = 9,
+                HintText = "BaseAnim",
+                Width = 100
+            };
+            grid.Widgets.Add(pend4);
+            var pendAdd = new TextButton
+            {
+                GridColumn = 11,
+                GridRow = 18,
+                Text = "Pendulum",
+                Width = 100,
+            };
+            pendAdd.Click += (s, a) =>
+            {
+                addToMovingObjectsBox(id.Text, ParadisePhysicalMapLogic.ObjectsStr[11], pend1.Text, pend2.Text, pend3.Text, pend4.Text);
+            };
+            grid.Widgets.Add(pendAdd);
             // Ghost
-            
-            // MovingWall
+            TextBox gh1 = new TextBox()
+            {
+                GridRow = 19,
+                GridColumn = 6,
+                HintText = "Direction",
+                Width = 100
+            };
+            grid.Widgets.Add(gh1);
+            TextBox gh2 = new TextBox()
+            {
+                GridRow = 19,
+                GridColumn = 7,
+                HintText = "MovePeriod",
+                Width = 100
+            };
+            grid.Widgets.Add(gh2);
+            TextBox gh3 = new TextBox()
+            {
+                GridRow = 19,
+                GridColumn = 8,
+                HintText = "Distance",
+                Width = 100
+            };
+            grid.Widgets.Add(gh3);
+            TextBox gh4 = new TextBox()
+            {
+                GridRow = 19,
+                GridColumn = 9,
+                HintText = "StartTime",
+                Width = 100
+            };
+            grid.Widgets.Add(gh4);
+            TextBox gh5 = new TextBox()
+            {
+                GridRow = 19,
+                GridColumn = 10,
+                HintText = "WaitPeriod",
+                Width = 100
+            };
+            grid.Widgets.Add(gh5);
+            var ghAdd = new TextButton
+            {
+                GridColumn = 11,
+                GridRow = 19,
+                Text = "Add ghost",
+                Width = 100,
+            };
+            ghAdd.Click += (s, a) =>
+            {
+                addToMovingObjectsBox(id.Text, ParadisePhysicalMapLogic.ObjectsStr[12], gh1.Text, gh2.Text, gh3.Text, gh4.Text, gh5.Text);
+            };
+            grid.Widgets.Add(ghAdd);
             // Gate
+            // TODO
             movingObjects.Text = _logic.GetPrettyText();
 
             // --- SUBMIT ---
