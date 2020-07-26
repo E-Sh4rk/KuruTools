@@ -23,8 +23,9 @@ namespace KuruLevelEditor
         private Desktop _mainMenuDesktop;
         private Desktop _lateralMenuDesktop;
         private SpecialItems _specialItemInterface = null;
-        private PhysicalMapLogic _physicalMapLogic = null;
-        private ParadisePhysicalMapLogic _paraPhysicalMapLogic = null;
+        private ParadiseSpecialItems _paraSpecialItemInterface = null;
+        private PhysicalMapLogic _physicalMapLogic = null; // Only alive when the special object editor is opened
+        private ParadisePhysicalMapLogic _paraPhysicalMapLogic = null; // Stays alive all the time the physical editor is opened
         private CustomInventories _inventories = null;
         private Rectangle _gridEditorBounds;
         private Rectangle _ssetBounds;
@@ -548,8 +549,15 @@ namespace KuruLevelEditor
             {
                 if (mode == Mode.Physical)
                 {
-                    _physicalMapLogic = new PhysicalMapLogic(editor.MapGrid);
-                    _specialItemInterface = new SpecialItems(this, _physicalMapLogic);
+                    if (Settings.Paradise)
+                    {
+                        _paraSpecialItemInterface = new ParadiseSpecialItems(this, _paraPhysicalMapLogic);
+                    }
+                    else
+                    {
+                        _physicalMapLogic = new PhysicalMapLogic(editor.MapGrid);
+                        _specialItemInterface = new SpecialItems(this, _physicalMapLogic);
+                    }
                 }
                 else
                 {
@@ -622,10 +630,18 @@ namespace KuruLevelEditor
 
         public void CloseSpecialItemMenu()
         {
-            editor.AddToUndoHistory();
-            _physicalMapLogic.OverrideGridData(editor.MapGrid);
-            _physicalMapLogic = null;
-            _specialItemInterface = null;
+            if (Settings.Paradise)
+            {
+                // TODO: What for undo?
+                _paraSpecialItemInterface = null;
+            }
+            else
+            {
+                editor.AddToUndoHistory();
+                _physicalMapLogic.OverrideGridData(editor.MapGrid);
+                _physicalMapLogic = null;
+                _specialItemInterface = null;
+            }
         }
 
         int _lastBonusId = -1;
@@ -794,7 +810,8 @@ namespace KuruLevelEditor
             }
             else
             {
-                bool gridControls = mode != Mode.Loading && mode != Mode.Menu && !_lateralMenuDesktop.HasModalWidget && _specialItemInterface == null;
+                bool gridControls = mode != Mode.Loading && mode != Mode.Menu && !_lateralMenuDesktop.HasModalWidget
+                    && _specialItemInterface == null && _paraSpecialItemInterface == null;
                 MouseState ms = Mouse.GetState();
                 List<Controller.Action> actions = Controller.GetActionsGrid(ks, ms, gameTime);
                 foreach (Controller.Action action in actions)
@@ -845,6 +862,8 @@ namespace KuruLevelEditor
                 _mainMenuDesktop.Render();
             else if (_specialItemInterface != null)
                 _specialItemInterface.Render();
+            else if (_paraSpecialItemInterface != null)
+                _paraSpecialItemInterface.Render();
             else
             {
                 _spriteBatch.Begin();

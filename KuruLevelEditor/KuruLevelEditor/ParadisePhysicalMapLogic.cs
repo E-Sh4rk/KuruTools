@@ -123,7 +123,7 @@ namespace KuruLevelEditor
             MovingWall = 14,
             Gate = 15
         }
-        static string[] ObjectsStr = new string[]
+        public static string[] ObjectsStr = new string[]
         {
             "Array", "Offset", null, "Roller", "Piston", "Shooter", "RollerRing", "Cog", "ArcOfFire", "RingOfFire",
             "ClockHand", "Pendulum", "Ghost", "Sword", "MovingWall", "Gate"

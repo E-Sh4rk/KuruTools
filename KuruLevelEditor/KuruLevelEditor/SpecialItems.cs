@@ -20,6 +20,7 @@ namespace KuruLevelEditor
         private TextBox bonusY;
 
         private TextBox movingObjects;
+        private ScrollViewer scroll;
 
         void saveChanges()
         {
@@ -101,6 +102,7 @@ namespace KuruLevelEditor
 
             movingObjects.Text += ID.PadLeft(5, ' ') + " " + type + " " + p1.PadLeft(5, ' ') + " "
                 + p2.PadLeft(5, ' ') + " " + p3.PadLeft(5, ' ') + " " + p4.PadLeft(5, ' ') + Environment.NewLine;
+            scroll.ScrollPosition = scroll.ScrollMaximum;
         }
 
         void add1pToMovingObjectsBox(string ID, string type, string p1, int p1d)
@@ -116,6 +118,7 @@ namespace KuruLevelEditor
                 p1 = p1d.ToString();
 
             movingObjects.Text += ID.PadLeft(5, ' ') + " " + type + " " + p1.PadLeft(5, ' ') + Environment.NewLine;
+            scroll.ScrollPosition = scroll.ScrollMaximum;
         }
 
         public SpecialItems(Game1 game, PhysicalMapLogic logic)
@@ -221,7 +224,7 @@ namespace KuruLevelEditor
             grid.Widgets.Add(bonusShow);
 
             // --- MOVING OBJECTS ---
-            var scroll = new ScrollViewer()
+            scroll = new ScrollViewer()
             {
                 GridRow = 2,
                 GridColumn = 0,
