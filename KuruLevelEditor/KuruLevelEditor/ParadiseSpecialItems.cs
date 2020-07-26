@@ -186,8 +186,148 @@ namespace KuruLevelEditor
             };
             grid.Widgets.Add(offsetAdd);
             // Roller
+            TextBox roller1 = new TextBox()
+            {
+                GridRow = 4,
+                GridColumn = 6,
+                HintText = "Direction",
+                Width = 100
+            };
+            grid.Widgets.Add(roller1);
+            TextBox roller2 = new TextBox()
+            {
+                GridRow = 4,
+                GridColumn = 7,
+                HintText = "Speed",
+                Width = 100
+            };
+            grid.Widgets.Add(roller2);
+            TextBox roller3 = new TextBox()
+            {
+                GridRow = 4,
+                GridColumn = 8,
+                HintText = "StartTime",
+                Width = 100
+            };
+            grid.Widgets.Add(roller3);
+            TextBox roller4 = new TextBox()
+            {
+                GridRow = 4,
+                GridColumn = 9,
+                HintText = "Period",
+                Width = 100
+            };
+            grid.Widgets.Add(roller4);
+            var rollerAdd = new TextButton
+            {
+                GridColumn = 11,
+                GridRow = 4,
+                Text = "Add roller",
+                Width = 100,
+            };
+            rollerAdd.Click += (s, a) =>
+            {
+                addToMovingObjectsBox(id.Text, ParadisePhysicalMapLogic.ObjectsStr[3], roller1.Text, roller2.Text, roller3.Text, roller4.Text);
+            };
+            grid.Widgets.Add(rollerAdd);
             // Piston
+            TextBox piston1 = new TextBox()
+            {
+                GridRow = 5,
+                GridColumn = 6,
+                HintText = "Direction",
+                Width = 100
+            };
+            grid.Widgets.Add(piston1);
+            TextBox piston2 = new TextBox()
+            {
+                GridRow = 5,
+                GridColumn = 7,
+                HintText = "Speed",
+                Width = 100
+            };
+            grid.Widgets.Add(piston2);
+            TextBox piston3 = new TextBox()
+            {
+                GridRow = 5,
+                GridColumn = 8,
+                HintText = "StrokeLength",
+                Width = 100
+            };
+            grid.Widgets.Add(piston3);
+            TextBox piston4 = new TextBox()
+            {
+                GridRow = 5,
+                GridColumn = 9,
+                HintText = "StartTime",
+                Width = 100
+            };
+            grid.Widgets.Add(piston4);
+            TextBox piston5 = new TextBox()
+            {
+                GridRow = 5,
+                GridColumn = 10,
+                HintText = "Period",
+                Width = 100
+            };
+            grid.Widgets.Add(piston5);
+            var pistonAdd = new TextButton
+            {
+                GridColumn = 11,
+                GridRow = 5,
+                Text = "Add piston",
+                Width = 100,
+            };
+            pistonAdd.Click += (s, a) =>
+            {
+                addToMovingObjectsBox(id.Text, ParadisePhysicalMapLogic.ObjectsStr[4], piston1.Text, piston2.Text, piston3.Text, piston4.Text, piston5.Text);
+            };
+            grid.Widgets.Add(pistonAdd);
             // Shooter
+            TextBox shooter1 = new TextBox()
+            {
+                GridRow = 6,
+                GridColumn = 6,
+                HintText = "Direction",
+                Width = 100
+            };
+            grid.Widgets.Add(shooter1);
+            TextBox shooter2 = new TextBox()
+            {
+                GridRow = 6,
+                GridColumn = 7,
+                HintText = "Speed",
+                Width = 100
+            };
+            grid.Widgets.Add(shooter2);
+            TextBox shooter3 = new TextBox()
+            {
+                GridRow = 6,
+                GridColumn = 8,
+                HintText = "StartTime",
+                Width = 100
+            };
+            grid.Widgets.Add(shooter3);
+            TextBox shooter4 = new TextBox()
+            {
+                GridRow = 6,
+                GridColumn = 9,
+                HintText = "Period",
+                Width = 100
+            };
+            grid.Widgets.Add(shooter4);
+            var shooterAdd = new TextButton
+            {
+                GridColumn = 11,
+                GridRow = 6,
+                Text = "Add shooter",
+                Width = 100,
+            };
+            shooterAdd.Click += (s, a) =>
+            {
+                addToMovingObjectsBox(id.Text, ParadisePhysicalMapLogic.ObjectsStr[5], shooter1.Text, shooter2.Text, shooter3.Text, shooter4.Text);
+            };
+            grid.Widgets.Add(shooterAdd);
             // RollerRing
             // Cog
             // ArcOfFire
