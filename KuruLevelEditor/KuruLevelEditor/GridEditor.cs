@@ -489,6 +489,8 @@ namespace KuruLevelEditor
         }
         int ChangePalette(int tile, int palette)
         {
+            if (type == Levels.MapType.Minimap)
+                return palette;
             return (tile & 0x0FFF) + (palette << 12);
         }
         void DrawTile(SpriteBatch sprite_batch, TilesSet sprites, Rectangle dst, int tile, bool overridePalette, bool showSpecial)
