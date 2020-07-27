@@ -29,6 +29,7 @@ namespace KuruLevelEditor
 		public static Texture2D Roller;
 		public static Texture2D RollerCatcher;
 
+		public static Texture2D Ice;
 		public static Texture2D Key;
 		public static Texture2D ConveyorH;
 		public static Texture2D ConveyorV;
@@ -75,6 +76,7 @@ namespace KuruLevelEditor
 				Piston = Content.Load<Texture2D>("piston");
 				Roller = Content.Load<Texture2D>("roller");
 				RollerCatcher = Content.Load<Texture2D>("roller_catcher");
+				Ice = Content.Load<Texture2D>("ice");
 				Key = Content.Load<Texture2D>("key");
 				ConveyorV = Content.Load<Texture2D>("conveyor_v");
 				ConveyorH = Content.Load<Texture2D>("conveyor_h");

@@ -12,9 +12,9 @@ namespace KuruLevelEditor
         public readonly static int[] HEALING_ZONE_IDS = new int[] { 0xEA, 0xEB, 0xEC, 0xED, 0xEE, 0xEF };
         public readonly static int[] STARTING_ZONE_IDS = new int[] { 0xFB, 0xFC, 0xFD };
         public readonly static int[] ENDING_ZONE_IDS = new int[] { 0xF7, 0xFE, 0xFF };
-        public readonly static int[] FIXED_OBJECTS_IDS = new int[] { 0xF2, 0xF3, 0xF4, 0xF5, 0xF8, 0xF9, 0xFA };
+        public readonly static int[] FIXED_OBJECTS_IDS = new int[] { 0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF8, 0xF9, 0xFA };
         public readonly static int[] NUMBER_TILES = new int[] { 0xE0, 0xE1, 0xE2, 0xE3, 0xE4, 0xE5, 0xE6, 0xE7, 0xE8, 0xE9 };
-        public readonly static int[] MOVING_OBJECTS_IDS = new int[] { 0xF0, 0xF1, 0xF6 };
+        public readonly static int[] MOVING_OBJECTS_IDS = new int[] { 0xF0, 0xF6 };
 
         readonly static Color HEALING_ZONE_COLOR = new Color(0xFF, 0x33, 0x33, 0xFF);
         readonly static Color HEALING_ZONE_BASE_COLOR = new Color(0xFF, 0x63, 0x73, 0xFF);
@@ -67,6 +67,8 @@ namespace KuruLevelEditor
 
         public static Texture2D TextureOfFixedObjects(int tile_id)
         {
+            if (tile_id == 0xF1)
+                return Load.Ice;
             if (tile_id == 0xF2)
                 return Load.ConveyorV;
             if (tile_id == 0xF3)
@@ -90,16 +92,10 @@ namespace KuruLevelEditor
 
         public static Texture2D TextureOfMovingObject(int tile_id)
         {
-            switch (tile_id)
-            {
-                case 0xF0:
-                    return Load.Lookup;
-                case 0xF1:
-                    return Load.Info;
-                case 0xF6:
-                    return Load.RollerCatcher;
-            }
-            return null;
+            if (tile_id == 0xF6)
+                return Load.RollerCatcher;
+
+            return Load.Lookup;
         }
 
         public const int VISIBLE_MAX_ID = 0xDF;
