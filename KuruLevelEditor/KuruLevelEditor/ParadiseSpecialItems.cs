@@ -607,7 +607,35 @@ namespace KuruLevelEditor
             };
             grid.Widgets.Add(ghAdd);
             // Gate
-            // TODO
+            TextBox g1 = new TextBox()
+            {
+                GridRow = 20,
+                GridColumn = 6,
+                HintText = "KeyID",
+                Width = 100
+            };
+            grid.Widgets.Add(g1);
+            TextBox g2 = new TextBox()
+            {
+                GridRow = 20,
+                GridColumn = 7,
+                HintText = "Direction",
+                Width = 100
+            };
+            grid.Widgets.Add(g2);
+            var gAdd = new TextButton
+            {
+                GridColumn = 11,
+                GridRow = 20,
+                Text = "Add gate",
+                Width = 100,
+            };
+            gAdd.Click += (s, a) =>
+            {
+                addToMovingObjectsBox(id.Text, ParadisePhysicalMapLogic.ObjectsStr[15], g1.Text, g2.Text);
+            };
+            grid.Widgets.Add(gAdd);
+
             movingObjects.Text = _logic.GetPrettyText();
 
             // --- SUBMIT ---
