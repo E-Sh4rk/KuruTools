@@ -115,7 +115,7 @@ namespace KuruLevelEditor
                 GridRow = 0,
                 GridColumn = 0,
                 GridColumnSpan = 6,
-                GridRowSpan = 20,
+                GridRowSpan = 21,
                 ShowHorizontalScrollBar = false,
                 ShowVerticalScrollBar = true
             };
@@ -341,7 +341,7 @@ namespace KuruLevelEditor
             {
                 GridRow = 8,
                 GridColumn = 6,
-                HintText = "Direction",
+                HintText = "MinDir",
                 Width = 100
             };
             grid.Widgets.Add(shooter1);
@@ -349,7 +349,7 @@ namespace KuruLevelEditor
             {
                 GridRow = 8,
                 GridColumn = 7,
-                HintText = "Speed",
+                HintText = "MaxDir",
                 Width = 100
             };
             grid.Widgets.Add(shooter2);
@@ -453,7 +453,7 @@ namespace KuruLevelEditor
             };
             grid.Widgets.Add(rfAdd);
             // ArcOfFire
-            // TODO: Add parameters...
+            // TODO: Add fire angle parameter
             var afAdd = new TextButton
             {
                 GridColumn = 11,

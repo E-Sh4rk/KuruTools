@@ -109,7 +109,7 @@ namespace KuruLevelEditor
         {
             Array = 0,
             Offset = 1,
-            // TODO: 2 = Roller Catcher ?
+
             Roller = 3,
             Piston = 4,
             Shooter = 5,
@@ -218,7 +218,7 @@ namespace KuruLevelEditor
             {
                 StringBuilder b = new StringBuilder();
                 for (int x = 0; x < 6; x++)
-                    b.Append(obj[x].ToString("X").PadLeft(4, ' ') + " ");
+                    b.Append(((ushort)obj[x]).ToString("X").PadLeft(4, ' ') + " ");
                 res[i] = b.ToString();
                 i++;
             }
