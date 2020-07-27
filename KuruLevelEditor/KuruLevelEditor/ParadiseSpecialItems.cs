@@ -65,7 +65,7 @@ namespace KuruLevelEditor
                 if (string.IsNullOrWhiteSpace(p5)) p5 = "0";
 
                 string line = id.ToString().PadLeft(3, ' ') + " " + type.PadLeft(10, ' ') + " " + p1.PadLeft(5, ' ') + " "
-                    + p2.PadLeft(5, ' ') + " " + p3.PadLeft(5, ' ') + " " + p4.PadLeft(5, ' ') + p5.PadLeft(5, ' ');
+                    + p2.PadLeft(5, ' ') + " " + p3.PadLeft(5, ' ') + " " + p4.PadLeft(5, ' ') + " " + p5.PadLeft(5, ' ');
                 int i = lineOfID(lines, id);
                 if (i < 0)
                 {
@@ -453,7 +453,14 @@ namespace KuruLevelEditor
             };
             grid.Widgets.Add(rfAdd);
             // ArcOfFire
-            // TODO: Add fire angle parameter
+            TextBox af5 = new TextBox()
+            {
+                GridRow = 13,
+                GridColumn = 10,
+                HintText = "AngleRange",
+                Width = 100
+            };
+            grid.Widgets.Add(af5);
             var afAdd = new TextButton
             {
                 GridColumn = 11,
@@ -463,7 +470,7 @@ namespace KuruLevelEditor
             };
             afAdd.Click += (s, a) =>
             {
-                addToMovingObjectsBox(id.Text, ParadisePhysicalMapLogic.ObjectsStr[8], rr1.Text, rr2.Text, rr3.Text, rr4.Text);
+                addToMovingObjectsBox(id.Text, ParadisePhysicalMapLogic.ObjectsStr[8], rr1.Text, rr2.Text, rr3.Text, rr4.Text, af5.Text);
             };
             grid.Widgets.Add(afAdd);
             // ClockHand
