@@ -632,7 +632,7 @@ namespace KuruLevelEditor
         {
             if (Settings.Paradise)
             {
-                // TODO: What for undo?
+                // NOTE: No possibility to undo yet.
                 _paraSpecialItemInterface = null;
             }
             else

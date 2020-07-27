@@ -660,6 +660,18 @@ namespace KuruLevelEditor
                 _game.CloseSpecialItemMenu();
             };
             grid.Widgets.Add(buttonQuit);
+            var buttonCancel = new TextButton
+            {
+                GridColumn = 2,
+                GridRow = 21,
+                Text = "Cancel",
+                Width = 150,
+            };
+            buttonCancel.Click += (s, a) =>
+            {
+                _game.CloseSpecialItemMenu();
+            };
+            grid.Widgets.Add(buttonCancel);
 
             panel.Widgets.Add(grid);
             _desktop = new Desktop();
