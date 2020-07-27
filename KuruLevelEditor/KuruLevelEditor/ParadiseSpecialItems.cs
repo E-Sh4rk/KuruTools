@@ -148,7 +148,7 @@ namespace KuruLevelEditor
             {
                 GridColumn = 11,
                 GridRow = 2,
-                Text = "Add array",
+                Text = "Array",
                 Width = 100,
             };
             arrayAdd.Click += (s, a) =>
@@ -177,7 +177,7 @@ namespace KuruLevelEditor
             {
                 GridColumn = 11,
                 GridRow = 3,
-                Text = "Add offset",
+                Text = "Offset",
                 Width = 100,
             };
             offsetAdd.Click += (s, a) =>
@@ -222,7 +222,7 @@ namespace KuruLevelEditor
             {
                 GridColumn = 11,
                 GridRow = 5,
-                Text = "Add roller",
+                Text = "Roller",
                 Width = 100,
             };
             rollerAdd.Click += (s, a) =>
@@ -275,7 +275,7 @@ namespace KuruLevelEditor
             {
                 GridColumn = 11,
                 GridRow = 6,
-                Text = "Add piston",
+                Text = "Piston",
                 Width = 100,
             };
             pistonAdd.Click += (s, a) =>
@@ -373,7 +373,7 @@ namespace KuruLevelEditor
             {
                 GridColumn = 11,
                 GridRow = 8,
-                Text = "Add shooter",
+                Text = "Shooter",
                 Width = 100,
             };
             shooterAdd.Click += (s, a) =>
@@ -431,7 +431,7 @@ namespace KuruLevelEditor
             {
                 GridColumn = 11,
                 GridRow = 11,
-                Text = "Add cog",
+                Text = "Cog",
                 Width = 100,
             };
             cogAdd.Click += (s, a) =>
@@ -507,7 +507,7 @@ namespace KuruLevelEditor
             {
                 GridColumn = 11,
                 GridRow = 16,
-                Text = "Add Sword",
+                Text = "Sword",
                 Width = 100,
             };
             swAdd.Click += (s, a) =>
@@ -605,7 +605,7 @@ namespace KuruLevelEditor
             {
                 GridColumn = 11,
                 GridRow = 19,
-                Text = "Add ghost",
+                Text = "Ghost",
                 Width = 100,
             };
             ghAdd.Click += (s, a) =>
@@ -634,7 +634,7 @@ namespace KuruLevelEditor
             {
                 GridColumn = 11,
                 GridRow = 20,
-                Text = "Add gate",
+                Text = "Gate",
                 Width = 100,
             };
             gAdd.Click += (s, a) =>

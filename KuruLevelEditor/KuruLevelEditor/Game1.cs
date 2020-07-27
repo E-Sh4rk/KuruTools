@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace KuruLevelEditor
 {
-    public class Game1 : Game
+    public class Game1 : Game // TODO: Update Minimap colors for Paradise
     {
         const int LATERAL_PANEL_WIDTH = 200;
         const int PALETTE_SELECTOR_Y = 250;
