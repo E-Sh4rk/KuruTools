@@ -133,6 +133,18 @@
 /processorParam:TextureFormat=Color
 /build:../../Assets/minimap_colors.png;minimap_colors.png
 
+#begin ../../Assets/minimap_colors_paradise.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../../Assets/minimap_colors_paradise.png;minimap_colors_paradise.png
+
 #begin ../../Assets/minimap00.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -144,6 +156,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:../../Assets/minimap00.png;minimap00.png
+
+#begin ../../Assets/minimap00_paradise.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../../Assets/minimap00_paradise.png;minimap00_paradise.png
 
 #begin ../../Assets/minimap01.png
 /importer:TextureImporter
@@ -157,6 +181,18 @@
 /processorParam:TextureFormat=Color
 /build:../../Assets/minimap01.png;minimap01.png
 
+#begin ../../Assets/minimap01_paradise.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../../Assets/minimap01_paradise.png;minimap01_paradise.png
+
 #begin ../../Assets/minimap02.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -168,6 +204,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:../../Assets/minimap02.png;minimap02.png
+
+#begin ../../Assets/minimap02_paradise.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../../Assets/minimap02_paradise.png;minimap02_paradise.png
 
 #begin ../../Assets/minimap03.png
 /importer:TextureImporter
@@ -181,6 +229,18 @@
 /processorParam:TextureFormat=Color
 /build:../../Assets/minimap03.png;minimap03.png
 
+#begin ../../Assets/minimap03_paradise.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../../Assets/minimap03_paradise.png;minimap03_paradise.png
+
 #begin ../../Assets/minimap04.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -192,6 +252,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:../../Assets/minimap04.png;minimap04.png
+
+#begin ../../Assets/minimap04_paradise.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../../Assets/minimap04_paradise.png;minimap04_paradise.png
 
 #begin ../../Assets/minimap05.png
 /importer:TextureImporter
@@ -205,6 +277,18 @@
 /processorParam:TextureFormat=Color
 /build:../../Assets/minimap05.png;minimap05.png
 
+#begin ../../Assets/minimap05_paradise.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../../Assets/minimap05_paradise.png;minimap05_paradise.png
+
 #begin ../../Assets/minimap06.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -216,6 +300,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:../../Assets/minimap06.png;minimap06.png
+
+#begin ../../Assets/minimap06_paradise.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../../Assets/minimap06_paradise.png;minimap06_paradise.png
 
 #begin ../../Assets/minimap07.png
 /importer:TextureImporter
@@ -229,6 +325,18 @@
 /processorParam:TextureFormat=Color
 /build:../../Assets/minimap07.png;minimap07.png
 
+#begin ../../Assets/minimap07_paradise.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../../Assets/minimap07_paradise.png;minimap07_paradise.png
+
 #begin ../../Assets/minimap08.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -240,6 +348,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:../../Assets/minimap08.png;minimap08.png
+
+#begin ../../Assets/minimap08_paradise.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../../Assets/minimap08_paradise.png;minimap08_paradise.png
 
 #begin ../../Assets/minimap09.png
 /importer:TextureImporter
@@ -253,6 +373,18 @@
 /processorParam:TextureFormat=Color
 /build:../../Assets/minimap09.png;minimap09.png
 
+#begin ../../Assets/minimap09_paradise.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../../Assets/minimap09_paradise.png;minimap09_paradise.png
+
 #begin ../../Assets/minimap10.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -264,6 +396,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:../../Assets/minimap10.png;minimap10.png
+
+#begin ../../Assets/minimap10_paradise.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../../Assets/minimap10_paradise.png;minimap10_paradise.png
 
 #begin ../../Assets/minimap11.png
 /importer:TextureImporter
@@ -277,6 +421,18 @@
 /processorParam:TextureFormat=Color
 /build:../../Assets/minimap11.png;minimap11.png
 
+#begin ../../Assets/minimap11_paradise.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../../Assets/minimap11_paradise.png;minimap11_paradise.png
+
 #begin ../../Assets/minimap12.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -288,6 +444,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:../../Assets/minimap12.png;minimap12.png
+
+#begin ../../Assets/minimap12_paradise.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../../Assets/minimap12_paradise.png;minimap12_paradise.png
 
 #begin ../../Assets/minimap13.png
 /importer:TextureImporter
@@ -301,6 +469,18 @@
 /processorParam:TextureFormat=Color
 /build:../../Assets/minimap13.png;minimap13.png
 
+#begin ../../Assets/minimap13_paradise.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../../Assets/minimap13_paradise.png;minimap13_paradise.png
+
 #begin ../../Assets/minimap14.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -313,6 +493,18 @@
 /processorParam:TextureFormat=Color
 /build:../../Assets/minimap14.png;minimap14.png
 
+#begin ../../Assets/minimap14_paradise.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../../Assets/minimap14_paradise.png;minimap14_paradise.png
+
 #begin ../../Assets/minimap15.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -324,6 +516,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:../../Assets/minimap15.png;minimap15.png
+
+#begin ../../Assets/minimap15_paradise.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../../Assets/minimap15_paradise.png;minimap15_paradise.png
 
 #begin ../../Assets/piston.png
 /importer:TextureImporter

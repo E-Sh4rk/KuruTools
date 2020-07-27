@@ -61,7 +61,12 @@ namespace KuruLevelEditor
 				LoadingScreen = Content.Load<Texture2D>("loading");
 				MinimapColors = new Texture2D[16];
 				for (int i = 0; i < MinimapColors.Length; i++)
-					MinimapColors[i] = Content.Load<Texture2D>("minimap" + i.ToString("D2"));
+				{
+					if (Settings.Paradise)
+						MinimapColors[i] = Content.Load<Texture2D>("minimap" + i.ToString("D2") + "_paradise");
+					else
+						MinimapColors[i] = Content.Load<Texture2D>("minimap" + i.ToString("D2"));
+				}
 				SpringHorizontal = Content.Load<Texture2D>("spring_horizontal");
 				SpringVertical = Content.Load<Texture2D>("spring_vertical");
 				SpringDiag = Content.Load<Texture2D>("spring_diag");
