@@ -93,34 +93,57 @@ namespace KuruLevelEditor
 			return false;
         }
 
+		static Levels.MapType[] tilesType;
 		// Must be called after Levels.init
 		public static bool LoadSpriteContent(GraphicsDevice graphics)
 		{
+			tilesType = Settings.Paradise ?
+				new Levels.MapType[] { Levels.MapType.Background, Levels.MapType.Graphical2, Levels.MapType.Graphical, Levels.MapType.Physical }
+				: new Levels.MapType[] { Levels.MapType.Background, Levels.MapType.Graphical, Levels.MapType.Physical };
 			try
 			{
 				Tiles = new Dictionary<WorldAndType, Texture2D[]>();
 				foreach (string world in Levels.AllWorlds)
 				{
-					foreach (Levels.MapType type in new Levels.MapType[] { Levels.MapType.Background, Levels.MapType.Graphical2, Levels.MapType.Graphical, Levels.MapType.Physical })
+					foreach (Levels.MapType type in tilesType)
 					{
-						if (type == Levels.MapType.Graphical2 && !Settings.Paradise) continue;
-						WorldAndType lat = new WorldAndType(world, type);
-						Texture2D[] ts = new Texture2D[16];
-						for (int i = 0; i < ts.Length; i++)
+						/*WorldAndType lat = new WorldAndType(world, type);
+						Texture2D[] ts = new Texture2D[16];*/
+						for (int i = 0; i < /*ts.Length*/16; i++)
 						{
 							string path = Levels.GetTilePath(world, type, i);
-							FileStream fileStream = new FileStream(path, FileMode.Open);
+							/*FileStream fileStream = new FileStream(path, FileMode.Open);
 							Texture2D tile = Texture2D.FromStream(graphics, fileStream);
 							fileStream.Close();
-							ts[i] = tile;
+							ts[i] = tile;*/
+							if (!File.Exists(path)) return false; // Since partial loading has been introduced, we just check here that the file exists...
 						}
-						Tiles.Add(lat, ts);
+						//Tiles.Add(lat, ts);
 					}
 				}
 				return true;
 			}
 			catch { }
 			return false;
+		}
+		public static void LoadWorldTiles(GraphicsDevice graphics, string world)
+        {
+			foreach (Levels.MapType type in tilesType)
+			{
+				WorldAndType lat = new WorldAndType(world, type);
+				if (Tiles.ContainsKey(lat)) continue;
+				Texture2D[] ts = new Texture2D[16];
+				for (int i = 0; i < ts.Length; i++)
+				{
+					string path = Levels.GetTilePath(world, type, i);
+					FileStream fileStream = new FileStream(path, FileMode.Open);
+					Texture2D tile = Texture2D.FromStream(graphics, fileStream);
+					fileStream.Close();
+					ts[i] = tile;
+				}
+				Tiles.Add(lat, ts);
+			}
+
 		}
 	}
 }

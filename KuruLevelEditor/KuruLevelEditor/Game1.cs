@@ -706,7 +706,7 @@ namespace KuruLevelEditor
             string world = Levels.GetWorldOfLevel(map);
             Levels.MapType mapType = MapType();
             string levelPath = Levels.GetLevelPath(map, mapType);
-            if (!File.Exists(levelPath) && Settings.Paradise)
+            if (!File.Exists(levelPath)) // Should only happen in Paradise
                 return false;
             if (mode == Mode.Minimap)
             {
@@ -716,6 +716,7 @@ namespace KuruLevelEditor
             }
             else
             {
+                Load.LoadWorldTiles(GraphicsDevice, world);
                 grid = Levels.GetGridFromLines(File.ReadAllLines(levelPath), Levels.TilesOffset(world, mapType));
                 sset = new TilesSet(Load.Tiles[new Load.WorldAndType(world, mapType)], true, _ssetBounds, 64);
 
