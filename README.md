@@ -1,13 +1,14 @@
 # KuruTools
 
-This repository contains the following tools for Kuru Kuru Kururin (Europe):
+This repository contains the following tools for the Kururin GBA ROMs:
 
 - `KuruRomExtractor`: A console application that can extract and decode map data and tiles from the ROM. It can also replace the maps of the ROM with your modified maps.
 - `KuruLevelEditor`: A GUI level editor. Depends on `KuruRomExtractor`.
 - `Misc`: Some additional ROM patches.
 
-*NOTE: Altough the map system is very similar in Kururin Paradise, these tools are NOT
-compatible with Kururin Paradise.*
+The supported ROMs are:
+- Kuru Kuru Kururin (Europe)
+- Kururin Paradise (Japan)
 
 ## Installation
 
@@ -27,7 +28,7 @@ If you want to use the level editor:
 
 - The rom extractor binaries must be placed in the same directory as the level editor,
 with the name `KuruRomExtractor.dll`
-- The Kuru Kuru Kururin ROM must be placed in the working directory (most of time, it is the same directory as the level editor),
+- The *Kuru Kuru Kururin* or *Kururin Paradise* ROM must be placed in the working directory (most of time, it is the same directory as the level editor),
 with the name `input.gba`
 - The patched ROM will be saved in the working directory, with the name `output.gba`
 
@@ -42,7 +43,8 @@ or with the command `dotnet KuruLevelEditor.dll` (Windows, Linux, macOS).
 
 Some notes about the level editor:
 
-- When running it for the first time, it should create a new directory `tiles` that contains all the tiles of the game. If the level editor exits as soon as you open it, please ensure the ROM is present (see previous section).
+- Depending on the input ROM, the *Kuru Kuru Kururin* or *Kururin Paradise* editor will be loaded.
+- When running it for the first time, a new directory `tiles` will be created. It contains all the tiles of the game. If the level editor exits as soon as you open it, please ensure the ROM is present (see previous section).
 - The level editor saves your levels under the directory `levels`. This is the directory that you should copy if you want to backup your levels.
 - The level editor saves the patched ROM as `output.gba` (by default). You should not modify this file manually as it will be overriden each time you click on the `Build` button. If you want to apply custom patches to the ROM, you should apply them to `input.gba` (the patches will be replicated on `output.gba`).
 
