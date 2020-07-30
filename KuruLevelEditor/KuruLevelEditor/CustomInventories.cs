@@ -75,8 +75,11 @@ namespace KuruLevelEditor
             SaveGrid(pathP, grids[Levels.MapType.Physical].Grid);
             string pathG = Path.Combine(dir, "graphical.txt");
             SaveGrid(pathG, grids[Levels.MapType.Graphical].Grid);
-            string pathG2 = Path.Combine(dir, "graphical2.txt");
-            SaveGrid(pathG2, grids[Levels.MapType.Graphical2].Grid);
+            if (Settings.Paradise)
+            {
+                string pathG2 = Path.Combine(dir, "graphical2.txt");
+                SaveGrid(pathG2, grids[Levels.MapType.Graphical2].Grid);
+            }
             string pathB = Path.Combine(dir, "background.txt");
             SaveGrid(pathB, grids[Levels.MapType.Background].Grid);
             string pathM = Path.Combine(dir, "minimap.txt");
