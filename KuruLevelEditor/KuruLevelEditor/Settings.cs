@@ -15,15 +15,7 @@ namespace KuruLevelEditor
         public static string Output;
         public static string EmulatorCommand;
 
-        static bool? _cachedParadise = null;
-        public static bool Paradise
-        {
-            get
-            {
-                Debug.Assert(_cachedParadise.HasValue);
-                return _cachedParadise.Value;
-            }
-        }
+        public static bool Paradise { get; set; }
 
         public static bool LoadSettings()
         {
@@ -37,7 +29,12 @@ namespace KuruLevelEditor
                 Input = config.GetSection("ROM").GetSection("InputRom").Value;
                 Output = config.GetSection("ROM").GetSection("OutputRom").Value;
                 EmulatorCommand = config.GetSection("Emulator").GetSection("Command").Value;
-                _cachedParadise = GetNameOfROM() == "KURUPARA";
+                string name = GetNameOfROM();
+                if (name == "KURUPARA")
+                    Paradise = true;
+                else if (name == "KURURIN")
+                    Paradise = false;
+                else return false;
                 return true;
             }
             catch { }

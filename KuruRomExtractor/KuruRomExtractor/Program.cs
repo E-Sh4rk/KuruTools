@@ -11,6 +11,7 @@ namespace KuruRomExtractor
     {
         static string NameOfROM(string path)
         {
+            if (!File.Exists(path)) return "";
             StringBuilder res = new StringBuilder();
             FileStream stream = File.OpenRead(path);
             stream.Seek(0xA0, SeekOrigin.Begin);
