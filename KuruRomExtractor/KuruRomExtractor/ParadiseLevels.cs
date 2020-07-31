@@ -105,6 +105,9 @@ namespace KuruRomExtractor
         const int COMMON_PALETTE_15 = 0x19BF84;
         public const int COLORSET_SIZE = 0x20;
 
+        const int NUMBER_AREAS_TABLE_OFFSET = 0x2E364;
+        const int NUMBER_AREAS_TABLE_SIZE = 42;
+
         FileStream rom;
         ParadiseLevelEntry[] level_entries;
 
@@ -542,6 +545,20 @@ namespace KuruRomExtractor
             writer.Write(reader.ReadBytes(COLORSET_SIZE));
             writer.Close();
             return res;
+        }
+
+        public byte[] GetNumberAreasTable()
+        {
+            byte[] res = new byte[NUMBER_AREAS_TABLE_SIZE];
+            rom.Seek(NUMBER_AREAS_TABLE_OFFSET, SeekOrigin.Begin);
+            rom.Read(res, 0, res.Length);
+            return res;
+        }
+
+        public void SetNumberAreasTable(byte[] table)
+        {
+            rom.Seek(NUMBER_AREAS_TABLE_OFFSET, SeekOrigin.Begin);
+            rom.Write(table, 0, table.Length);
         }
 
         public void Dispose()

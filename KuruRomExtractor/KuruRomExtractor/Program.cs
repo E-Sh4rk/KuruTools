@@ -104,6 +104,7 @@ namespace KuruRomExtractor
                 }
 
                 Directory.CreateDirectory(workspace);
+                byte[] nbAreasTable = levels.GetNumberAreasTable();
                 foreach (int level in ParadiseLevels.AllLevels())
                 {
                     string filename = Path.Combine(workspace, level.ToString("D2") + ".physical.txt");
@@ -121,7 +122,12 @@ namespace KuruRomExtractor
                     byte[] b = null;
                     byte[] m = null;
                     if (File.Exists(filename))
-                        p = Map.Parse(File.ReadAllLines(filename), Map.Type.PHYSICAL, false).ToByteData();
+                    {
+                        Map mp = Map.Parse(File.ReadAllLines(filename), Map.Type.PHYSICAL, false);
+                        p = mp.ToByteData();
+                        if (level < nbAreasTable.Length)
+                            nbAreasTable[level] = (byte)mp.NumberOfAreas();
+                    }
                     if (File.Exists(filename_objects))
                         o = Map.Parse(File.ReadAllLines(filename_objects), Map.Type.OBJECTS, false).ToByteData();
                     if (File.Exists(filename_graphical))
@@ -181,8 +187,8 @@ namespace KuruRomExtractor
                     // Alter map in the ROM
                     if (levels.AlterLevelData(level, p, o, g, g2, b, m))
                         Console.WriteLine("Changes detected in " + level.ToString() + ". The ROM has been updated.");
-
                 }
+                levels.SetNumberAreasTable(nbAreasTable);
 
                 Console.WriteLine("All tasks terminated.");
                 levels.Dispose();
@@ -239,6 +245,8 @@ namespace KuruRomExtractor
                 }
 
                 Directory.CreateDirectory(workspace);
+                byte[] nbAreasTable = levels.GetNumberAreasTable();
+                int levelNb = 0;
                 foreach (Levels.LevelIdentifier level in Levels.AllLevels())
                 {
                     string filename = Path.Combine(workspace, level.ShortName() + ".physical.txt");
@@ -251,7 +259,12 @@ namespace KuruRomExtractor
                     byte[] b = null;
                     byte[] m = null;
                     if (File.Exists(filename))
-                        p = Map.Parse(File.ReadAllLines(filename), Map.Type.PHYSICAL, false).ToByteData();
+                    {
+                        Map mp = Map.Parse(File.ReadAllLines(filename), Map.Type.PHYSICAL, false);
+                        p = mp.ToByteData();
+                        if (levelNb < nbAreasTable.Length)
+                            nbAreasTable[levelNb] = (byte)mp.NumberOfAreas();
+                    }
                     if (File.Exists(filename_graphical))
                         g = Map.Parse(File.ReadAllLines(filename_graphical), Map.Type.GRAPHICAL, false).ToByteData();
                     if (File.Exists(filename_background))
@@ -289,7 +302,10 @@ namespace KuruRomExtractor
                     // Alter map in the ROM
                     if (levels.AlterLevelData(level, p, g, b, m, relocate))
                         Console.WriteLine("Changes detected in " + level.ToString() + ". The ROM has been updated.");
+
+                    levelNb++;
                 }
+                levels.SetNumberAreasTable(nbAreasTable);
 
                 Console.WriteLine("All tasks terminated.");
                 levels.Dispose();

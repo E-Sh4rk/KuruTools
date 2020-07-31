@@ -110,6 +110,9 @@ namespace KuruRomExtractor
         const int COMMON_PALETTE_15 = 0x1DC968;
         public const int COLORSET_SIZE = 0x20;
 
+        const int NUMBER_AREAS_TABLE_OFFSET = 0x1E740;
+        const int NUMBER_AREAS_TABLE_SIZE = 38;
+
         public enum World
         {
             TRAINING = 0,
@@ -428,6 +431,20 @@ namespace KuruRomExtractor
                 Utils.TypeToByte(writer, entry);
 
             return true;
+        }
+
+        public byte[] GetNumberAreasTable()
+        {
+            byte[] res = new byte[NUMBER_AREAS_TABLE_SIZE];
+            rom.Seek(NUMBER_AREAS_TABLE_OFFSET, SeekOrigin.Begin);
+            rom.Read(res, 0, res.Length);
+            return res;
+        }
+
+        public void SetNumberAreasTable(byte[] table)
+        {
+            rom.Seek(NUMBER_AREAS_TABLE_OFFSET, SeekOrigin.Begin);
+            rom.Write(table, 0, table.Length);
         }
 
         public void Dispose()

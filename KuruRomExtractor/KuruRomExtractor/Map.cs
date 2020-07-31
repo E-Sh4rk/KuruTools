@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Linq;
 
 namespace KuruRomExtractor
 {
@@ -52,6 +53,21 @@ namespace KuruRomExtractor
             this.data = data;
             this.type = type;
             this.compact = compact;
+        }
+
+        public int NumberOfAreas()
+        {
+            if (type != Type.PHYSICAL) return 0;
+            int[] HEALING_ZONE_IDS = new int[]{ 0xED, 0xEE, 0xEF };
+            const int OFFSET = 0xEC;
+            int max = OFFSET;
+            foreach(ushort d in data)
+            {
+                int id = d & 0x3FF;
+                if (HEALING_ZONE_IDS.Contains(id) && id > max)
+                    max = id;
+            }
+            return (max - OFFSET) + 1;
         }
 
         static ushort CountLines(string[] lines)
