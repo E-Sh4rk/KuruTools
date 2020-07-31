@@ -14,11 +14,11 @@ namespace KuruRomExtractor
         const int ROM_MEMORY_DOMAIN = 0x08000000;
 
         [FieldOffset(0)]
-        int world_info_mem_address;
+        public int world_info_mem_address;
         [FieldOffset(4)]
-        int world_data_mem_address;
+        public int world_data_mem_address;
         [FieldOffset(8)]
-        int dummy1; // Seems related to bonuses or training mode
+        public int dummy1; // Seems related to bonuses or training mode
 
         public int WorldInfoBaseAddress
         {
@@ -221,6 +221,17 @@ namespace KuruRomExtractor
                     le[l] = Utils.ByteToType<LevelEntry>(reader);
                 level_entries[w] = le;
             }
+
+            // For debugging purpose
+            /*for (int w = 0; w < world_entries.Length; w++)
+            {
+                Console.WriteLine(w.ToString("D2") + ": " + world_entries[w].dummy1.ToString("X"));
+                Console.WriteLine(world_infos[w].addr8_offset + " " + world_infos[w].addr8_size);
+            }
+            rom.Seek(WorldEntry.BASE_ADDRESS, SeekOrigin.Begin);
+            for (int w = 0; w < world_entries.Length; w++)
+                Utils.TypeToByte(new BinaryWriter(rom), world_entries[w]);
+            Console.ReadLine();*/
         }
 
         public LevelInfo GetLevelInfo(LevelIdentifier level)
