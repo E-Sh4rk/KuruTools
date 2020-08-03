@@ -18,7 +18,7 @@ or build it from source (tested on Visual Studio 2019).
 Prerequisite:
 - Windows, Linux or macOS
 - .NET core 3.1
-- The european version of Kuru Kuru Kururin (ROM format: `.gba`)
+- A supported ROM (format: `.gba`)
 
 See this link to install .NET core: https://dotnet.microsoft.com/download
 
