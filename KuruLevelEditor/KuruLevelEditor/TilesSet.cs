@@ -49,14 +49,14 @@ namespace KuruLevelEditor
             this.display_size = display_size;
             nb_per_row = (display_area.Width + 1) / (display_size + 1);
         }
-        public static void DrawRectangle(SpriteBatch sprite_batch, Rectangle rect, Color color, int thickness = 1)
+        /*public static void DrawRectangle(SpriteBatch sprite_batch, Rectangle rect, Color color, int thickness = 1)
         {
             int half = thickness / 2;
             sprite_batch.FillRectangle(new Rectangle(rect.Location + new Point(-half, 0), new Point(thickness, rect.Height)), color);
             sprite_batch.FillRectangle(new Rectangle(rect.Location + new Point(0, -half), new Point(rect.Width, thickness)), color);
             sprite_batch.FillRectangle(new Rectangle(rect.Location + new Point(rect.Width - half, 0), new Point(thickness, rect.Height)), color);
             sprite_batch.FillRectangle(new Rectangle(rect.Location + new Point(0, rect.Height - half), new Point(rect.Width, thickness)), color);
-        }
+        }*/
         public void Draw(SpriteBatch sprite_batch, int sprite_set, int sprite_number, Rectangle dest, SpriteEffects effects = SpriteEffects.None)
         {
             Texture2D texture = textures[sprite_set];
@@ -76,7 +76,7 @@ namespace KuruLevelEditor
                     new Rectangle(display_area.X + x * (display_size + 1), display_area.Y + y * (display_size + 1), display_size, display_size);
                 sprite_batch.Draw(textures[i], dst, null, Color.White);
                 if (SelectedSet == i)
-                    DrawRectangle(sprite_batch, dst, Color.White, 2);
+                    sprite_batch.DrawRectangle(dst, Color.White, 2);
             }
         }
 

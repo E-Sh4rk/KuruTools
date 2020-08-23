@@ -700,15 +700,15 @@ namespace KuruLevelEditor
             }
             if (showSpecial && !inventoryOpened && !Settings.Paradise)
                 sprite_batch.FillRectangle(new Rectangle(map_bounds.X, map_bounds.Y + TileSize * PhysicalMapLogic.NUMBER_RESERVED_ROWS, map_bounds.Width, 1), Color.Orange);
-            TilesSet.DrawRectangle(sprite_batch, map_bounds, Color.Red, 2); // Issue with DrawRectangle: https://github.com/rds1983/Myra/issues/211
+            sprite_batch.DrawRectangle(map_bounds, Color.Red, 2);
             // Draw selection rectangle
             if (mouse_move_is_selecting)
             {
                 Rectangle r = Rectangle.Union(new Rectangle(initial_mouse_move_pos.Value, Point.Zero), new Rectangle(mouse.Position, Point.Zero));
-                TilesSet.DrawRectangle(sprite_batch, r, Color.White, 1);
+                sprite_batch.DrawRectangle(r, Color.White, 1);
             }
             else if (selectedElementsBounds.HasValue)
-                TilesSet.DrawRectangle(sprite_batch, selectedElementsBounds.Value, Color.White, 1);
+                sprite_batch.DrawRectangle(selectedElementsBounds.Value, Color.White, 1);
         }
     }
 }

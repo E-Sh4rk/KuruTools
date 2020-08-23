@@ -1,4 +1,16 @@
-﻿using System;
+﻿/*
+
+KuruRom Extractor
+Author: Mickael LAURENT
+
+For documentation about the GBA (memory sections, tiled video mode, etc.),
+you can refer to this awesome tutorial:
+
+https://www.coranac.com/tonc/text/toc.htm
+
+*/
+
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
