@@ -59,15 +59,13 @@ namespace KuruRomExtractor
         {
             if (type != Type.PHYSICAL) return 0;
             int[] HEALING_ZONE_IDS = new int[]{ 0xED, 0xEE, 0xEF };
-            const int OFFSET = 0xEC;
-            int max = OFFSET;
+            int max = -1;
             foreach(ushort d in data)
             {
                 int id = d & 0x3FF;
-                if (HEALING_ZONE_IDS.Contains(id) && id > max)
-                    max = id;
+                max = Math.Max(max, Array.IndexOf(HEALING_ZONE_IDS, id));
             }
-            return (max - OFFSET) + 1;
+            return max + 2;
         }
 
         static ushort CountLines(string[] lines)

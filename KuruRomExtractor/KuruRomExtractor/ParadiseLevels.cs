@@ -107,6 +107,9 @@ namespace KuruRomExtractor
 
         const int NUMBER_AREAS_TABLE_OFFSET = 0x2E364;
         const int NUMBER_AREAS_TABLE_SIZE = 42;
+        const int TIMES_TABLE_OFFSET = 0x28DB8;
+        public const int TIMES_TABLE_HEIGHT = NUMBER_LEVELS + 42 /* Easy Mode Times */;
+        public const int TIMES_TABLE_WIDTH = 3;
 
         FileStream rom;
         ParadiseLevelEntry[] level_entries;
@@ -561,6 +564,32 @@ namespace KuruRomExtractor
             rom.Write(table, 0, table.Length);
         }
 
+        public ushort[,] GetTimesTable()
+        {
+            ushort[,] res = new ushort[TIMES_TABLE_HEIGHT, TIMES_TABLE_WIDTH];
+            BinaryReader reader = new BinaryReader(rom);
+            rom.Seek(TIMES_TABLE_OFFSET, SeekOrigin.Begin);
+            for (int j = 0; j < TIMES_TABLE_HEIGHT; j++)
+            {
+                for (int i = 0; i < TIMES_TABLE_WIDTH; i++)
+                {
+                    res[j, i] = reader.ReadUInt16();
+                }
+            }
+            return res;
+        }
+        public void SetTimesTable(ushort[,] table)
+        {
+            BinaryWriter writer = new BinaryWriter(rom);
+            rom.Seek(TIMES_TABLE_OFFSET, SeekOrigin.Begin);
+            for (int j = 0; j < TIMES_TABLE_HEIGHT; j++)
+            {
+                for (int i = 0; i < TIMES_TABLE_WIDTH; i++)
+                {
+                    writer.Write(table[j, i]);
+                }
+            }
+        }
         public void Dispose()
         {
             rom.Close();

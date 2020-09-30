@@ -201,6 +201,20 @@ namespace KuruRomExtractor
                         Console.WriteLine("Changes detected in " + level.ToString() + ". The ROM has been updated.");
                 }
                 levels.SetNumberAreasTable(nbAreasTable);
+                // Times table
+                string times_filename = Path.Combine(workspace, "times_paradise.txt");
+                if (File.Exists(times_filename))
+                {
+                    string[] timesTable = File.ReadAllLines(times_filename);
+                    levels.SetTimesTable(Utils.LinesToUint16Table(timesTable, Levels.TIMES_TABLE_HEIGHT, Levels.TIMES_TABLE_WIDTH));
+                    Console.WriteLine("The times table has been updated.");
+                }
+                else
+                {
+                    ushort[,] timesTable = levels.GetTimesTable();
+                    File.WriteAllText(times_filename, Utils.Uint16TableToString(timesTable));
+                    Console.WriteLine("The times table has been exported.");
+                }
 
                 Console.WriteLine("All tasks terminated.");
                 levels.Dispose();
@@ -318,6 +332,20 @@ namespace KuruRomExtractor
                     levelNb++;
                 }
                 levels.SetNumberAreasTable(nbAreasTable);
+                // Times table
+                string times_filename = Path.Combine(workspace, "times.txt");
+                if (File.Exists(times_filename))
+                {
+                    string[] timesTable = File.ReadAllLines(times_filename);
+                    levels.SetTimesTable(Utils.LinesToUint16Table(timesTable, Levels.TIMES_TABLE_HEIGHT, Levels.TIMES_TABLE_WIDTH));
+                    Console.WriteLine("The times table has been updated.");
+                }
+                else
+                {
+                    ushort[,] timesTable = levels.GetTimesTable();
+                    File.WriteAllText(times_filename, Utils.Uint16TableToString(timesTable));
+                    Console.WriteLine("The times table has been exported.");
+                }
 
                 Console.WriteLine("All tasks terminated.");
                 levels.Dispose();
