@@ -24,6 +24,7 @@ namespace KuruLevelEditor
         private Desktop _lateralMenuDesktop;
         private SpecialItems _specialItemInterface = null;
         private ParadiseSpecialItems _paraSpecialItemInterface = null;
+        private TimesEditor _timesEditor = null;
         private PhysicalMapLogic _physicalMapLogic = null; // Only alive when the special object editor is opened
         private ParadisePhysicalMapLogic _paraPhysicalMapLogic = null; // Stays alive all the time the physical editor is opened
         private CustomInventories _inventories = null;
@@ -218,10 +219,38 @@ namespace KuruLevelEditor
             };
 
             grid.Widgets.Add(buttonEdit);
-
-            var buttonReset = new TextButton
+            // Edit times
+            var buttonEditTimesF = new TextButton
             {
                 GridColumn = 3,
+                GridRow = 0,
+                Text = "Edit times (in frame)",
+                Width = 150,
+                Height = 25
+            };
+            buttonEditTimesF.Click += (s, a) =>
+            {
+                _timesEditor = new TimesEditor(this, false);
+            };
+            grid.Widgets.Add(buttonEditTimesF);
+
+            var buttonEditTimesS = new TextButton
+            {
+                GridColumn = 3,
+                GridRow = 1,
+                Text = "Edit times (in cs)",
+                Width = 150,
+                Height = 25
+            };
+            buttonEditTimesS.Click += (s, a) =>
+            {
+                _timesEditor = new TimesEditor(this, true);
+            };
+            grid.Widgets.Add(buttonEditTimesS);
+            // Reset
+            var buttonReset = new TextButton
+            {
+                GridColumn = 4,
                 GridRow = 0,
                 Text = "Reset this map",
                 Width = 150,
@@ -260,7 +289,7 @@ namespace KuruLevelEditor
 
             var buttonResetAll = new TextButton
             {
-                GridColumn = 3,
+                GridColumn = 4,
                 GridRow = 1,
                 Text = "Reset ALL maps",
                 Width = 150,
@@ -288,7 +317,7 @@ namespace KuruLevelEditor
                 messageBox.ShowModal(_mainMenuDesktop);
             };
             grid.Widgets.Add(buttonResetAll);
-
+            // Build
             var buttonBuild = new TextButton
             {
                 GridColumn = 2,
@@ -644,6 +673,11 @@ namespace KuruLevelEditor
             }
         }
 
+        public void CloseTimesEditor()
+        {
+            _timesEditor = null;
+        }
+
         int _lastBonusId = -1;
         public void SetBonusLocation(int id, Point? currentLocation)
         {
@@ -812,7 +846,7 @@ namespace KuruLevelEditor
             else
             {
                 bool gridControls = mode != Mode.Loading && mode != Mode.Menu && !_lateralMenuDesktop.HasModalWidget
-                    && _specialItemInterface == null && _paraSpecialItemInterface == null;
+                    && _specialItemInterface == null && _paraSpecialItemInterface == null && _timesEditor == null;
                 MouseState ms = Mouse.GetState();
                 List<Controller.Action> actions = Controller.GetActionsGrid(ks, ms, gameTime);
                 foreach (Controller.Action action in actions)
@@ -852,13 +886,16 @@ namespace KuruLevelEditor
         {
             GraphicsDevice.Clear(Color.Black);
 
-            if (mode == Mode.Loading) {
+            if (mode == Mode.Loading)
+            {
                 Point center = new Point(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2);
-                Point location = new Point(center.X - Load.LoadingScreen.Width/2, center.Y - Load.LoadingScreen.Height / 2);
+                Point location = new Point(center.X - Load.LoadingScreen.Width / 2, center.Y - Load.LoadingScreen.Height / 2);
                 _spriteBatch.Begin();
                 _spriteBatch.Draw(Load.LoadingScreen, new Rectangle(location, Load.LoadingScreen.Bounds.Size), Color.White);
                 _spriteBatch.End();
             }
+            else if (_timesEditor != null)
+                _timesEditor.Render();
             else if (mode == Mode.Menu)
                 _mainMenuDesktop.Render();
             else if (_specialItemInterface != null)

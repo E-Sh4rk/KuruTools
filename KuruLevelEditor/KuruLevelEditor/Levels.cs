@@ -30,7 +30,7 @@ namespace KuruLevelEditor
                 foreach (string file in Directory.EnumerateFiles(LEVELS_DIR))
                 {
                     string name = Path.GetFileNameWithoutExtension(file);
-                    name = name.Substring(0, name.IndexOf('.'));
+                    name = name.Substring(0, Math.Max(name.IndexOf('.'), 0));
                     if (string.IsNullOrEmpty(name))
                         continue;
                     res.Add(name);
@@ -51,6 +51,11 @@ namespace KuruLevelEditor
         public static void DeleteAllLevels()
         {
             Directory.Delete(LEVELS_DIR, true);
+        }
+        public static string GetTimesPath()
+        {
+            return Settings.Paradise ? Path.Combine(LEVELS_DIR, "times_paradise.txt")
+                : Path.Combine(LEVELS_DIR, "times.txt");
         }
         public static string GetLevelPath(string name, MapType type)
         {

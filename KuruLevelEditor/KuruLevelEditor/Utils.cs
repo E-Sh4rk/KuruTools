@@ -91,6 +91,35 @@ namespace KuruLevelEditor
             }
             return ret;
         }*/
+
+        public static string Uint16TableToString(ushort[,] table)
+        {
+            StringBuilder res = new StringBuilder();
+            for (int j = 0; j < table.GetLength(0); j++)
+            {
+                for (int i = 0; i < table.GetLength(1); i++)
+                    res.Append(table[j, i].ToString().PadLeft(5, ' ') + " ");
+                res.Append("\n");
+            }
+            return res.ToString();
+        }
+
+        public static ushort[,] LinesToUint16Table(string[] lines, int height, int width)
+        {
+            ushort[,] res = new ushort[height, width];
+            try
+            {
+                for (int j = 0; j < Math.Min(lines.Length, height); j++)
+                {
+                    string[] elts = lines[j].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    for (int i = 0; i < Math.Min(elts.Length, width); i++)
+                        res[j, i] = Convert.ToUInt16(elts[i]);
+                }
+            }
+            catch { }
+            return res;
+        }
+
     }
     class OverflowingStack<T>
     {

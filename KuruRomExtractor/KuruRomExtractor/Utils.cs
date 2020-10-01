@@ -31,7 +31,6 @@ namespace KuruRomExtractor
             writer.Write(arr);
         }
 
-
         public static string Uint16TableToString(ushort[,] table)
         {
             StringBuilder res = new StringBuilder();
@@ -49,10 +48,10 @@ namespace KuruRomExtractor
             ushort[,] res = new ushort[height, width];
             try
             {
-                for (int j = 0; j < lines.Length; j++)
+                for (int j = 0; j < Math.Min(lines.Length, height); j++)
                 {
                     string[] elts = lines[j].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                    for (int i = 0; i < elts.Length; i++)
+                    for (int i = 0; i < Math.Min(elts.Length, width); i++)
                         res[j, i] = Convert.ToUInt16(elts[i]);
                 }
             }
