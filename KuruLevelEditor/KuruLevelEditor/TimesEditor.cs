@@ -113,10 +113,10 @@ namespace KuruLevelEditor
             Label labelExplanation = new Label()
             {
                 Id = "labelExplanation",
-                Text = "Please enter times for the ranks Trainee, Professor and Master.",
+                Text = "Please enter times for the ranks Trainee, Professor and Master. You must reset your SaveRAM for the changes to be visible in the leaderboard.",
                 GridColumn = 0,
                 GridRow = 0,
-                GridColumnSpan = 6
+                GridColumnSpan = 8
             };
             grid.Widgets.Add(labelExplanation);
 
