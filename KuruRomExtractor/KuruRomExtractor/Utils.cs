@@ -46,16 +46,16 @@ namespace KuruRomExtractor
         public static ushort[,] LinesToUint16Table(string[] lines, int height, int width)
         {
             ushort[,] res = new ushort[height, width];
-            try
+
+            for (int j = 0; j < Math.Min(lines.Length, height); j++)
             {
-                for (int j = 0; j < Math.Min(lines.Length, height); j++)
+                string[] elts = lines[j].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                for (int i = 0; i < Math.Min(elts.Length, width); i++)
                 {
-                    string[] elts = lines[j].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                    for (int i = 0; i < Math.Min(elts.Length, width); i++)
-                        res[j, i] = Convert.ToUInt16(elts[i]);
+                    try { res[j, i] = Convert.ToUInt16(elts[i]); }
+                    catch { }
                 }
             }
-            catch { }
             return res;
         }
     }

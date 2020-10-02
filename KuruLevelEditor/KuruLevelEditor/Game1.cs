@@ -238,7 +238,7 @@ namespace KuruLevelEditor
             {
                 GridColumn = 3,
                 GridRow = 1,
-                Text = "Edit times (in cs)",
+                Text = "Edit times",
                 Width = 150,
                 Height = 25
             };

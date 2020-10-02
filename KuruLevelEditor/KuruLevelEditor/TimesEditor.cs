@@ -29,29 +29,47 @@ namespace KuruLevelEditor
         {
             string[] levels = Levels.AllLevels;
             int nbLevels = levels.Length;
-            string[] normalLines = normalLevels.Text.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
-            ushort[,] normal = Utils.LinesToUint16Table(normalLines, nbLevels, NUMBER_TIMES_PER_LEVEL);
-            string[] easyLines = easyLevels.Text.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
-            ushort[,] easy = Utils.LinesToUint16Table(easyLines, easyLines.Length, NUMBER_TIMES_PER_LEVEL);
-            ushort[,] table = new ushort[nbLevels + easyLines.Length, NUMBER_TIMES_PER_LEVEL];
+            string[] normalLines = Utils.SplitNonEmptyLines(normalLevels.Text);
+            uint[,] normal = Utils.LinesToUintTable(normalLines, nbLevels, NUMBER_TIMES_PER_LEVEL, inSeconds);
+            string[] easyLines = Utils.SplitNonEmptyLines(easyLevels.Text);
+            uint[,] easy = Utils.LinesToUintTable(easyLines, easyLines.Length, NUMBER_TIMES_PER_LEVEL, inSeconds);
+            uint[,] table = new uint[nbLevels + easyLines.Length, NUMBER_TIMES_PER_LEVEL];
             for (int j = 0; j < table.GetLength(0); j++)
             {
                 for (int i = 0; i < table.GetLength(1); i++)
-                    table[j, i] = j >= nbLevels ? easy[j-nbLevels, i] : normal[j, i];
+                {
+                    table[j, i] = j >= nbLevels ? easy[j - nbLevels, i] : normal[j, i];
+                    if (inSeconds)
+                        table[j, i] = (ushort)Math.Ceiling(table[j, i] * 60 / 100.0); // Cs to frame
+                }
+                    
             }
-            // TODO: isSeconds
-            string result = Utils.Uint16TableToString(table);
+            string result = Utils.UintTableToString(table, false);
             File.WriteAllText(Levels.GetTimesPath(), result);
         }
 
         void loadData()
         {
-            // TODO: inSeconds
             normalLevels.Text = "";
             easyLevels.Text = "";
             try
             {
-                string[] lines = File.ReadAllLines(Levels.GetTimesPath());
+                string[] lines = Utils.SplitNonEmptyLines(File.ReadAllText(Levels.GetTimesPath()));
+                uint[,] table = Utils.LinesToUintTable(lines, lines.Length, NUMBER_TIMES_PER_LEVEL, false);
+
+                if (inSeconds)
+                {
+                    for (int y = 0; y < table.GetLength(0); y++)
+                    {
+                        for (int x = 0; x < table.GetLength(1); x++)
+                        {
+                            table[y, x] = (ushort)(table[y, x] * 100 / 60.0); // Frame to cs
+                        }
+                    }
+                }
+
+                lines = Utils.SplitNonEmptyLines(Utils.UintTableToString(table, inSeconds));
+
                 int i = 0;
                 string[] levels = Levels.AllLevels;
                 foreach (string level in levels)

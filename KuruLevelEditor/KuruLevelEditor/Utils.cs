@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
+using System.Net;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
@@ -92,31 +94,65 @@ namespace KuruLevelEditor
             return ret;
         }*/
 
-        public static string Uint16TableToString(ushort[,] table)
+        static string TimeToStr(uint cs)
+        {
+            uint min = cs / 6000;
+            cs = cs % 6000;
+            uint sec = cs / 100;
+            cs = cs % 100;
+            return string.Format("{0:D2}'{1:D2}''{2:D2}", min, sec, cs);
+        }
+
+        static uint StrToTime(string t)
+        {
+            t = t.Replace("\"", "''");
+            int i1 = t.IndexOf("'");
+            int i2 = t.LastIndexOf("'");
+            string min = t.Substring(0, i1);
+            string sec = t.Substring(i1 + 1, i2 - i1 - 2);
+            string cs = t.Substring(i2 + 1);
+            return Convert.ToUInt32(min) * 6000 + Convert.ToUInt32(sec) * 100 + Convert.ToUInt32(cs);
+        }
+
+        public static string UintTableToString(uint[,] table, bool timeNotation)
         {
             StringBuilder res = new StringBuilder();
             for (int j = 0; j < table.GetLength(0); j++)
             {
                 for (int i = 0; i < table.GetLength(1); i++)
-                    res.Append(table[j, i].ToString().PadLeft(5, ' ') + " ");
+                {
+                    if (timeNotation)
+                        res.Append(TimeToStr(table[j, i]) + "   ");
+                    else
+                        res.Append(table[j, i].ToString().PadLeft(5, ' ') + " ");
+                }
                 res.Append("\n");
             }
             return res.ToString();
         }
 
-        public static ushort[,] LinesToUint16Table(string[] lines, int height, int width)
+        public static string[] SplitNonEmptyLines(string txt)
         {
-            ushort[,] res = new ushort[height, width];
-            try
+            return txt.Split(new string[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+        }
+
+        public static uint[,] LinesToUintTable(string[] lines, int height, int width, bool timeNotation)
+        {
+            uint[,] res = new uint[height, width];
+            for (int j = 0; j < Math.Min(lines.Length, height); j++)
             {
-                for (int j = 0; j < Math.Min(lines.Length, height); j++)
-                {
-                    string[] elts = lines[j].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                    for (int i = 0; i < Math.Min(elts.Length, width); i++)
-                        res[j, i] = Convert.ToUInt16(elts[i]);
+                string[] elts = lines[j].Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                for (int i = 0; i < Math.Min(elts.Length, width); i++) {
+                    try
+                    {
+                        if (timeNotation)
+                            res[j, i] = StrToTime(elts[i]);
+                        else
+                            res[j, i] = Convert.ToUInt32(elts[i]);
+                    }
+                    catch { }
                 }
             }
-            catch { }
             return res;
         }
 
