@@ -62,10 +62,11 @@ namespace KuruRomExtractor
             b.UnlockBits(bmpData);
             return b;
         }
-        public static Bitmap PreviewOf8bppTilesData(byte[] data, Color[] palette = null, Color? treatFirstColorAs = null)
+
+        public static Bitmap PreviewOf8bppTilesData(byte[] data, int width, Color[] palette = null, Color? treatFirstColorAs = null)
         {
-            int height = data.Length / WIDTH;
-            var b = new Bitmap(WIDTH, height, PixelFormat.Format8bppIndexed);
+            int height = data.Length / width;
+            var b = new Bitmap(width, height, PixelFormat.Format8bppIndexed);
 
             ColorPalette ncp = b.Palette;
             if (palette == null)
@@ -92,7 +93,7 @@ namespace KuruRomExtractor
             int bytes = bmpData.Stride * b.Height;
             var rgbValues = new byte[bytes];
 
-            int nb_tiles_per_row = WIDTH / 8;
+            int nb_tiles_per_row = width / 8;
             for (int i = 0; i < data.Length / 64; i++)
             {
                 int x = (i % nb_tiles_per_row) * 8;
@@ -101,7 +102,7 @@ namespace KuruRomExtractor
                 {
                     int x2 = x + (j % 8);
                     int y2 = y + (j / 8);
-                    rgbValues[y2 * WIDTH + x2] = data[i * 64 + j];
+                    rgbValues[y2 * width + x2] = data[i * 64 + j];
                 }
             }
 
@@ -109,6 +110,12 @@ namespace KuruRomExtractor
             b.UnlockBits(bmpData);
             return b;
         }
+
+        public static Bitmap PreviewOf8bppTilesData(byte[] data, Color[] palette = null, Color? treatFirstColorAs = null)
+        {
+            return PreviewOf8bppTilesData(data, 256, palette, treatFirstColorAs);
+        }
+
     }
     class Palette
     {

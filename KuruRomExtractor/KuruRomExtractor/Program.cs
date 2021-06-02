@@ -113,6 +113,15 @@ namespace KuruRomExtractor
                             }
                         }
                     }
+
+                    Console.WriteLine("Extracting overworld background...");
+                    Palette overworldPalette = new Palette(levels.ExtractOverworldBGPaletteData());
+                    byte[] overworldData = levels.ExtractOverworldBGTiles();
+                    List<Color> fullOverworldPalette = new List<Color>();
+                    foreach (Color[] colors in overworldPalette.Colors)
+                        fullOverworldPalette.AddRange(colors);
+                    Bitmap overworld_bmp8bpp = Tiles.PreviewOf8bppTilesData(overworldData, ParadiseLevels.OVERWORLD_BG_WIDTH, fullOverworldPalette.ToArray(), Color.Transparent);
+                    overworld_bmp8bpp.Save(Path.Combine(extractTiles, "overworld.png"));
                 }
 
                 Directory.CreateDirectory(workspace);
@@ -206,7 +215,7 @@ namespace KuruRomExtractor
                 if (File.Exists(times_filename))
                 {
                     string[] timesTable = File.ReadAllLines(times_filename);
-                    levels.SetTimesTable(Utils.LinesToUint16Table(timesTable, Levels.TIMES_TABLE_HEIGHT, Levels.TIMES_TABLE_WIDTH));
+                    levels.SetTimesTable(Utils.LinesToUint16Table(timesTable, ParadiseLevels.TIMES_TABLE_HEIGHT, ParadiseLevels.TIMES_TABLE_WIDTH));
                     Console.WriteLine("The times table has been updated.");
                 }
                 else
@@ -214,6 +223,20 @@ namespace KuruRomExtractor
                     ushort[,] timesTable = levels.GetTimesTable();
                     File.WriteAllText(times_filename, Utils.Uint16TableToString(timesTable));
                     Console.WriteLine("The times table has been exported.");
+                }
+
+                string overworld_markers_filename = Path.Combine(workspace, "overworld_markers_paradise.txt");
+                if (File.Exists(overworld_markers_filename))
+                {
+                    string[] overworldMarkerDataTable = File.ReadAllLines(overworld_markers_filename);
+                    levels.SetOverworldMarkers(Utils.LinesToUint16Table(overworldMarkerDataTable, ParadiseLevels.OVERWORLD_MARKER_COUNT, ParadiseLevels.OVERWORLD_MARKER_PROPERTY_COUNT));
+                    Console.WriteLine("The overworld marker data has been updated.");
+                }
+                else
+                {
+                    ushort[,] overworldMarkerDataTable = levels.GetOverworldMarkers();
+                    File.WriteAllText(overworld_markers_filename, Utils.Uint16TableToString(overworldMarkerDataTable));
+                    Console.WriteLine("The overworld marker data has been exported.");
                 }
 
                 Console.WriteLine("All tasks terminated.");
