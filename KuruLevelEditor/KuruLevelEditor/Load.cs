@@ -35,6 +35,8 @@ namespace KuruLevelEditor
 		public static Texture2D ConveyorV;
 		public static Texture2D ConveyorDiag;
 
+		public static Texture2D OverworldMap;
+
 		public static SpriteFont Monospace;
 
 		public struct WorldAndType
@@ -145,5 +147,13 @@ namespace KuruLevelEditor
 			}
 
 		}
+		public static void LoadOverworldMap(GraphicsDevice graphics)
+        {
+			string path = Levels.GetOverworldPath();
+			FileStream fileStream = new FileStream(path, FileMode.Open);
+			Texture2D map = Texture2D.FromStream(graphics, fileStream);
+			fileStream.Close();
+			OverworldMap = map;
+        }
 	}
 }

@@ -57,6 +57,10 @@ namespace KuruLevelEditor
             return Settings.Paradise ? Path.Combine(LEVELS_DIR, "times_paradise.txt")
                 : Path.Combine(LEVELS_DIR, "times.txt");
         }
+        public static string GetOverworldPath()
+        {
+            return Path.Combine(TILES_DIR, "overworld.png");
+        }
         public static string GetLevelPath(string name, MapType type)
         {
             return Path.Combine(LEVELS_DIR, name + "." + MAP_TYPE_STR[(int)type] + ".txt");

@@ -19,12 +19,14 @@ namespace KuruLevelEditor
         enum Connection { East, West, North, South}
         enum Exit { Normal, Secret}
         enum Coords { X, Y}
+        enum DoorKey { Neither, Door, Key}
 
         private TextBox[] connections = new TextBox[4];
         private Label labelConnections;
         private TextBox[] exits = new TextBox[2];
         private TextBox[] coords = new TextBox[2];
-        private TextBox[] doorKey;
+        private TextBox doorKey;
+        private ComboBox doorKeyCombo;
 
         void saveChanges()
         {
@@ -33,12 +35,14 @@ namespace KuruLevelEditor
 
         void loadData()
         {
-
+            Load.LoadOverworldMap(_game.GraphicsDevice);
         }
 
         public OverworldEditor(Game1 game)
         {
             _game = game;
+
+            loadData();
 
             Panel panel = new Panel()
             {
@@ -196,6 +200,33 @@ namespace KuruLevelEditor
                 grid.Widgets.Add(coordBox);
             }
 
+            // Door/Key
+            doorKey = new TextBox()
+            {
+                GridColumn = 8,
+                GridRow = 2,
+                Width = 90,
+                Readonly = true
+            };
+            grid.Widgets.Add(doorKey);
+
+            doorKeyCombo = new ComboBox
+            {
+                GridColumn = 8,
+                GridRow = 1,
+                Width = 90,
+                SelectedIndex = (int)DoorKey.Neither
+            };
+            for (int i = 0; i < 3; i++)
+            {
+                doorKeyCombo.Items.Add(new ListItem(Enum.GetNames(typeof(DoorKey))[i], Color.White));
+            }
+            doorKeyCombo.SelectedIndexChanged += (s, a) =>
+            {
+                doorKey.Readonly = doorKeyCombo.SelectedIndex == (int)DoorKey.Neither;
+            };
+            grid.Widgets.Add(doorKeyCombo);
+
             // --- SUBMIT ---
 
             var buttonSaveQuit = new TextButton
@@ -228,6 +259,14 @@ namespace KuruLevelEditor
             panel.Widgets.Add(grid);
             _desktop = new Desktop();
             _desktop.Root = panel;
+        }
+
+        public void Draw(SpriteBatch spriteBatch)
+        {
+            Texture2D map = Load.OverworldMap;
+            spriteBatch.Begin();
+            spriteBatch.Draw(map, new Rectangle(0, 300, map.Width, map.Height), Color.White);
+            spriteBatch.End();
         }
 
         public void Render()
