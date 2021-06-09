@@ -926,8 +926,8 @@ namespace KuruLevelEditor
                 _timesEditor.Render();
             else if (_overworldEditor != null)
             {
-                _overworldEditor.Render();
                 _overworldEditor.Draw(_spriteBatch);
+                _overworldEditor.Render();
             }
             else if (mode == Mode.Menu)
                 _mainMenuDesktop.Render();
