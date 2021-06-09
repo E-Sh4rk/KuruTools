@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Myra.Graphics2D.TextureAtlases;
 using Myra.Graphics2D.Brushes;
 using Myra.Graphics2D.UI;
 using System;
@@ -15,6 +16,7 @@ namespace KuruLevelEditor
     {
         private Desktop _desktop;
         private Game1 _game;
+        private RenderTarget2D _renderTarget;
 
         enum Connection { East, West, North, South}
         enum Exit { Normal, Secret}
@@ -256,6 +258,25 @@ namespace KuruLevelEditor
             };
             grid.Widgets.Add(buttonCancel);
 
+            _renderTarget = new RenderTarget2D(_game.GraphicsDevice, Load.OverworldMap.Width*2, Load.OverworldMap.Height*2);
+
+            Image img = new Image()
+            {
+                Renderable = new TextureRegion(_renderTarget)
+            };
+            ScrollViewer mapScroll = new ScrollViewer()
+            {
+                GridColumn = 0,
+                GridRow = 3,
+                GridColumnSpan = 10,
+                Padding = new Myra.Graphics2D.Thickness(0, 200, 0, 0),
+                ShowHorizontalScrollBar = true,
+                ShowVerticalScrollBar = false
+            };
+            mapScroll.Content = img;
+
+            panel.Widgets.Add(mapScroll);
+
             panel.Widgets.Add(grid);
             _desktop = new Desktop();
             _desktop.Root = panel;
@@ -263,10 +284,13 @@ namespace KuruLevelEditor
 
         public void Draw(SpriteBatch spriteBatch)
         {
+            _game.GraphicsDevice.SetRenderTarget(_renderTarget);
+            _game.GraphicsDevice.Clear(Color.Transparent);
             Texture2D map = Load.OverworldMap;
             spriteBatch.Begin();
-            spriteBatch.Draw(map, new Rectangle(0, 300, map.Width, map.Height), Color.White);
+            spriteBatch.Draw(map, new Rectangle(0, 0, map.Width*2, map.Height*2), Color.White);
             spriteBatch.End();
+            _game.GraphicsDevice.SetRenderTarget(null);
         }
 
         public void Render()
