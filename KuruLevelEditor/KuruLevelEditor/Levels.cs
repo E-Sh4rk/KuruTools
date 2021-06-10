@@ -72,6 +72,10 @@ namespace KuruLevelEditor
             dict.Add("magicHatBeaten", Path.Combine(TILES_DIR, "overworld_magicHatBeaten.png"));
             return dict;
         }
+        public static string GetOverworldMarkerPath()
+        {
+            return Path.Combine(LEVELS_DIR, "overworld_markers_paradise.txt");
+        }
         public static string GetLevelPath(string name, MapType type)
         {
             return Path.Combine(LEVELS_DIR, name + "." + MAP_TYPE_STR[(int)type] + ".txt");
