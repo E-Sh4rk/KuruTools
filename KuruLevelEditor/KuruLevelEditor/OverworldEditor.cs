@@ -38,6 +38,7 @@ namespace KuruLevelEditor
         void loadData()
         {
             Load.LoadOverworldMap(_game.GraphicsDevice);
+            Load.LoadOverworldObjects(_game.GraphicsDevice);
         }
 
         public OverworldEditor(Game1 game)

@@ -61,6 +61,17 @@ namespace KuruLevelEditor
         {
             return Path.Combine(TILES_DIR, "overworld.png");
         }
+        public static Dictionary<string, string> GetOverworldObjectsPaths()
+        {
+            Dictionary<string, string> dict = new Dictionary<string, string>();
+            dict.Add("connectorDot", Path.Combine(TILES_DIR, "overworld_connectorDot.png"));
+            dict.Add("blueDot", Path.Combine(TILES_DIR, "overworld_blueDot.png"));
+            dict.Add("orangeDot", Path.Combine(TILES_DIR, "overworld_orangeDot.png"));
+            dict.Add("star", Path.Combine(TILES_DIR, "overworld_star.png"));
+            dict.Add("magicHatUnbeaten", Path.Combine(TILES_DIR, "overworld_magicHatUnbeaten.png"));
+            dict.Add("magicHatBeaten", Path.Combine(TILES_DIR, "overworld_magicHatBeaten.png"));
+            return dict;
+        }
         public static string GetLevelPath(string name, MapType type)
         {
             return Path.Combine(LEVELS_DIR, name + "." + MAP_TYPE_STR[(int)type] + ".txt");

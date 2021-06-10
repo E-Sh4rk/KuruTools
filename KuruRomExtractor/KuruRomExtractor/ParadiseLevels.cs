@@ -116,6 +116,7 @@ namespace KuruRomExtractor
         const int OVERWORLD_BG_HEIGHT = 200;
         const int OVERWORLD_BG_TILES = 0x149D24;
         const int OVERWORLD_BG_PALETTE = 0x19BDA4;
+        const int OVERWORLD_FG_PALETTE = 0x19C1A4;
 
         const int COMMON_PALETTE_11 = 0x1C5BF0;
         const int COMMON_PALETTE_12 = 0x1C5CF0;
@@ -136,6 +137,37 @@ namespace KuruRomExtractor
         const int OVERWORLD_MARKER_PROGRESSION_OFFSET = 0x2E220;
         const int OVERWORLD_MARKER_COORDS_OFFSET = 0x2E28C;
         const int OVERWORLD_MARKER_DOOR_KEY_ASSOCIATIONS_OFFSET = 0x2E38E;
+
+        public class OverworldObject
+        {
+            public static readonly OverworldObject CONNECTOR_DOT = new OverworldObject("connectorDot", 0x29C6D4, 1, 8, 8);
+            public static readonly OverworldObject BLUE_DOT = new OverworldObject("blueDot", 0x29C6FC, 1, 16, 16);
+            public static readonly OverworldObject ORANGE_DOT = new OverworldObject("orangeDot", 0x29C784, 1, 16, 16);
+            public static readonly OverworldObject STAR = new OverworldObject("star", 0x29C80C, 1, 16, 16);
+            public static readonly OverworldObject MAGIC_HAT_UNBEATEN = new OverworldObject("magicHatUnbeaten", 0x29C894, 3, 32, 32);
+            public static readonly OverworldObject MAGIC_HAT_BEATEN = new OverworldObject("magicHatBeaten", 0x29CA9C, 3, 32, 32);
+
+            public static IEnumerable<OverworldObject> Values
+            {
+                get
+                {
+                    yield return CONNECTOR_DOT;
+                    yield return BLUE_DOT;
+                    yield return ORANGE_DOT;
+                    yield return STAR;
+                    yield return MAGIC_HAT_UNBEATEN;
+                    yield return MAGIC_HAT_BEATEN;
+                }
+            }
+            OverworldObject(string name, int offset, int paletteIndex, int width, int height) =>
+                (Name, Offset, PaletteIndex, Width, Height) = (name, offset, paletteIndex, width, height);
+
+            public string Name { get; private set; }
+            public int Offset { get; private set; }
+            public int PaletteIndex { get; private set; }
+            public int Width { get; private set; }
+            public int Height { get; private set; }
+        }
 
         FileStream rom;
         ParadiseLevelEntry[] level_entries;
@@ -558,6 +590,16 @@ namespace KuruRomExtractor
             return res;
         }
 
+        public byte[] ExtractGraphicalData(int offset, int size)
+        {
+            byte[] res = new byte[size];
+            BinaryWriter writer = new BinaryWriter(new MemoryStream(res));
+            BinaryReader reader = new BinaryReader(rom);
+            rom.Seek(offset, SeekOrigin.Begin);
+            writer.Write(reader.ReadBytes(res.Length));
+            return res;
+        }
+
         public byte[] ExtractOverworldBGTiles()
         {
             byte[] res = new byte[OVERWORLD_BG_HEIGHT * OVERWORLD_BG_WIDTH];
@@ -587,16 +629,17 @@ namespace KuruRomExtractor
             return res;
         }
         
-        public byte[] ExtractOverworldBGPaletteData()
+        public byte[] ExtractOverworldPaletteData(bool background)
         {
             byte[] res = new byte[16 * COLORSET_SIZE];
             BinaryWriter writer = new BinaryWriter(new MemoryStream(res));
             BinaryReader reader = new BinaryReader(rom);
-            rom.Seek(OVERWORLD_BG_PALETTE, SeekOrigin.Begin);
+            rom.Seek(background ? OVERWORLD_BG_PALETTE : OVERWORLD_FG_PALETTE, SeekOrigin.Begin);
             writer.Write(reader.ReadBytes(res.Length));
             writer.Close();
             return res;
         }
+
         public byte[] GetNumberAreasTable()
         {
             byte[] res = new byte[NUMBER_AREAS_TABLE_SIZE];

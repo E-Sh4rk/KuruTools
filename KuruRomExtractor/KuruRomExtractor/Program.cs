@@ -115,13 +115,23 @@ namespace KuruRomExtractor
                     }
 
                     Console.WriteLine("Extracting overworld background...");
-                    Palette overworldPalette = new Palette(levels.ExtractOverworldBGPaletteData());
+                    Palette overworldPalette = new Palette(levels.ExtractOverworldPaletteData(true));
                     byte[] overworldData = levels.ExtractOverworldBGTiles();
                     List<Color> fullOverworldPalette = new List<Color>();
                     foreach (Color[] colors in overworldPalette.Colors)
                         fullOverworldPalette.AddRange(colors);
                     Bitmap overworld_bmp8bpp = Tiles.PreviewOf8bppTilesData(overworldData, ParadiseLevels.OVERWORLD_BG_WIDTH, fullOverworldPalette.ToArray(), Color.Transparent);
                     overworld_bmp8bpp.Save(Path.Combine(extractTiles, "overworld.png"));
+
+                    Console.WriteLine("Extracting overworld graphics...");
+                    Palette overworldPaletteFG = new Palette(levels.ExtractOverworldPaletteData(false));
+
+                    foreach (ParadiseLevels.OverworldObject obj in ParadiseLevels.OverworldObject.Values)
+                    {
+                        byte[] graphicData = levels.ExtractGraphicalData(obj.Offset, obj.Width * obj.Height / 2);
+                        Bitmap object_bmp4bpp = Tiles.PreviewOfTilesData(graphicData, obj.Width, overworldPaletteFG.Colors[obj.PaletteIndex], Color.Transparent);
+                        object_bmp4bpp.Save(Path.Combine(extractTiles, "overworld_" + obj.Name + ".png"));
+                    }
                 }
 
                 Directory.CreateDirectory(workspace);
