@@ -10,6 +10,8 @@ using System.Net;
 using System.Resources;
 using System.Text;
 using System.Linq;
+using Microsoft.Xna.Framework.Input;
+using System.Diagnostics;
 
 namespace KuruLevelEditor
 {
@@ -19,9 +21,12 @@ namespace KuruLevelEditor
         private Game1 _game;
         private RenderTarget2D _renderTarget;
 
+        public const int PADDING = 20;
+
         public const int SCALE = 2;
         public const int NUM_MARKERS = 54;
         public const int FIRST_MAGIC_HAT = 43;
+        public const int VERTICAL_PANEL_HEIGHT = 200;
 
         enum Connection { East, West, North, South}
         enum Exit { Normal, Secret}
@@ -35,6 +40,10 @@ namespace KuruLevelEditor
         private TextBox[] coords = new TextBox[2];
         private TextBox doorKey;
         private ComboBox doorKeyCombo;
+        private ScrollViewer mapScroll;
+
+        private Rectangle clickableBounds;
+        private int selectedMarker = -1;
 
         private class OverworldObject
         {
@@ -43,6 +52,13 @@ namespace KuruLevelEditor
             public ushort X, Y;
             public byte DoorKey;
             public MarkerType type;
+
+            public Rectangle rect;
+            public Texture2D img;
+
+            public int xOffset;
+            public int yOffset;
+            public int size;
 
             public OverworldObject(uint[] data, MarkerType type)
             {
@@ -56,24 +72,20 @@ namespace KuruLevelEditor
                 Y = (ushort)data[7];
                 DoorKey = (byte)data[8];
                 this.type = type;
-            }
 
-            public Rectangle rect()
-            {
-                int xOffset = (type == MarkerType.NormalLevel) ? -8 : -16; // Internal offsets in-game for displaying markers
-                int yOffset = (type == MarkerType.NormalLevel) ? -8 : -14;
-                int size = (type == MarkerType.NormalLevel) ? 16 : 32;
-                return new Rectangle((X + xOffset) * SCALE ,(Y + yOffset) * SCALE, size * SCALE, size * SCALE);
-            }
+                //Rect
+                xOffset = (type == MarkerType.NormalLevel) ? -8 : -16; // Internal offsets in-game for displaying markers
+                yOffset = (type == MarkerType.NormalLevel) ? -8 : -14;
+                size = (type == MarkerType.NormalLevel) ? 16 : 32;
+                rect = new Rectangle((X + xOffset) * SCALE, (Y + yOffset) * SCALE, size * SCALE, size * SCALE);
 
-            public Texture2D img()
-            {
-                return (type == MarkerType.NormalLevel) ? Load.Star : Load.MagicHatUnbeaten;
+                //Image
+                img = (type == MarkerType.NormalLevel) ? Load.Star : Load.MagicHatUnbeaten;
             }
 
             public void Draw(SpriteBatch spriteBatch)
             {
-                spriteBatch.Draw(img(), rect(), Color.White);
+                spriteBatch.Draw(img, rect, Color.White);
             }
         }
 
@@ -112,7 +124,7 @@ namespace KuruLevelEditor
             Panel panel = new Panel()
             {
                 Background = new SolidBrush(Color.Black),
-                Padding = new Myra.Graphics2D.Thickness(20, 20, 20, 20)
+                Padding = new Myra.Graphics2D.Thickness(PADDING, PADDING, PADDING, PADDING)
             };
 
             var grid = new Grid
@@ -321,18 +333,22 @@ namespace KuruLevelEditor
             };
             grid.Widgets.Add(buttonCancel);
 
+            clickableBounds = new Rectangle(PADDING, VERTICAL_PANEL_HEIGHT + PADDING, 
+                _game.GraphicsDevice.Viewport.Width - 2 * PADDING,
+                Load.OverworldMap.Height * SCALE);
+
             _renderTarget = new RenderTarget2D(_game.GraphicsDevice, Load.OverworldMap.Width*SCALE, Load.OverworldMap.Height*SCALE);
 
             Image img = new Image()
             {
                 Renderable = new TextureRegion(_renderTarget)
             };
-            ScrollViewer mapScroll = new ScrollViewer()
+            mapScroll = new ScrollViewer()
             {
                 GridColumn = 0,
                 GridRow = 3,
                 GridColumnSpan = 10,
-                Padding = new Myra.Graphics2D.Thickness(0, 200, 0, 0),
+                Padding = new Myra.Graphics2D.Thickness(0, VERTICAL_PANEL_HEIGHT, 0, 0),
                 ShowHorizontalScrollBar = true,
                 ShowVerticalScrollBar = false
             };
@@ -343,6 +359,44 @@ namespace KuruLevelEditor
             panel.Widgets.Add(grid);
             _desktop = new Desktop();
             _desktop.Root = panel;
+        }
+
+        bool mouse_move_is_selecting = false;
+        public void Update(MouseState mouse)
+        {
+            if (mouse.LeftButton == ButtonState.Released)
+            {
+                if (mouse_move_is_selecting)
+                {
+                    //Translate mouse position to coords within the scroll viewer (+ scale it)
+                    Point p = new Point(mouse.X, mouse.Y) + mapScroll.ScrollPosition - clickableBounds.Location;
+                    if (clickableBounds.Contains(new Point(mouse.X, mouse.Y)))
+                    {
+                        //Pick a marker to select, if any
+                        Debug.WriteLine(p.ToString());
+                        bool found = false;
+                        for (int i = 0; i < markers.Length; i++)
+                        {
+                            if (markers[i].rect.Contains(p))
+                            {
+                                Debug.WriteLine("found");
+                                selectedMarker = i;
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (!found)
+                        {
+                            selectedMarker = -1;
+                        }
+                    }
+                    mouse_move_is_selecting = false;
+                }
+            }
+            else if (mouse.LeftButton == ButtonState.Pressed)
+            {
+                mouse_move_is_selecting = true;
+            }
         }
 
         public void Draw(SpriteBatch spriteBatch)
@@ -360,7 +414,7 @@ namespace KuruLevelEditor
                 {
                     DrawConnectorDots(spriteBatch, marker.X, markers[marker.East].X, marker.Y, markers[marker.East].Y);
                 }*/
-                // A quirk of all the level markers in Paradise - they all have 1 westward connection!
+                // A quirk of all the level markers in Paradise - they all have 1 westward connection to the previous level that unlocks it (except the first level)!
                 if (marker.West >= 0 && marker.West < NUM_MARKERS)
                 {
                     DrawConnectorDots(spriteBatch, marker.X, markers[marker.West].X, marker.Y, markers[marker.West].Y);
@@ -379,6 +433,13 @@ namespace KuruLevelEditor
             foreach (OverworldObject marker in markers)
             {
                 marker.Draw(spriteBatch);
+            }
+
+            if (selectedMarker != -1)
+            {
+                OverworldObject m = markers[selectedMarker];
+                Texture2D sm = Load.SelectedMarker;
+                spriteBatch.Draw(sm, new Rectangle((m.X - 2 + m.xOffset) * SCALE, (m.Y - 2 + m.yOffset) * SCALE, (m.size + 4) * SCALE, (m.size + 4) * SCALE), Color.White);
             }
 
             spriteBatch.End();

@@ -565,6 +565,18 @@
 /processorParam:TextureFormat=Color
 /build:../../Assets/roller_catcher.png;roller_catcher.png
 
+#begin ../../Assets/selected_marker.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:../../Assets/selected_marker.png;selected_marker.png
+
 #begin ../../Assets/shooter.png
 /importer:TextureImporter
 /processor:TextureProcessor

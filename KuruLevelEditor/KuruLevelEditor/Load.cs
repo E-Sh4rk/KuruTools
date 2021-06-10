@@ -43,6 +43,8 @@ namespace KuruLevelEditor
 		public static Texture2D MagicHatUnbeaten;
 		public static Texture2D MagicHatBeaten;
 
+		public static Texture2D SelectedMarker;
+
 
 		public static SpriteFont Monospace;
 
@@ -94,6 +96,7 @@ namespace KuruLevelEditor
 				ConveyorV = Content.Load<Texture2D>("conveyor_v");
 				ConveyorH = Content.Load<Texture2D>("conveyor_h");
 				ConveyorDiag = Content.Load<Texture2D>("conveyor_diag");
+				SelectedMarker = Content.Load<Texture2D>("selected_marker");
 				Monospace = Content.Load<SpriteFont>("monospace");
 				return true;
 			}

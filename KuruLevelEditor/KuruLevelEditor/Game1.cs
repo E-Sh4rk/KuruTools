@@ -904,6 +904,9 @@ namespace KuruLevelEditor
                 {
                     editor.Update(gameTime, ms, ks);
                     sset.Update(ms);
+                } else if (_overworldEditor != null)
+                {
+                    _overworldEditor.Update(ms);
                 }
             }
 
