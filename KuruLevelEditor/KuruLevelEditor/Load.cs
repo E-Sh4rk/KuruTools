@@ -35,6 +35,17 @@ namespace KuruLevelEditor
 		public static Texture2D ConveyorV;
 		public static Texture2D ConveyorDiag;
 
+		public static Texture2D OverworldMap;
+		public static Texture2D ConnectorDot;
+		public static Texture2D BlueDot;
+		public static Texture2D OrangeDot;
+		public static Texture2D Star;
+		public static Texture2D MagicHatUnbeaten;
+		public static Texture2D MagicHatBeaten;
+
+		public static Texture2D SelectedMarker;
+
+
 		public static SpriteFont Monospace;
 
 		public struct WorldAndType
@@ -49,7 +60,6 @@ namespace KuruLevelEditor
 			public readonly string world;
 		}
 		public static Dictionary<WorldAndType, Texture2D[]> Tiles { get; private set; }
-
 
 		public static bool LoadFixedContent(ContentManager Content)
         {
@@ -86,6 +96,7 @@ namespace KuruLevelEditor
 				ConveyorV = Content.Load<Texture2D>("conveyor_v");
 				ConveyorH = Content.Load<Texture2D>("conveyor_h");
 				ConveyorDiag = Content.Load<Texture2D>("conveyor_diag");
+				SelectedMarker = Content.Load<Texture2D>("selected_marker");
 				Monospace = Content.Load<SpriteFont>("monospace");
 				return true;
 			}
@@ -145,5 +156,29 @@ namespace KuruLevelEditor
 			}
 
 		}
+		public static Texture2D GetImage(GraphicsDevice graphics, string path)
+        {
+			FileStream fileStream = new FileStream(path, FileMode.Open);
+			Texture2D map = Texture2D.FromStream(graphics, fileStream);
+			fileStream.Close();
+			return map;
+		}
+		public static void LoadOverworldMap(GraphicsDevice graphics)
+        {
+			string path = Levels.GetOverworldPath();
+			Texture2D map = GetImage(graphics, path);
+			OverworldMap = map;
+        }
+
+		public static void LoadOverworldObjects(GraphicsDevice graphics)
+        {
+			Dictionary<string, string> dict = Levels.GetOverworldObjectsPaths();
+			ConnectorDot = GetImage(graphics, dict["connectorDot"]);
+			BlueDot = GetImage(graphics, dict["blueDot"]);
+			OrangeDot = GetImage(graphics, dict["orangeDot"]);
+			Star = GetImage(graphics, dict["star"]);
+			MagicHatUnbeaten = GetImage(graphics, dict["magicHatUnbeaten"]);
+			MagicHatBeaten = GetImage(graphics, dict["magicHatBeaten"]);
+        }
 	}
 }

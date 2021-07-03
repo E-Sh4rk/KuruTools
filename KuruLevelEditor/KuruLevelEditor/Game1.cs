@@ -25,6 +25,7 @@ namespace KuruLevelEditor
         private SpecialItems _specialItemInterface = null;
         private ParadiseSpecialItems _paraSpecialItemInterface = null;
         private TimesEditor _timesEditor = null;
+        private OverworldEditor _overworldEditor = null;
         private PhysicalMapLogic _physicalMapLogic = null; // Only alive when the special object editor is opened
         private ParadisePhysicalMapLogic _paraPhysicalMapLogic = null; // Stays alive all the time the physical editor is opened
         private CustomInventories _inventories = null;
@@ -198,7 +199,7 @@ namespace KuruLevelEditor
                 GridColumn = 2,
                 GridRow = 0,
                 GridRowSpan = 2,
-                Text = "Edit",
+                Text = "Edit map",
                 Width = 150,
                 Height = 60
             };
@@ -219,6 +220,7 @@ namespace KuruLevelEditor
             };
 
             grid.Widgets.Add(buttonEdit);
+
             // Edit times
             var buttonEditTimesF = new TextButton
             {
@@ -247,6 +249,26 @@ namespace KuruLevelEditor
                 _timesEditor = new TimesEditor(this, true);
             };
             grid.Widgets.Add(buttonEditTimesS);
+
+            // Edit overworld data (Paradise only for now)
+            if (Settings.Paradise)
+            {
+                var buttonEditOverworld = new TextButton
+                {
+                    GridColumn = 3,
+                    GridRow = 2,
+                    Text = "Edit overworld",
+                    Width = 150,
+                    Height = 25
+                };
+
+                buttonEditOverworld.Click += (s, a) =>
+                {
+                    _overworldEditor = new OverworldEditor(this);
+                };
+                grid.Widgets.Add(buttonEditOverworld);
+            }
+
             // Reset
             var buttonReset = new TextButton
             {
@@ -322,10 +344,10 @@ namespace KuruLevelEditor
             {
                 GridColumn = 2,
                 GridRow = 2,
-                GridRowSpan = 2,
+                GridRowSpan = 1,
                 Text = "Build",
                 Width = 150,
-                Height = 60
+                Height = 25
             };
             buttonBuild.Click += (s, a) =>
             {
@@ -343,12 +365,12 @@ namespace KuruLevelEditor
 
             var buttonBuildAndRun = new TextButton
             {
-                GridColumn = 3,
-                GridRow = 2,
-                GridRowSpan = 2,
+                GridColumn = 2,
+                GridRow = 3,
+                GridRowSpan = 1,
                 Text = "Build and run",
                 Width = 150,
-                Height = 60
+                Height = 25
             };
             buttonBuildAndRun.Click += (s, a) =>
             {
@@ -678,6 +700,11 @@ namespace KuruLevelEditor
             _timesEditor = null;
         }
 
+        public void CloseOverworldEditor()
+        {
+            _overworldEditor = null;
+        }
+
         int _lastBonusId = -1;
         public void SetBonusLocation(int id, Point? currentLocation)
         {
@@ -846,7 +873,8 @@ namespace KuruLevelEditor
             else
             {
                 bool gridControls = mode != Mode.Loading && mode != Mode.Menu && !_lateralMenuDesktop.HasModalWidget
-                    && _specialItemInterface == null && _paraSpecialItemInterface == null && _timesEditor == null;
+                    && _specialItemInterface == null && _paraSpecialItemInterface == null && _timesEditor == null
+                    && _overworldEditor == null;
                 MouseState ms = Mouse.GetState();
                 List<Controller.Action> actions = Controller.GetActionsGrid(ks, ms, gameTime);
                 foreach (Controller.Action action in actions)
@@ -876,6 +904,9 @@ namespace KuruLevelEditor
                 {
                     editor.Update(gameTime, ms, ks);
                     sset.Update(ms);
+                } else if (_overworldEditor != null)
+                {
+                    _overworldEditor.Update(ms);
                 }
             }
 
@@ -896,6 +927,11 @@ namespace KuruLevelEditor
             }
             else if (_timesEditor != null)
                 _timesEditor.Render();
+            else if (_overworldEditor != null)
+            {
+                _overworldEditor.Draw(_spriteBatch);
+                _overworldEditor.Render();
+            }
             else if (mode == Mode.Menu)
                 _mainMenuDesktop.Render();
             else if (_specialItemInterface != null)
