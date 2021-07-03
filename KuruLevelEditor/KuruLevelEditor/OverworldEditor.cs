@@ -28,11 +28,13 @@ namespace KuruLevelEditor
         public const int FIRST_MAGIC_HAT = 43;
         public const int VERTICAL_PANEL_HEIGHT = 200;
 
-        enum Connection { East, West, North, South}
+        enum Connection { East, West, South, North}
         enum Exit { Normal, Secret}
         enum Coords { X, Y}
         enum DoorKey { Neither, Door, Key}
         enum MarkerType { NormalLevel, MagicHat}
+
+        private TextButton buttonSaveMarker;
 
         private TextBox[] connections = new TextBox[4];
         private Label labelConnections;
@@ -47,7 +49,7 @@ namespace KuruLevelEditor
 
         private class OverworldObject
         {
-            public byte East, West, North, South;
+            public byte East, West, South, North;
             public byte NormalExit, SecretExit;
             public ushort X, Y;
             public byte DoorKey;
@@ -62,22 +64,8 @@ namespace KuruLevelEditor
 
             public OverworldObject(uint[] data, MarkerType type)
             {
-                East = (byte)data[0];
-                West = (byte)data[1];
-                North = (byte)data[2];
-                South = (byte)data[3];
-                NormalExit = (byte)data[4];
-                SecretExit = (byte)data[5];
-                X = (ushort)data[6];
-                Y = (ushort)data[7];
-                DoorKey = (byte)data[8];
                 this.type = type;
-
-                //Rect
-                xOffset = (type == MarkerType.NormalLevel) ? -8 : -16; // Internal offsets in-game for displaying markers
-                yOffset = (type == MarkerType.NormalLevel) ? -8 : -14;
-                size = (type == MarkerType.NormalLevel) ? 16 : 32;
-                rect = new Rectangle((X + xOffset) * SCALE, (Y + yOffset) * SCALE, size * SCALE, size * SCALE);
+                SetData(data);
 
                 //Image
                 img = (type == MarkerType.NormalLevel) ? Load.Star : Load.MagicHatUnbeaten;
@@ -87,13 +75,47 @@ namespace KuruLevelEditor
             {
                 spriteBatch.Draw(img, rect, Color.White);
             }
+
+            public uint[] GetData()
+            {
+                return new uint[] { East, West, South, North, NormalExit, SecretExit, X, Y, DoorKey };
+            }
+
+            public void SetData(uint[] data)
+            {
+                East = (byte)data[0];
+                West = (byte)data[1];
+                South = (byte)data[2];
+                North = (byte)data[3];
+                NormalExit = (byte)data[4];
+                SecretExit = (byte)data[5];
+                X = (ushort)data[6];
+                Y = (ushort)data[7];
+                DoorKey = (byte)data[8];
+
+                //Rect detecting mouse click position
+                xOffset = (type == MarkerType.NormalLevel) ? -8 : -16; // Internal offsets in-game for displaying markers
+                yOffset = (type == MarkerType.NormalLevel) ? -8 : -14;
+                size = (type == MarkerType.NormalLevel) ? 16 : 32;
+                rect = new Rectangle((X + xOffset) * SCALE, (Y + yOffset) * SCALE, size * SCALE, size * SCALE);
+            }
         }
 
         private OverworldObject[] markers;
 
         void saveChanges()
         {
-
+            uint[,] table = new uint[NUM_MARKERS, 9];
+            for (int j = 0; j < table.GetLength(0); j++)
+            {
+                uint[] dat = markers[j].GetData();
+                for (int i = 0; i < table.GetLength(1); i++)
+                {
+                    table[j, i] = dat[i];
+                }
+            }
+            string result = Utils.UintTableToString(table, false);
+            File.WriteAllText(Levels.GetOverworldMarkerPath(), result);
         }
 
         void loadData()
@@ -168,13 +190,13 @@ namespace KuruLevelEditor
                         connectionBox.GridColumn = 1;
                         connectionBox.GridRow = 2;
                         break;
-                    case (int)Connection.North:
-                        connectionBox.GridColumn = 2;
-                        connectionBox.GridRow = 1;
-                        break;
                     case (int)Connection.South:
                         connectionBox.GridColumn = 2;
                         connectionBox.GridRow = 3;
+                        break;
+                    case (int)Connection.North:
+                        connectionBox.GridColumn = 2;
+                        connectionBox.GridRow = 1;
                         break;
                 }
 
@@ -306,24 +328,39 @@ namespace KuruLevelEditor
 
             // --- SUBMIT ---
 
-            var buttonSaveQuit = new TextButton
+            buttonSaveMarker = new TextButton
             {
                 GridColumn = 9,
                 GridRow = 1,
-                Text = "Save and Quit",
+                Text = "Save this marker",
+                Width = 150,
+                Enabled = false
+            };
+            buttonSaveMarker.Click += (s, a) =>
+            {
+                markers[selectedMarker].SetData(GetDataFromGUI());
+                UpdateGUI(markers[selectedMarker]); //case where user enters invalid data - reverts to original data
+            };
+            grid.Widgets.Add(buttonSaveMarker);
+
+            var buttonSaveAllAndQuit = new TextButton
+            {
+                GridColumn = 9,
+                GridRow = 2,
+                Text = "Save All & Quit",
                 Width = 150,
             };
-            buttonSaveQuit.Click += (s, a) =>
+            buttonSaveAllAndQuit.Click += (s, a) =>
             {
                 saveChanges();
                 _game.CloseOverworldEditor();
             };
-            grid.Widgets.Add(buttonSaveQuit);
+            grid.Widgets.Add(buttonSaveAllAndQuit);
 
             var buttonCancel = new TextButton
             {
                 GridColumn = 9,
-                GridRow = 2,
+                GridRow = 3,
                 Text = "Cancel",
                 Width = 150,
             };
@@ -346,7 +383,7 @@ namespace KuruLevelEditor
             mapScroll = new ScrollViewer()
             {
                 GridColumn = 0,
-                GridRow = 3,
+                GridRow = 4,
                 GridColumnSpan = 10,
                 Padding = new Myra.Graphics2D.Thickness(0, VERTICAL_PANEL_HEIGHT, 0, 0),
                 ShowHorizontalScrollBar = true,
@@ -361,6 +398,23 @@ namespace KuruLevelEditor
             _desktop.Root = panel;
         }
 
+        public uint[] GetDataFromGUI()
+        {
+            uint doorKeyVal = 0;
+            if (doorKeyCombo.SelectedIndex == (int)DoorKey.Door)
+                doorKeyVal = uint.Parse(doorKey.Text);
+            else if (doorKeyCombo.SelectedIndex == (int)DoorKey.Key)
+                doorKeyVal = 256 - uint.Parse(doorKey.Text);
+            try
+            {
+                return new uint[] { uint.Parse(connections[0].Text), uint.Parse(connections[1].Text), uint.Parse(connections[2].Text), uint.Parse(connections[3].Text),
+                uint.Parse(exits[0].Text), uint.Parse(exits[1].Text), uint.Parse(coords[0].Text), uint.Parse(coords[1].Text), doorKeyVal};
+            } catch (System.FormatException)
+            {
+                return markers[selectedMarker].GetData();
+            }
+        }
+
         bool mouse_move_is_selecting = false;
         public void Update(MouseState mouse)
         {
@@ -373,22 +427,26 @@ namespace KuruLevelEditor
                     if (clickableBounds.Contains(new Point(mouse.X, mouse.Y)))
                     {
                         //Pick a marker to select, if any
-                        Debug.WriteLine(p.ToString());
-                        bool found = false;
+                        //Debug.WriteLine(p.ToString());
+                        //bool found = false;
                         for (int i = 0; i < markers.Length; i++)
                         {
                             if (markers[i].rect.Contains(p))
                             {
-                                Debug.WriteLine("found");
+                                //Debug.WriteLine("found");
+                                //Debug.WriteLine("[{0}]", string.Join(", ", markers[i].GetData()));
                                 selectedMarker = i;
-                                found = true;
+                                //found = true;
+
+                                UpdateGUI(markers[i]);
+                                UpdateGUIReadOnly(false);
                                 break;
                             }
                         }
-                        if (!found)
-                        {
-                            selectedMarker = -1;
-                        }
+                        //if (!found)
+                        //{
+                        //    selectedMarker = -1;
+                        //}
                     }
                     mouse_move_is_selecting = false;
                 }
@@ -397,6 +455,46 @@ namespace KuruLevelEditor
             {
                 mouse_move_is_selecting = true;
             }
+        }
+
+        private void UpdateGUI(OverworldObject marker)
+        {
+            connections[(int)Connection.East].Text = marker.East.ToString();
+            connections[(int)Connection.West].Text = marker.West.ToString();
+            connections[(int)Connection.North].Text = marker.North.ToString();
+            connections[(int)Connection.South].Text = marker.South.ToString();
+
+            exits[(int)Exit.Normal].Text = marker.NormalExit.ToString();
+            exits[(int)Exit.Secret].Text = marker.SecretExit.ToString();
+
+            coords[(int)Coords.X].Text = marker.X.ToString();
+            coords[(int)Coords.Y].Text = marker.Y.ToString();
+
+            if (marker.DoorKey == 0)
+            {
+                doorKeyCombo.SelectedIndex = -1;
+                doorKey.Text = "";
+            }
+            else if ((marker.DoorKey & 0x80) == 0)
+            {
+                doorKeyCombo.SelectedIndex = (int)DoorKey.Door;
+                doorKey.Text = marker.DoorKey.ToString();
+            }
+            else
+            {
+                doorKeyCombo.SelectedIndex = (int)DoorKey.Key;
+                doorKey.Text = (256 - marker.DoorKey).ToString();
+            }
+        }
+
+        public void UpdateGUIReadOnly(bool readOnly)
+        {
+            foreach(TextBox b in connections) { b.Readonly = readOnly; }
+            foreach(TextBox b in exits) { b.Readonly = readOnly; }
+            foreach(TextBox b in coords) { b.Readonly = readOnly; }
+            doorKey.Readonly = readOnly;
+            //ComboBox has no readonly field
+            buttonSaveMarker.Enabled = true;
         }
 
         public void Draw(SpriteBatch spriteBatch)
