@@ -50,7 +50,8 @@ Some notes about the level editor:
 
 ## License and contributions
 
-Made by Mickael Laurent (E-Sh4rk).
+Made by Mickael Laurent (E-Sh4rk).  
+Overworld editor by Dimedime.
 
 You can freely use, share and modify these tools, as long as you give me some credits
 (you can mention my name, username, or a link to this repository).
