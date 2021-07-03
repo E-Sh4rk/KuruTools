@@ -207,7 +207,7 @@ namespace KuruLevelEditor
             labelConnections = new Label()
             {
                 Id = "labelConnections",
-                Text = "Map Connections",
+                Text = "Level Connections",
                 GridColumn = 2,
                 GridRow = 2
             };
@@ -218,7 +218,7 @@ namespace KuruLevelEditor
             var labelNormalExit = new Label()
             {
                 Id = "labelNormalExit",
-                Text = "Normal Exit Map:",
+                Text = "Normal Exit Level:",
                 GridColumn = 4,
                 GridRow = 1
             };
@@ -226,7 +226,7 @@ namespace KuruLevelEditor
             var labelSecretExit = new Label()
             {
                 Id = "labelSecretExit",
-                Text = "Secret Exit Map:",
+                Text = "Secret Exit Level:",
                 GridColumn = 4,
                 GridRow = 2
             };
@@ -304,7 +304,7 @@ namespace KuruLevelEditor
             {
                 GridColumn = 8,
                 GridRow = 2,
-                Width = 90,
+                Width = 150,
                 Readonly = true
             };
             grid.Widgets.Add(doorKey);
@@ -313,7 +313,7 @@ namespace KuruLevelEditor
             {
                 GridColumn = 8,
                 GridRow = 1,
-                Width = 90,
+                Width = 150,
                 SelectedIndex = (int)DoorKey.Neither
             };
             for (int i = 0; i < 3; i++)
@@ -325,6 +325,32 @@ namespace KuruLevelEditor
                 doorKey.Readonly = doorKeyCombo.SelectedIndex == (int)DoorKey.Neither;
             };
             grid.Widgets.Add(doorKeyCombo);
+
+            var buttonHelp = new TextButton
+            {
+                GridColumn = 8,
+                GridRow = 3,
+                Text = "Help",
+                Width = 150,
+            };
+            buttonHelp.Click += (s, a) =>
+            {
+                var messageBox = Dialog.CreateMessageBox("Help",
+                    "Only the westward connection is used\n" +
+                    "to render small blue dots between markers.\n" +
+                    "\n" +
+                    "255 for connection or exit level = None.\n" +
+                    "\n" +
+                    "Door/Key values are affect Kururin's overworld\n" +
+                    "sprite and are *not* associated with the actual\n" +
+                    "door/key inside the level.\n" +
+                    "\n" +
+                    "Door/Key values have a maximum value of 15.\n" +
+                    "(Higher values aren't saved.)\n"
+                    );
+                messageBox.ShowModal(_desktop);
+            };
+            grid.Widgets.Add(buttonHelp);
 
             // --- SUBMIT ---
 
@@ -459,6 +485,8 @@ namespace KuruLevelEditor
 
         private void UpdateGUI(OverworldObject marker)
         {
+            labelConnections.Text = String.Format("Level {0} Connections", selectedMarker);
+
             connections[(int)Connection.East].Text = marker.East.ToString();
             connections[(int)Connection.West].Text = marker.West.ToString();
             connections[(int)Connection.North].Text = marker.North.ToString();
