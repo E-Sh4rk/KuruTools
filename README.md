@@ -49,6 +49,10 @@ Some notes about the level editor:
 - The level editor saves your levels under the directory `levels`. This is the directory that you should copy if you want to backup your levels.
 - The level editor saves the patched ROM as `output.gba` (by default). You should not modify this file manually as it will be overriden each time you click on the `Build` button. If you want to apply custom patches to the ROM, you should apply them to `input.gba` (the patches will be replicated on `output.gba`).
 
+[Documentation for the *Kuru Kuru Kururin* level editor](Doc/KuruKuruKururin.md)
+
+[Documentation for the *Kururin Paradise* level editor](Doc/KururinParadise.md)
+
 ## License and contributions
 
 Made by Mickael Laurent (E-Sh4rk).  
