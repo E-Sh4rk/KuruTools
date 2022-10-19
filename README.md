@@ -15,6 +15,9 @@ The supported ROMs are:
 You can simply download the binaries under the `Release` section,
 or build it from source (tested on Visual Studio 2019).
 
+If you choose to build the level editor from source, you will have to put the rom extractor binaries in the same directory as the level editor binaries
+with the name `KuruRomExtractor.dll` before being able to run it successfully.
+
 Prerequisite:
 - Windows, Linux or macOS
 - .NET core 3.1
@@ -22,12 +25,10 @@ Prerequisite:
 
 See this link to install .NET core: https://dotnet.microsoft.com/download
 
-## Configuration
+## Configuration of the level editor
 
 If you want to use the level editor:
 
-- The rom extractor binaries must be placed in the same directory as the level editor,
-with the name `KuruRomExtractor.dll`
 - The *Kuru Kuru Kururin* or *Kururin Paradise* ROM must be placed in the working directory (most of time, it is the same directory as the level editor),
 with the name `input.gba`
 - The patched ROM will be saved in the working directory, with the name `output.gba`
